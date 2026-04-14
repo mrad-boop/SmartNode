@@ -1,4 +1,3 @@
-// ── SmartNode — PostgreSQL Database Layer ───────────────────
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -6,7 +5,6 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
-// ── Migrations ───────────────────────────────────────────────
 async function migrate() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -17,10 +15,14 @@ async function migrate() {
       upline_list       JSONB        NOT NULL DEFAULT '[]',
       paid_system_fee   BOOLEAN      NOT NULL DEFAULT FALSE,
       paid_levels       JSONB        NOT NULL DEFAULT '[]',
+      avatar            VARCHAR(10)  NOT NULL DEFAULT '👤',
       registration_date TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     CREATE INDEX IF NOT EXISTS idx_users_referrer ON users(referrer);
+
+    -- Add avatar column if upgrading from older schema
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(10) NOT NULL DEFAULT '👤';
 
     CREATE TABLE IF NOT EXISTS site_config (
       key   VARCHAR(64) PRIMARY KEY,
@@ -30,7 +32,6 @@ async function migrate() {
   console.log('[db] Tables ready');
 }
 
-// ── Normalize user row ───────────────────────────────────────
 function normalize(row) {
   if (!row) return null;
   return {
@@ -40,11 +41,11 @@ function normalize(row) {
     uplineMatrix:     row.upline_list,
     paidSystemFee:    row.paid_system_fee,
     paidLevels:       row.paid_levels,
+    avatar:           row.avatar || '👤',
     registrationDate: row.registration_date,
   };
 }
 
-// ── User queries ─────────────────────────────────────────────
 async function getUser(username) {
   const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
   return normalize(rows[0]);
@@ -64,12 +65,13 @@ async function createUser({ username, walletAddress, referrer, uplineMatrix }) {
   return normalize(rows[0]);
 }
 
-async function updateUser(username, { walletAddress, paidSystemFee, paidLevels }) {
+async function updateUser(username, { walletAddress, paidSystemFee, paidLevels, avatar }) {
   const sets = [], vals = [];
   let i = 1;
   if (walletAddress !== undefined) { sets.push(`wallet_address = $${i++}`);  vals.push(walletAddress); }
   if (paidSystemFee !== undefined) { sets.push(`paid_system_fee = $${i++}`); vals.push(paidSystemFee); }
   if (paidLevels    !== undefined) { sets.push(`paid_levels = $${i++}`);     vals.push(JSON.stringify(paidLevels)); }
+  if (avatar        !== undefined) { sets.push(`avatar = $${i++}`);          vals.push(avatar); }
   if (!sets.length) return getUser(username);
   vals.push(username);
   const { rows } = await pool.query(
@@ -84,13 +86,17 @@ async function countUsers() {
 }
 
 async function getAllUsers() {
-  const { rows } = await pool.query(
-    'SELECT * FROM users ORDER BY registration_date DESC'
-  );
+  const { rows } = await pool.query('SELECT * FROM users ORDER BY registration_date DESC');
   return rows.map(normalize);
 }
 
-// ── Site config queries ──────────────────────────────────────
+async function getReferralCount(username) {
+  const { rows } = await pool.query(
+    'SELECT COUNT(*) AS n FROM users WHERE referrer = $1', [username]
+  );
+  return parseInt(rows[0].n, 10);
+}
+
 async function getConfig() {
   const { rows } = await pool.query('SELECT key, value FROM site_config');
   const cfg = {};
@@ -110,6 +116,7 @@ async function setConfigBulk(entries) {
 
 module.exports = {
   migrate,
-  getUser, usernameExists, createUser, updateUser, countUsers, getAllUsers,
+  getUser, usernameExists, createUser, updateUser,
+  countUsers, getAllUsers, getReferralCount,
   getConfig, setConfigBulk,
 };

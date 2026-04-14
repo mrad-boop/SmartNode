@@ -8,7 +8,7 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#050510;--bg2:#0a0a1a;--bg3:#0f0f28;
+      --bg:#050510;--bg2:#0a0a1a;
       --card:rgba(255,255,255,0.03);
       --border:rgba(0,255,136,0.12);--border2:rgba(123,47,247,0.25);
       --green:#00ff88;--purple:#7b2ff7;--cyan:#00d4ff;
@@ -20,27 +20,27 @@
     html{font-size:16px;scroll-behavior:smooth}
     body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
     body::before{content:'';position:fixed;inset:0;z-index:-1;background:
-      radial-gradient(ellipse 80% 60% at 10% 10%,rgba(123,47,247,0.12) 0%,transparent 60%),
-      radial-gradient(ellipse 60% 80% at 90% 90%,rgba(0,255,136,0.08) 0%,transparent 60%),var(--bg)}
+      radial-gradient(ellipse 80% 60% at 10% 10%,rgba(123,47,247,.12) 0%,transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 90%,rgba(0,255,136,.08) 0%,transparent 60%),var(--bg)}
     body::after{content:'';position:fixed;inset:0;z-index:-1;
       background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);
       background-size:40px 40px}
     ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
 
-    /* ── HEADER ── */
+    /* HEADER */
     .hdr{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;
       background:rgba(5,5,16,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);
       position:sticky;top:0;z-index:100}
-    .logo{display:flex;align-items:center;gap:.6rem;font-size:1.35rem;font-weight:800;letter-spacing:.02em;cursor:pointer}
+    .logo{display:flex;align-items:center;gap:.6rem;font-size:1.35rem;font-weight:800;cursor:pointer}
     .logo-icon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--green));
       display:flex;align-items:center;justify-content:center;font-size:.95rem}
     .logo-txt{background:linear-gradient(90deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .hdr-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 
-    /* ── BUTTONS ── */
+    /* BUTTONS */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
       padding:.6rem 1.2rem;border-radius:8px;font-size:.875rem;font-weight:600;
-      cursor:pointer;border:none;transition:all .2s ease;text-decoration:none;white-space:nowrap}
+      cursor:pointer;border:none;transition:all .2s ease;white-space:nowrap}
     .btn-g{background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,255,136,.05));color:var(--green);border:1px solid rgba(0,255,136,.35)}
     .btn-g:hover{background:rgba(0,255,136,.22);box-shadow:var(--glow-g);transform:translateY(-1px)}
     .btn-p{background:linear-gradient(135deg,rgba(123,47,247,.25),rgba(123,47,247,.1));color:#c084fc;border:1px solid var(--border2)}
@@ -56,102 +56,84 @@
     .btn-full{width:100%}
     .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 
-    /* wallet btn */
     #walletBtn{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:8px;
       background:linear-gradient(135deg,rgba(123,47,247,.3),rgba(0,212,255,.15));
       color:var(--text);border:1px solid rgba(123,47,247,.4);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
     #walletBtn:hover{box-shadow:var(--glow-p);transform:translateY(-1px)}
     #walletBtn .wdot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
     #walletBtn.connected .wdot{background:var(--green);box-shadow:0 0 6px var(--green)}
-    .admin-link{font-size:.72rem;color:var(--muted);text-decoration:none;padding:.35rem .6rem;border-radius:6px;border:1px solid rgba(255,255,255,.07);transition:all .2s}
-    .admin-link:hover{color:var(--purple);border-color:var(--border2)}
+    /* admin link — looks like a subtle node icon, not obvious */
+    .sys-link{font-size:.75rem;color:rgba(255,255,255,.18);text-decoration:none;padding:.3rem .5rem;
+      border-radius:5px;transition:all .2s;letter-spacing:.05em}
+    .sys-link:hover{color:var(--muted)}
 
-    /* ── VIEWS ── */
+    /* VIEWS */
     .view{display:none}.view.active{display:block}
-    .container{max-width:580px;margin:0 auto;padding:2rem 1rem}
-    .cwide{max-width:900px;margin:0 auto;padding:2rem 1rem}
+    .wrap{max-width:580px;margin:0 auto;padding:2rem 1rem}
+    .cwide{max-width:920px;margin:0 auto;padding:2rem 1rem}
 
-    /* ═══════════════════════════════════════════════
-       LANDING PAGE
-    ═══════════════════════════════════════════════ */
-    .land-hero{text-align:center;padding:4rem 1rem 3rem;position:relative}
+    /* ── LANDING ── */
+    .land-hero{text-align:center;padding:4rem 1.5rem 3rem}
     .land-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem 1rem;border-radius:100px;
       background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);font-size:.78rem;color:var(--green);margin-bottom:1.5rem}
-    .land-title{font-size:clamp(2rem,6vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:1.2rem}
-    .land-title span{background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .land-sub{font-size:clamp(1rem,2.5vw,1.15rem);color:var(--muted);max-width:540px;margin:0 auto 2.2rem;line-height:1.65}
+    .land-title{font-size:clamp(2.2rem,6vw,3.6rem);font-weight:900;line-height:1.1;margin-bottom:1.2rem}
+    .land-title .hl{background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .land-sub{font-size:clamp(.95rem,2.5vw,1.12rem);color:var(--muted);max-width:540px;margin:0 auto 2.2rem;line-height:1.65}
     .land-cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
-    .land-stats{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;margin-bottom:4rem}
-    .land-stat{text-align:center}
-    .land-stat-val{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .land-stat-lbl{font-size:.75rem;color:var(--muted);margin-top:.2rem}
-
-    /* features */
-    .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.2rem;margin-bottom:4rem;padding:0 1rem}
+    .land-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:4rem}
+    .ls-val{font-size:1.9rem;font-weight:800;background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .ls-lbl{font-size:.73rem;color:var(--muted);margin-top:.15rem}
+    .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem;margin-bottom:4rem;padding:0 1.5rem}
     .feat-card{padding:1.5rem;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid var(--border);transition:all .25s}
     .feat-card:hover{border-color:rgba(0,255,136,.25);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
     .feat-icon{font-size:1.8rem;margin-bottom:.9rem}
     .feat-title{font-size:1rem;font-weight:700;margin-bottom:.5rem;color:var(--green)}
     .feat-text{font-size:.875rem;color:var(--muted);line-height:1.6}
-
-    /* how it works */
-    .how-section{padding:3rem 1rem;text-align:center;margin-bottom:2rem}
-    .how-title{font-size:1.6rem;font-weight:800;margin-bottom:.5rem}
-    .how-sub{color:var(--muted);font-size:.9rem;margin-bottom:2.5rem}
+    .how-section{padding:3rem 1.5rem;text-align:center;margin-bottom:2rem}
     .how-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;max-width:750px;margin:0 auto}
-    .how-step{position:relative;padding:1.5rem 1rem}
-    .how-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    .how-step .how-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
       display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;margin:0 auto 1rem}
-    .how-step-title{font-size:.9rem;font-weight:700;margin-bottom:.5rem}
-    .how-step-text{font-size:.82rem;color:var(--muted);line-height:1.55}
-
     .land-footer{text-align:center;padding:2rem 1rem 5rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted)}
 
-    /* ═══════════════════════════════════════════════
-       REGISTER PAGE
-    ═══════════════════════════════════════════════ */
-    .hero-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .8rem;border-radius:100px;
-      background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);font-size:.75rem;color:var(--green);margin-bottom:1rem}
-    .hero-title{font-size:clamp(1.7rem,5vw,2.6rem);margin-bottom:.5rem;line-height:1.15}
-    .hero-sub{color:var(--muted);font-size:.95rem;margin-bottom:2rem}
+    /* ── FORMS / CARDS ── */
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;backdrop-filter:blur(8px)}
     .card-p{border-color:var(--border2)}
-    .form-group{margin-bottom:1.2rem}
     .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;letter-spacing:.04em;text-transform:uppercase}
     .form-input{width:100%;padding:.75rem 1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
       border-radius:8px;color:var(--text);font-size:.95rem;transition:border-color .2s,box-shadow .2s;outline:none}
     .form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,.1)}
     .form-input::placeholder{color:var(--muted)}
+    .form-group{margin-bottom:1.1rem}
+    .stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
+    .stat-card{padding:.9rem;border-radius:10px;text-align:center;background:rgba(255,255,255,.025);border:1px solid var(--border)}
+    .stat-val{font-size:1.3rem;font-weight:800}.stat-lbl{font-size:.7rem;color:var(--muted);margin-top:.1rem}
+    .section-lbl{font-size:.73rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    .section-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    /* register page */
     .ref-badge{display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;border-radius:8px;
       background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);font-size:.85rem;margin-bottom:1.2rem}
     .ref-badge .bdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
     .mx-preview{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1.2rem}
     .mx-preview-title{font-size:.73rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem}
-    .mx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+    .mx-grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
     .lv-chip{padding:.4rem .5rem;border-radius:6px;text-align:center;background:rgba(123,47,247,.1);border:1px solid rgba(123,47,247,.2);font-size:.7rem}
     .lv-chip .cn{color:var(--muted);font-size:.62rem}.lv-chip .cv{color:var(--cyan);font-weight:600;font-size:.7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .lv-chip.lv6{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.25)}.lv-chip.lv6 .cv{color:var(--green)}
-    .stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
-    .stat-card{padding:.9rem;border-radius:10px;text-align:center;background:rgba(255,255,255,.025);border:1px solid var(--border)}
-    .stat-val{font-size:1.3rem;font-weight:800}.stat-lbl{font-size:.7rem;color:var(--muted);margin-top:.1rem}
 
-    /* ═══════════════════════════════════════════════
-       ACTIVATION / DASHBOARD
-    ═══════════════════════════════════════════════ */
+    /* ── DASHBOARD ── */
     .act-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
     .user-pill{display:flex;align-items:center;gap:.6rem;padding:.5rem 1rem;border-radius:100px;
-      background:rgba(123,47,247,.12);border:1px solid var(--border2);font-size:.85rem}
-    .user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
-      display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
-    /* Referral box — hidden until fully paid */
+      background:rgba(123,47,247,.12);border:1px solid var(--border2);font-size:.85rem;cursor:pointer}
+    .user-pill:hover{background:rgba(123,47,247,.2)}
+    .user-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+      display:flex;align-items:center;justify-content:center;font-size:1rem}
     .ref-box{padding:.8rem 1rem;border-radius:10px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);
       display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;flex-wrap:wrap}
     .ref-url{font-size:.8rem;color:var(--cyan);word-break:break-all;flex:1;font-family:monospace}
     .ref-locked{padding:1rem;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);
       display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem;color:var(--muted);font-size:.85rem}
-    .section-lbl{font-size:.73rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-      color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
-    .section-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
     .fee-card{padding:1.2rem;background:linear-gradient(135deg,rgba(255,215,0,.06),rgba(255,215,0,.02));
       border:1px solid rgba(255,215,0,.2);border-radius:12px;margin-bottom:1.5rem}
     .fee-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
@@ -164,6 +146,13 @@
     .sdot.paid{background:var(--green);box-shadow:0 0 6px var(--green)}
     .sdot.pend{background:var(--gold);animation:pulse 1.5s infinite}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    /* pay-all banner */
+    .payall-banner{padding:1rem 1.2rem;border-radius:12px;margin-bottom:1.5rem;
+      background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(123,47,247,.06));
+      border:1px solid rgba(0,255,136,.2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+    .payall-info{font-size:.88rem;line-height:1.5}
+    .payall-total{font-size:1.1rem;font-weight:800;color:var(--green)}
+    /* level cards */
     .mx-grid-act{display:flex;flex-direction:column;gap:.75rem}
     .lv-card{position:relative;overflow:hidden;padding:1rem 1.2rem;
       background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);
@@ -181,47 +170,55 @@
     .lv-uname{font-size:1rem;font-weight:700;margin-bottom:.2rem}
     .lv-wallet{font-size:.72rem;font-family:monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .lv-status{font-size:.7rem;margin-top:.15rem}
-    .check-ico{width:30px;height:30px;border-radius:50%;background:rgba(0,255,136,.15);
-      border:1px solid rgba(0,255,136,.3);display:flex;align-items:center;justify-content:center;color:var(--green)}
+    .check-ico{width:30px;height:30px;border-radius:50%;background:rgba(0,255,136,.15);border:1px solid rgba(0,255,136,.3);display:flex;align-items:center;justify-content:center;color:var(--green)}
 
-    /* ═══════════════════════════════════════════════
-       ADMIN PANEL
-    ═══════════════════════════════════════════════ */
+    /* ── PROFILE ── */
+    .profile-hero{display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap}
+    .profile-av-big{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+      display:flex;align-items:center;justify-content:center;font-size:2.2rem;border:3px solid rgba(0,255,136,.3);flex-shrink:0}
+    .profile-name{font-size:1.6rem;font-weight:800}
+    .profile-since{font-size:.8rem;color:var(--muted)}
+    .profile-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.8rem;margin-bottom:2rem}
+    .pstat{padding:1rem;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid var(--border);text-align:center}
+    .pstat-val{font-size:1.4rem;font-weight:800;margin-bottom:.2rem}
+    .pstat-lbl{font-size:.7rem;color:var(--muted)}
+    .avatar-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+    .av-opt{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);
+      display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:all .2s}
+    .av-opt:hover,.av-opt.sel{border-color:var(--green);background:rgba(0,255,136,.12);transform:scale(1.1)}
+    .matrix-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem}
+
+    /* ── ADMIN ── */
     .admin-login{max-width:380px;margin:4rem auto;padding:0 1rem}
     .admin-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
     .tab-btn{padding:.55rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;
       background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);transition:all .2s}
     .tab-btn.active{background:rgba(123,47,247,.2);border-color:var(--border2);color:#c084fc}
-    .tab-content{display:none}.tab-content.active{display:block}
-    .admin-section{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:1.3rem;margin-bottom:1.2rem}
-    .admin-section-title{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
-    .field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem}
-    .field-group{margin-bottom:.75rem}
-    .field-label{font-size:.72rem;color:var(--muted);margin-bottom:.3rem;display:block;text-transform:uppercase;letter-spacing:.04em}
-    .field-input{width:100%;padding:.6rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+    .tab-pane{display:none}.tab-pane.active{display:block}
+    .admin-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:1.3rem;margin-bottom:1.2rem}
+    .admin-card-title{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
+    .fg{margin-bottom:.75rem}
+    .fl{font-size:.72rem;color:var(--muted);margin-bottom:.3rem;display:block;text-transform:uppercase;letter-spacing:.04em}
+    .fi{width:100%;padding:.6rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
       border-radius:7px;color:var(--text);font-size:.875rem;outline:none;transition:border-color .2s}
-    .field-input:focus{border-color:var(--purple)}
-    .field-textarea{min-height:80px;resize:vertical}
-    .matrix-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-    @media(max-width:540px){.matrix-admin-grid{grid-template-columns:1fr}}
-    .mx-row{display:contents}
-    .mx-row-label{grid-column:1/-1;font-size:.72rem;color:var(--green);font-weight:700;margin-top:.5rem;text-transform:uppercase;letter-spacing:.05em}
+    .fi:focus{border-color:var(--purple)}.fta{min-height:75px;resize:vertical}
+    .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.7rem}
+    .mx-admin-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.5rem}
+    @media(max-width:540px){.mx-admin-row{grid-template-columns:1fr}}
     .users-table{width:100%;border-collapse:collapse;font-size:.8rem}
-    .users-table th{text-align:left;padding:.6rem .8rem;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+    .users-table th{text-align:left;padding:.6rem .8rem;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
     .users-table td{padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
     .users-table tr:hover td{background:rgba(255,255,255,.02)}
-    .badge-sm{display:inline-flex;padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:600}
-    .badge-green{background:rgba(0,255,136,.12);color:var(--green)}.badge-muted{background:rgba(255,255,255,.06);color:var(--muted)}
+    .badge{display:inline-flex;padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:600}
+    .b-green{background:rgba(0,255,136,.12);color:var(--green)}.b-muted{background:rgba(255,255,255,.06);color:var(--muted)}
     .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
 
-    /* ═══════════════════════════════════════════════
-       MODAL
-    ═══════════════════════════════════════════════ */
+    /* ── MODAL ── */
     .modal-ov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
       display:flex;align-items:center;justify-content:center;padding:1rem}
     .modal-ov.hidden{display:none}
     .modal{background:#0d0d22;border:1px solid var(--border2);border-radius:16px;padding:1.8rem;
-      max-width:420px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,.8),var(--glow-p)}
+      max-width:440px;width:100%;box-shadow:0 25px 60px rgba(0,0,0,.8),var(--glow-p);max-height:90vh;overflow-y:auto}
     .m-title{font-size:1.1rem;font-weight:700;margin-bottom:.4rem}
     .m-sub{font-size:.83rem;color:var(--muted);margin-bottom:1.2rem}
     .m-amount{font-size:2.2rem;font-weight:800;color:var(--green);text-align:center;margin-bottom:.3rem}
@@ -232,10 +229,13 @@
     .m-tolbl{font-size:.77rem;color:var(--muted);margin-bottom:.3rem}
     .m-to{font-size:1rem;font-weight:700;margin-bottom:1.2rem}
     .m-btns{display:flex;gap:.75rem}.m-btns .btn{flex:1}
+    /* pay-all breakdown in modal */
+    .payall-breakdown{background:rgba(0,0,0,.3);border-radius:8px;padding:.75rem;margin-bottom:1.2rem;font-size:.8rem}
+    .pb-row{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .pb-row:last-child{border-bottom:none;font-weight:700;color:var(--green);margin-top:.2rem;padding-top:.5rem}
+    .pb-label{color:var(--muted)}.pb-amt{color:var(--text)}
 
-    /* ═══════════════════════════════════════════════
-       TOAST + SPINNER + DEBUG
-    ═══════════════════════════════════════════════ */
+    /* TOAST + SPINNER + DEBUG */
     .toast-w{position:fixed;bottom:5rem;right:1rem;z-index:300;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
     .toast{padding:.65rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;
       background:rgba(15,15,40,.95);border:1px solid;backdrop-filter:blur(8px);
@@ -248,9 +248,8 @@
     .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--green);border-radius:50%;animation:sp .7s linear infinite}
     @keyframes sp{to{transform:rotate(360deg)}}
     .debug{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(0,0,0,.93);
-      border-top:1px solid rgba(0,255,136,.18);backdrop-filter:blur(8px);
-      font-family:'Courier New',monospace;font-size:.7rem;padding:.45rem 1rem;
-      display:flex;flex-wrap:wrap;gap:.35rem 1rem;align-items:center}
+      border-top:1px solid rgba(0,255,136,.15);font-family:'Courier New',monospace;font-size:.7rem;
+      padding:.45rem 1rem;display:flex;flex-wrap:wrap;gap:.35rem 1rem;align-items:center}
     .dl{color:var(--green);font-weight:700;font-size:.67rem;letter-spacing:.08em}
     .dv{color:#a0a8c8}.ds{color:var(--border)}
     main{padding-bottom:4.5rem}
@@ -267,7 +266,8 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
-    <a href="?page=admin" class="admin-link" id="adminLink">⚙ Admin</a>
+    <!-- Admin link: looks like a harmless node indicator -->
+    <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
     <button id="walletBtn" onclick="connectWallet()">
       <span class="wdot"></span><span id="walletTxt">Connect Wallet</span>
     </button>
@@ -278,78 +278,68 @@
 
 <main>
 
-<!-- ═══════ LANDING VIEW ═══════ -->
+<!-- ═══ LANDING ═══ -->
 <div id="viewLanding" class="view">
   <div class="land-hero">
     <div class="land-badge">⬡ Decentralized Matrix Protocol on Solana</div>
-    <h1 class="land-title" id="landTitle">The DeFi<br><span>Matrix Network</span></h1>
-    <p class="land-sub" id="landSub">Loading...</p>
+    <h1 class="land-title" id="landTitle">The DeFi <span class="hl">Matrix Network</span></h1>
+    <p class="land-sub" id="landSub"></p>
     <div class="land-cta">
       <button class="btn btn-g btn-xl" onclick="showView('viewRegister')">Join the Matrix →</button>
       <button class="btn btn-p btn-xl" onclick="connectWallet()">Connect Wallet</button>
     </div>
     <div class="land-stats">
-      <div class="land-stat"><div class="land-stat-val" id="landUsers">—</div><div class="land-stat-lbl">Active Nodes</div></div>
-      <div class="land-stat"><div class="land-stat-val">6</div><div class="land-stat-lbl">Matrix Levels</div></div>
-      <div class="land-stat"><div class="land-stat-val" id="landAmt">10</div><div class="land-stat-lbl">USDT Per Level</div></div>
-      <div class="land-stat"><div class="land-stat-val">◎</div><div class="land-stat-lbl">Solana Network</div></div>
+      <div class="ls"><div class="ls-val" id="landUsers">—</div><div class="ls-lbl">Active Nodes</div></div>
+      <div class="ls"><div class="ls-val">6</div><div class="ls-lbl">Matrix Levels</div></div>
+      <div class="ls"><div class="ls-val" id="landAmt">—</div><div class="ls-lbl">USDT Per Level</div></div>
+      <div class="ls"><div class="ls-val">◎</div><div class="ls-lbl">Solana Network</div></div>
     </div>
   </div>
-
-  <!-- Features -->
   <div class="feat-grid" id="featGrid"></div>
-
-  <!-- How it works -->
   <div class="how-section">
-    <h2 class="how-title">How It Works</h2>
-    <p class="how-sub">Three simple steps to start earning</p>
+    <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.5rem">How It Works</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:2.5rem">Three simple steps to start earning</p>
     <div class="how-steps" id="howSteps"></div>
   </div>
-
   <div class="land-footer" id="landFooter"></div>
 </div>
 
-<!-- ═══════ REGISTER VIEW ═══════ -->
+<!-- ═══ REGISTER ═══ -->
 <div id="viewRegister" class="view">
-  <div class="container">
+  <div class="wrap">
     <div style="text-align:center;margin-bottom:2rem">
-      <div class="hero-badge">⬡ Join the Network</div>
-      <h1 class="hero-title">Register Your <span style="color:var(--green)">Node</span></h1>
-      <p class="hero-sub">Free registration — activation payments happen on next step.</p>
+      <div style="display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .8rem;border-radius:100px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);font-size:.75rem;color:var(--green);margin-bottom:1rem">⬡ Join the Network</div>
+      <h1 style="font-size:clamp(1.7rem,5vw,2.5rem);margin-bottom:.5rem">Register Your <span style="color:var(--green)">Node</span></h1>
+      <p style="color:var(--muted);font-size:.93rem">Free registration — activation payments on next step.</p>
     </div>
-
     <div id="refBadge" class="ref-badge" style="display:none">
       <span class="bdot"></span>
       <span>Referred by: <strong id="refName" style="color:var(--green)"></strong></span>
     </div>
-
     <div class="card card-p" style="margin-bottom:1.5rem">
       <div class="form-group">
         <label class="form-label">Choose Username</label>
-        <input id="usernameInput" class="form-input" type="text"
-          placeholder="e.g. BOSS, CryptoKing, Node_01" maxlength="20" oninput="onUsernameInput()"/>
+        <input id="usernameInput" class="form-input" type="text" placeholder="e.g. BOSS, CryptoKing, Node_01" maxlength="20" oninput="onUsernameInput()"/>
       </div>
       <div class="mx-preview">
         <div class="mx-preview-title">Your Upline Matrix Preview</div>
-        <div class="mx-grid" id="matrixPreview"><div style="color:var(--muted);font-size:.75rem;grid-column:1/-1;text-align:center">Loading...</div></div>
+        <div class="mx-grid6" id="matrixPreview"><div style="color:var(--muted);font-size:.75rem;grid-column:1/-1;text-align:center">Loading...</div></div>
       </div>
       <button id="registerBtn" class="btn btn-g btn-lg btn-full" onclick="register()">⬡ Activate Node &amp; Join Matrix</button>
       <p style="font-size:.73rem;color:var(--muted);text-align:center;margin-top:.7rem">Free registration. Pay activation fees on next step.</p>
     </div>
-
     <div class="stats-strip">
-      <div class="stat-card"><div class="stat-val" style="color:var(--green)" id="regTotalCount">—</div><div class="stat-lbl">Total Nodes</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--green)" id="regTotal">—</div><div class="stat-lbl">Total Nodes</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--cyan)">6</div><div class="stat-lbl">Matrix Levels</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--purple)" id="regLevelCost">10</div><div class="stat-lbl">USDT / Level</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--purple)" id="regCost">—</div><div class="stat-lbl">USDT / Level</div></div>
     </div>
-
     <div style="text-align:center;margin-top:1rem">
-      <button class="btn btn-p" onclick="showView('viewLanding')">← Back to Home</button>
+      <button class="btn btn-p" onclick="goHome()">← Back to Home</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════ ACTIVATION VIEW ═══════ -->
+<!-- ═══ DASHBOARD ═══ -->
 <div id="viewActivation" class="view">
   <div class="cwide">
     <div class="act-hdr">
@@ -357,24 +347,26 @@
         <h2 style="font-size:1.35rem;margin-bottom:.2rem">Node Dashboard</h2>
         <p style="color:var(--muted);font-size:.83rem">Activate your matrix levels to receive payments</p>
       </div>
-      <div class="user-pill">
-        <div class="user-av" id="userAv">?</div>
+      <!-- User pill → click to open profile -->
+      <div class="user-pill" onclick="openProfile()" title="View my profile">
+        <div class="user-av" id="userAv">👤</div>
         <div>
           <div style="font-weight:700;font-size:.88rem" id="dispUser">—</div>
           <div style="font-size:.7rem;color:var(--muted)" id="dispWallet">No wallet</div>
         </div>
+        <span style="font-size:.7rem;color:var(--muted)">👤</span>
       </div>
     </div>
 
-    <!-- Referral link — only shown when fully paid -->
+    <!-- Referral — locked until all paid -->
     <div id="refBoxPaid" class="ref-box" style="display:none">
       <div style="font-size:.7rem;color:var(--muted);white-space:nowrap">Your Ref Link:</div>
       <div class="ref-url" id="refUrl">—</div>
       <button class="btn btn-c" style="font-size:.73rem;padding:.3rem .65rem" onclick="copyRef()">Copy</button>
     </div>
     <div id="refBoxLocked" class="ref-locked">
-      <span style="font-size:1.1rem">🔒</span>
-      <span>Your referral link will be revealed after you complete <strong style="color:var(--gold)">all payments</strong> (system fee + 6 levels)</span>
+      <span style="font-size:1.2rem">🔒</span>
+      <span>Your referral link unlocks after completing <strong style="color:var(--gold)">all payments</strong> — system fee + 6 levels.</span>
     </div>
 
     <!-- Stats -->
@@ -384,136 +376,181 @@
       <div class="stat-card"><div class="stat-val" style="color:var(--cyan)" id="remaining">6</div><div class="stat-lbl">Remaining</div></div>
     </div>
 
-    <!-- Section 1: Fee -->
+    <!-- Pay All banner (shown when nothing paid yet) -->
+    <div id="payAllBanner" class="payall-banner">
+      <div class="payall-info">
+        <div style="font-weight:700;color:var(--green);margin-bottom:.2rem">⚡ Activate Everything at Once</div>
+        <div style="color:var(--muted);font-size:.82rem">Pay system fee + all 6 levels in one action</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+        <div style="text-align:right">
+          <div class="payall-total" id="payAllTotal">— USDT</div>
+          <div style="font-size:.7rem;color:var(--muted)">Total</div>
+        </div>
+        <button class="btn btn-g" onclick="openPayAll()">Pay All</button>
+      </div>
+    </div>
+
+    <!-- System Fee -->
     <div class="section-lbl">Section 1 — System Fee</div>
     <div class="fee-card" id="feeCard">
       <div class="fee-hdr">
         <div>
           <div style="font-size:.98rem;font-weight:700">⚙️ System Activation Fee</div>
-          <div style="font-size:.76rem;color:var(--muted);margin-top:.2rem">One-time node activation fee</div>
+          <div style="font-size:.76rem;color:var(--muted);margin-top:.2rem">One-time node activation</div>
         </div>
-        <div class="fee-amt" id="feeAmt">10 <span style="font-size:.82rem;color:var(--muted)">USDT</span></div>
+        <div class="fee-amt" id="feeAmt">— USDT</div>
       </div>
       <div class="fee-addr" id="feeAddr">—</div>
       <div class="fee-row">
         <div class="fee-status" id="feeStatus"><span class="sdot pend"></span><span style="color:var(--gold)">Awaiting Payment</span></div>
-        <button class="btn btn-gold" id="feeBtn" onclick="payFee()">Pay USDT</button>
+        <button class="btn btn-gold" id="feeBtn" onclick="payFee()">Pay</button>
       </div>
     </div>
 
-    <!-- Section 2: Levels -->
+    <!-- Levels -->
     <div class="section-lbl">Section 2 — Upline Matrix Levels</div>
     <div class="mx-grid-act" id="matrixLevels"></div>
   </div>
 </div>
 
-<!-- ═══════ ADMIN VIEW ═══════ -->
-<div id="viewAdmin" class="view">
+<!-- ═══ PROFILE ═══ -->
+<div id="viewProfile" class="view">
+  <div class="cwide">
+    <button class="btn btn-p" style="margin-bottom:1.5rem;font-size:.82rem" onclick="backToDash()">← Back to Dashboard</button>
 
-  <!-- Admin login -->
-  <div id="adminLoginBox" class="admin-login">
+    <div class="profile-hero">
+      <div class="profile-av-big" id="profileAvBig">👤</div>
+      <div>
+        <div class="profile-name" id="profileName">—</div>
+        <div class="profile-since" id="profileSince">—</div>
+        <div style="margin-top:.5rem;font-size:.8rem;color:var(--muted)" id="profileRef">—</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="profile-stats" id="profileStats"></div>
+
+    <!-- Matrix mini view -->
+    <div class="section-lbl" style="margin-bottom:1rem">Upline Matrix</div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="matrix-mini" id="profileMatrix"></div>
+    </div>
+
+    <!-- Edit section (only for own profile) -->
+    <div id="profileEditSection">
+      <div class="section-lbl">Edit Profile</div>
+      <div class="card card-p" style="margin-bottom:1rem">
+        <div class="admin-card-title">Choose Avatar</div>
+        <div class="avatar-grid" id="avatarGrid"></div>
+      </div>
+      <div class="card card-p" style="margin-bottom:1rem">
+        <div class="admin-card-title">Wallet Address</div>
+        <div class="form-group">
+          <label class="form-label">Solana Wallet</label>
+          <input id="profileWalletInput" class="form-input" type="text" placeholder="Paste Solana address or click Connect Wallet above"/>
+        </div>
+        <button class="btn btn-g" onclick="saveProfile()">💾 Save Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="viewAdmin" class="view">
+  <div id="adminLoginBox" style="max-width:380px;margin:4rem auto;padding:0 1rem">
     <div style="text-align:center;margin-bottom:2rem">
       <div style="font-size:2rem;margin-bottom:.5rem">🔐</div>
-      <h2 style="font-size:1.3rem;margin-bottom:.3rem">Admin Panel</h2>
-      <p style="color:var(--muted);font-size:.85rem">Enter your admin password to continue</p>
+      <h2 style="font-size:1.3rem;margin-bottom:.3rem">Control Panel</h2>
+      <p style="color:var(--muted);font-size:.85rem">Authorized access only</p>
     </div>
     <div class="card card-p">
       <div class="form-group">
-        <label class="form-label">Admin Password</label>
-        <input id="adminPwdInput" class="form-input" type="password" placeholder="Enter password"
+        <label class="form-label">Password</label>
+        <input id="adminPwd" class="form-input" type="password" placeholder="Enter password"
           onkeydown="if(event.key==='Enter')adminLogin()"/>
       </div>
-      <button class="btn btn-p btn-lg btn-full" onclick="adminLogin()">Login</button>
+      <button class="btn btn-p btn-lg btn-full" onclick="adminLogin()">Access</button>
     </div>
   </div>
 
-  <!-- Admin dashboard -->
   <div id="adminDash" class="cwide" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
-      <div>
-        <h2 style="font-size:1.35rem;margin-bottom:.2rem">⚙️ Admin Panel</h2>
-        <p style="color:var(--muted);font-size:.83rem">Manage site content, matrix defaults and users</p>
-      </div>
-      <button class="btn btn-r" onclick="adminLogout()" style="font-size:.8rem">Logout Admin</button>
+      <div><h2 style="font-size:1.35rem;margin-bottom:.2rem">⚙️ Control Panel</h2>
+        <p style="color:var(--muted);font-size:.83rem">Manage content, amounts, matrix and users</p></div>
+      <button class="btn btn-r" onclick="adminLogout()" style="font-size:.8rem">Exit</button>
     </div>
-
     <div class="admin-tabs">
-      <button class="tab-btn active" onclick="switchTab('tabContent',this)">📝 Site Content</button>
-      <button class="tab-btn" onclick="switchTab('tabMatrix',this)">🔢 Default Matrix</button>
-      <button class="tab-btn" onclick="switchTab('tabUsers',this)">👥 Users</button>
+      <button class="tab-btn active" onclick="switchTab('tContent',this)">📝 Content</button>
+      <button class="tab-btn" onclick="switchTab('tMatrix',this)">💰 Matrix &amp; Amounts</button>
+      <button class="tab-btn" onclick="switchTab('tUsers',this)">👥 Users</button>
     </div>
 
-    <!-- TAB: Site Content -->
-    <div id="tabContent" class="tab-content active">
-      <div class="admin-section">
-        <div class="admin-section-title">App Branding</div>
-        <div class="field-grid">
-          <div class="field-group"><label class="field-label">App Name</label><input class="field-input" id="cfg_APP_NAME" placeholder="SmartNode"/></div>
-          <div class="field-group"><label class="field-label">Browser Title</label><input class="field-input" id="cfg_APP_TITLE" placeholder="SmartNode — DeFi Matrix"/></div>
+    <!-- Content tab -->
+    <div id="tContent" class="tab-pane active">
+      <div class="admin-card"><div class="admin-card-title">Branding</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">App Name</label><input class="fi" id="c_APP_NAME"/></div>
+          <div class="fg"><label class="fl">Browser Title</label><input class="fi" id="c_APP_TITLE"/></div>
         </div>
       </div>
-      <div class="admin-section">
-        <div class="admin-section-title">Hero Section</div>
-        <div class="field-group"><label class="field-label">Hero Title</label><input class="field-input" id="cfg_HERO_TITLE" placeholder="The DeFi Matrix Network"/></div>
-        <div class="field-group"><label class="field-label">Hero Subtitle</label><textarea class="field-input field-textarea" id="cfg_HERO_SUBTITLE" placeholder="Description..."></textarea></div>
+      <div class="admin-card"><div class="admin-card-title">Hero Section</div>
+        <div class="fg"><label class="fl">Title</label><input class="fi" id="c_HERO_TITLE"/></div>
+        <div class="fg"><label class="fl">Subtitle</label><textarea class="fi fta" id="c_HERO_SUBTITLE"></textarea></div>
       </div>
-      <div class="admin-section">
-        <div class="admin-section-title">Feature Cards</div>
-        <div class="field-grid">
-          <div class="field-group"><label class="field-label">Feature 1 Icon</label><input class="field-input" id="cfg_FEAT_1_ICON" placeholder="⬡"/></div>
-          <div class="field-group"><label class="field-label">Feature 1 Title</label><input class="field-input" id="cfg_FEAT_1_TITLE" placeholder="6-Level Matrix"/></div>
-          <div class="field-group" style="grid-column:1/-1"><label class="field-label">Feature 1 Text</label><input class="field-input" id="cfg_FEAT_1_TEXT"/></div>
-          <div class="field-group"><label class="field-label">Feature 2 Icon</label><input class="field-input" id="cfg_FEAT_2_ICON" placeholder="◎"/></div>
-          <div class="field-group"><label class="field-label">Feature 2 Title</label><input class="field-input" id="cfg_FEAT_2_TITLE" placeholder="Solana Powered"/></div>
-          <div class="field-group" style="grid-column:1/-1"><label class="field-label">Feature 2 Text</label><input class="field-input" id="cfg_FEAT_2_TEXT"/></div>
-          <div class="field-group"><label class="field-label">Feature 3 Icon</label><input class="field-input" id="cfg_FEAT_3_ICON" placeholder="⚡"/></div>
-          <div class="field-group"><label class="field-label">Feature 3 Title</label><input class="field-input" id="cfg_FEAT_3_TITLE" placeholder="Instant Payments"/></div>
-          <div class="field-group" style="grid-column:1/-1"><label class="field-label">Feature 3 Text</label><input class="field-input" id="cfg_FEAT_3_TEXT"/></div>
+      <div class="admin-card"><div class="admin-card-title">Feature Cards</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">F1 Icon</label><input class="fi" id="c_FEAT_1_ICON"/></div>
+          <div class="fg"><label class="fl">F1 Title</label><input class="fi" id="c_FEAT_1_TITLE"/></div>
+          <div class="fg" style="grid-column:1/-1"><label class="fl">F1 Text</label><input class="fi" id="c_FEAT_1_TEXT"/></div>
+          <div class="fg"><label class="fl">F2 Icon</label><input class="fi" id="c_FEAT_2_ICON"/></div>
+          <div class="fg"><label class="fl">F2 Title</label><input class="fi" id="c_FEAT_2_TITLE"/></div>
+          <div class="fg" style="grid-column:1/-1"><label class="fl">F2 Text</label><input class="fi" id="c_FEAT_2_TEXT"/></div>
+          <div class="fg"><label class="fl">F3 Icon</label><input class="fi" id="c_FEAT_3_ICON"/></div>
+          <div class="fg"><label class="fl">F3 Title</label><input class="fi" id="c_FEAT_3_TITLE"/></div>
+          <div class="fg" style="grid-column:1/-1"><label class="fl">F3 Text</label><input class="fi" id="c_FEAT_3_TEXT"/></div>
         </div>
       </div>
-      <div class="admin-section">
-        <div class="admin-section-title">How It Works Steps</div>
-        <div class="field-group"><label class="field-label">Step 1</label><input class="field-input" id="cfg_HOW_1"/></div>
-        <div class="field-group"><label class="field-label">Step 2</label><input class="field-input" id="cfg_HOW_2"/></div>
-        <div class="field-group"><label class="field-label">Step 3</label><input class="field-input" id="cfg_HOW_3"/></div>
+      <div class="admin-card"><div class="admin-card-title">How It Works</div>
+        <div class="fg"><label class="fl">Step 1</label><input class="fi" id="c_HOW_1"/></div>
+        <div class="fg"><label class="fl">Step 2</label><input class="fi" id="c_HOW_2"/></div>
+        <div class="fg"><label class="fl">Step 3</label><input class="fi" id="c_HOW_3"/></div>
       </div>
-      <div class="admin-section">
-        <div class="admin-section-title">Footer</div>
-        <div class="field-group"><label class="field-label">Footer Text</label><textarea class="field-input field-textarea" id="cfg_FOOTER_TEXT"></textarea></div>
+      <div class="admin-card"><div class="admin-card-title">Footer</div>
+        <div class="fg"><textarea class="fi fta" id="c_FOOTER_TEXT"></textarea></div>
       </div>
       <button class="btn btn-g btn-lg" onclick="saveConfig()">💾 Save Content</button>
     </div>
 
-    <!-- TAB: Default Matrix -->
-    <div id="tabMatrix" class="tab-content">
-      <div class="admin-section">
-        <div class="admin-section-title">Payments</div>
-        <div class="field-grid">
-          <div class="field-group"><label class="field-label">System Fee (USDT)</label><input class="field-input" id="cfg_SYSTEM_FEE_AMOUNT" type="number"/></div>
-          <div class="field-group"><label class="field-label">Level Amount (USDT)</label><input class="field-input" id="cfg_LEVEL_AMOUNT" type="number"/></div>
-          <div class="field-group" style="grid-column:1/-1"><label class="field-label">System Fee Wallet Address</label><input class="field-input" id="cfg_SYSTEM_FEE_ADDRESS" placeholder="Solana address..."/></div>
+    <!-- Matrix & Amounts tab -->
+    <div id="tMatrix" class="tab-pane">
+      <div class="admin-card"><div class="admin-card-title">💰 Payment Amounts (change anytime)</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">SmartNode Fee (USDT)</label><input class="fi" id="c_SYSTEM_FEE_AMOUNT" type="number" min="0" step="0.01"/></div>
+          <div class="fg"><label class="fl">Per User Level (USDT)</label><input class="fi" id="c_LEVEL_AMOUNT" type="number" min="0" step="0.01"/></div>
+          <div class="fg" style="grid-column:1/-1"><label class="fl">SmartNode Fee Wallet Address</label><input class="fi" id="c_SYSTEM_FEE_ADDRESS" placeholder="Solana address..."/></div>
         </div>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:.75rem">
+          💡 Changes apply to <strong>new payments only</strong> — existing paid levels are not affected.
+        </p>
       </div>
-      <div class="admin-section">
-        <div class="admin-section-title">Default Matrix Users (Level 1 → 6)</div>
-        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">These 6 accounts seed every new user's matrix when there is no referrer.</p>
-        <div class="matrix-admin-grid" id="matrixAdminGrid"></div>
+      <div class="admin-card"><div class="admin-card-title">Default Matrix Users (L1 → L6)</div>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">These 6 slots seed every new user's matrix when there is no referrer.</p>
+        <div id="matrixAdminGrid"></div>
       </div>
-      <button class="btn btn-g btn-lg" onclick="saveConfig()">💾 Save Matrix</button>
+      <button class="btn btn-g btn-lg" onclick="saveConfig()">💾 Save Amounts &amp; Matrix</button>
     </div>
 
-    <!-- TAB: Users -->
-    <div id="tabUsers" class="tab-content">
+    <!-- Users tab -->
+    <div id="tUsers" class="tab-pane">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
         <span style="color:var(--muted);font-size:.83rem">All registered nodes</span>
         <button class="btn btn-c" style="font-size:.78rem" onclick="loadUsers()">↺ Refresh</button>
       </div>
       <div class="table-wrap">
         <table class="users-table">
-          <thead><tr>
-            <th>Username</th><th>Referrer</th><th>Fee</th><th>Levels</th><th>Wallet</th><th>Registered</th>
-          </tr></thead>
-          <tbody id="usersTableBody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
+          <thead><tr><th>User</th><th>Ref</th><th>Fee</th><th>Levels</th><th>Total Paid</th><th>Wallet</th><th>Date</th></tr></thead>
+          <tbody id="usersTableBody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -527,12 +564,15 @@
   <div class="modal">
     <div class="m-title" id="mTitle">Confirm Payment</div>
     <div class="m-sub" id="mSub">Send USDT on Solana</div>
-    <div class="m-amount" id="mAmt">10</div>
-    <div class="m-curr">USDT (SPL Token)</div>
-    <div class="m-albl">Send To Address</div>
-    <div class="m-addr" id="mAddr">—</div>
-    <div class="m-tolbl">Recipient</div>
-    <div class="m-to" id="mTo">—</div>
+    <div id="mPayAllBreakdown" style="display:none"></div>
+    <div id="mSinglePay">
+      <div class="m-amount" id="mAmt">—</div>
+      <div class="m-curr">USDT (SPL Token)</div>
+      <div class="m-albl">Send To Address</div>
+      <div class="m-addr" id="mAddr">—</div>
+      <div class="m-tolbl">Recipient</div>
+      <div class="m-to" id="mTo">—</div>
+    </div>
     <div class="m-btns">
       <button class="btn btn-r" onclick="closeModal()">Cancel</button>
       <button class="btn btn-g" id="mConfirm" onclick="confirmPayment()">✓ Confirm</button>
@@ -553,54 +593,49 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-//  SmartNode — Full Frontend Logic
-// ══════════════════════════════════════════════════════════
-const cfg     = () => window.APP_CONFIG || {};
-const $       = id  => document.getElementById(id);
-const getRef  = ()  => new URLSearchParams(location.search).get('ref');
-const getPage = ()  => new URLSearchParams(location.search).get('page');
+// ════════════════════════════════════════════════════════
+//  SmartNode Frontend
+// ════════════════════════════════════════════════════════
+const cfg=()=>window.APP_CONFIG||{};
+const $=id=>document.getElementById(id);
+const getRef=()=>new URLSearchParams(location.search).get('ref');
 
 function shortAddr(a){return a?a.slice(0,4)+'...'+a.slice(-4):'—'}
 function buildRefUrl(u){return location.origin+location.pathname+'?ref='+encodeURIComponent(u)}
+function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—'}
 
 // Session
-const saveSession  = n => localStorage.setItem('sn_session',n);
-const loadSession  = () => localStorage.getItem('sn_session');
-const clearSession = () => localStorage.removeItem('sn_session');
-
-// Admin session
-const saveAdminSession  = () => sessionStorage.setItem('sn_admin','1');
-const loadAdminSession  = () => sessionStorage.getItem('sn_admin')==='1';
-const clearAdminSession = () => sessionStorage.removeItem('sn_admin');
-let adminPassword = '';
+const saveSession =n=>localStorage.setItem('sn_session',n);
+const loadSession =()=>localStorage.getItem('sn_session');
+const clearSession=()=>localStorage.removeItem('sn_session');
 
 // State
-let currentUser=null, connectedWallet=null, pendingPayment=null, previewTimer=null;
+let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
+let adminPassword='',selectedAvatar=null;
 
-// ── API ────────────────────────────────────────────────────
-async function apiFetch(method,path,body,headers={}){
-  const opts={method,headers:{'Content-Type':'application/json',...headers}};
-  if(body) opts.body=JSON.stringify(body);
-  const r=await fetch(path,opts);
+const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
+
+// ── API ─────────────────────────────────────────────────
+async function apiFetch(method,path,body,hdrs={}){
+  const r=await fetch(path,{method,headers:{'Content-Type':'application/json',...hdrs},body:body?JSON.stringify(body):undefined});
   const json=await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(json.error||`HTTP ${r.status}`);
+  if(!r.ok)throw new Error(json.error||`HTTP ${r.status}`);
   return json;
 }
-const apiGet  =(p,h)   =>apiFetch('GET',p,null,h);
-const apiPost =(p,b,h) =>apiFetch('POST',p,b,h);
-const apiPatch=(p,b)   =>apiFetch('PATCH',p,b);
+const apiGet  =(p,h)  =>apiFetch('GET',p,null,h);
+const apiPost =(p,b,h)=>apiFetch('POST',p,b,h);
+const apiPatch=(p,b)  =>apiFetch('PATCH',p,b);
 async function loadUser(u){try{return await apiGet(`/api/user/${encodeURIComponent(u)}`)}catch{return null}}
+async function loadProfile(u){try{return await apiGet(`/api/profile/${encodeURIComponent(u)}`)}catch{return null}}
 
-// ── Wallet ─────────────────────────────────────────────────
+// ── Wallet ───────────────────────────────────────────────
 async function connectWallet(){
   if(connectedWallet){toast('Wallet already connected','inf');return}
   const p=window.solana;
   if(!p?.isPhantom){toast('Phantom not found — install at phantom.app','err');setTimeout(()=>window.open('https://phantom.app/','_blank'),1200);return}
   try{
     const r=await p.connect();
-    connectedWallet=r.publicKey.toString();
-    updateWalletUI();
+    connectedWallet=r.publicKey.toString();updateWalletUI();
     toast('Wallet: '+shortAddr(connectedWallet),'ok');
     if(currentUser){
       currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{walletAddress:connectedWallet});
@@ -615,117 +650,91 @@ function updateWalletUI(){
   $('dbgWallet').textContent=connectedWallet?shortAddr(connectedWallet):'—';
 }
 
-// ── Views ──────────────────────────────────────────────────
-function showView(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  $(id).classList.add('active');
-}
-function goHome(){showView('viewLanding');history.pushState({},'',location.pathname)}
+// ── Views ────────────────────────────────────────────────
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active')}
+function goHome(){showView('viewLanding')}
+function backToDash(){showView('viewActivation')}
 
-// ── Landing page ────────────────────────────────────────────
+// ── Admin link (hidden, uses CONTROL_TOKEN from config) ──
+function openSys(e){
+  e.preventDefault();
+  const token=cfg().CONTROL_TOKEN||'node-matrix-sys';
+  // Navigate to /?sys=<token> — looks like a system param
+  window.location.href=`?sys=${token}`;
+}
+
+// ── Landing ──────────────────────────────────────────────
 async function renderLanding(){
   const C=cfg();
-  $('appName').textContent   = C.APP_NAME||'SmartNode';
-  $('landTitle').innerHTML   = (C.HERO_TITLE||'The DeFi Matrix Network').replace(' ',' <span>').replace(/$/,'</span>');
-  // Simple render — just set the gradient span to the last word
+  $('appName').textContent=C.APP_NAME||'SmartNode';
+  if(C.APP_TITLE)document.title=C.APP_TITLE;
   const parts=(C.HERO_TITLE||'The DeFi Matrix Network').split(' ');
   const last=parts.pop();
-  $('landTitle').innerHTML=parts.join(' ')+' <span>'+last+'</span>';
-  $('landSub').textContent   = C.HERO_SUBTITLE||'';
-  $('landAmt').textContent   = C.LEVEL_AMOUNT||10;
-  if(C.APP_TITLE) document.title=C.APP_TITLE;
-
+  $('landTitle').innerHTML=parts.join(' ')+' <span class="hl">'+last+'</span>';
+  $('landSub').textContent=C.HERO_SUBTITLE||'';
+  $('landAmt').textContent=C.LEVEL_AMOUNT||'—';
   try{const s=await apiGet('/api/stats');$('landUsers').textContent=s.totalUsers}catch{$('landUsers').textContent='—'}
-
-  $('featGrid').innerHTML=[
-    [C.FEAT_1_ICON||'⬡',C.FEAT_1_TITLE||'6-Level Matrix',C.FEAT_1_TEXT||''],
+  $('featGrid').innerHTML=[[C.FEAT_1_ICON||'⬡',C.FEAT_1_TITLE||'6-Level Matrix',C.FEAT_1_TEXT||''],
     [C.FEAT_2_ICON||'◎',C.FEAT_2_TITLE||'Solana Powered',C.FEAT_2_TEXT||''],
-    [C.FEAT_3_ICON||'⚡',C.FEAT_3_TITLE||'Instant Payments',C.FEAT_3_TEXT||''],
-  ].map(([icon,title,text])=>`
-    <div class="feat-card">
-      <div class="feat-icon">${icon}</div>
-      <div class="feat-title">${title}</div>
-      <div class="feat-text">${text}</div>
-    </div>`).join('');
-
-  $('howSteps').innerHTML=[
-    ['Register',C.HOW_1||''],
-    ['Activate',C.HOW_2||''],
-    ['Earn',C.HOW_3||''],
-  ].map(([title,text],i)=>`
-    <div class="how-step">
-      <div class="how-num">${i+1}</div>
-      <div class="how-step-title">${title}</div>
-      <div class="how-step-text">${text}</div>
-    </div>`).join('');
-
+    [C.FEAT_3_ICON||'⚡',C.FEAT_3_TITLE||'Instant Payments',C.FEAT_3_TEXT||'']
+  ].map(([i,t,x])=>`<div class="feat-card"><div class="feat-icon">${i}</div><div class="feat-title">${t}</div><div class="feat-text">${x}</div></div>`).join('');
+  $('howSteps').innerHTML=[['Register',C.HOW_1||''],['Activate',C.HOW_2||''],['Earn',C.HOW_3||'']]
+    .map(([t,x],i)=>`<div class="how-step"><div class="how-num">${i+1}</div><div style="font-size:.9rem;font-weight:700;margin-bottom:.4rem">${t}</div><div style="font-size:.82rem;color:var(--muted);line-height:1.55">${x}</div></div>`).join('');
   $('landFooter').textContent=C.FOOTER_TEXT||'';
 }
 
-// ── Register ───────────────────────────────────────────────
+// ── Register ─────────────────────────────────────────────
 function onUsernameInput(){clearTimeout(previewTimer);previewTimer=setTimeout(renderMatrixPreview,350)}
-
 async function renderMatrixPreview(){
   const referrer=getRef();
   let matrix=[...(cfg().DEFAULT_MATRIX||[])];
   if(referrer){const ru=await loadUser(referrer);if(ru)matrix=[...ru.uplineMatrix.slice(1),referrer]}
-  $('matrixPreview').innerHTML=matrix.map((n,i)=>`
-    <div class="lv-chip ${i===5?'lv6':''}">
-      <div class="cn">L${i+1}</div><div class="cv" title="${n}">${n}</div>
-    </div>`).join('');
+  $('matrixPreview').innerHTML=matrix.map((n,i)=>`<div class="lv-chip ${i===5?'lv6':''}"><div class="cn">L${i+1}</div><div class="cv" title="${n}">${n}</div></div>`).join('');
 }
-
 async function register(){
   const raw=$('usernameInput').value.trim();
-  if(!raw){toast('Please enter a username','err');return}
-  const btn=$('registerBtn');
-  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registering...';
+  if(!raw){toast('Enter a username','err');return}
+  const btn=$('registerBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registering...';
   try{
     const user=await apiPost('/api/register',{username:raw,walletAddress:connectedWallet||null,referrer:getRef()||null});
     currentUser=user;saveSession(user.username);
-    toast(`Welcome, ${user.username}!`,'ok');
-    showActivation();
+    toast(`Welcome, ${user.username}!`,'ok');showActivation();
   }catch(e){toast(e.message,'err')}
   finally{btn.disabled=false;btn.innerHTML='⬡ Activate Node &amp; Join Matrix'}
 }
 
-// ── Auth ───────────────────────────────────────────────────
-function logout(){
-  clearSession();currentUser=null;
-  $('logoutBtn').style.display='none';
-  showView('viewLanding');updateDebug();
-}
+// ── Auth ─────────────────────────────────────────────────
+function logout(){clearSession();currentUser=null;$('logoutBtn').style.display='none';showView('viewLanding');updateDebug()}
 
-// ── Activation ─────────────────────────────────────────────
-function showActivation(){
-  $('logoutBtn').style.display='';
-  renderActivation();
-  showView('viewActivation');
-  updateDebug();
-}
-
-function isFullyPaid(u){
-  return u.paidSystemFee && u.paidLevels.length===6;
-}
+// ── Dashboard ────────────────────────────────────────────
+function showActivation(){$('logoutBtn').style.display='';renderActivation();showView('viewActivation');updateDebug()}
+function isFullyPaid(u){return u.paidSystemFee&&u.paidLevels.length===6}
 
 function renderActivation(){
   const u=currentUser,C=cfg();
   $('dispUser').textContent=u.username;
-  $('userAv').textContent=u.username[0].toUpperCase();
+  $('userAv').textContent=u.avatar||'👤';
   $('dispWallet').textContent=u.walletAddress?shortAddr(u.walletAddress):'No wallet';
 
-  // Referral link — only if fully paid
-  const fullyPaid=isFullyPaid(u);
-  $('refBoxPaid').style.display  = fullyPaid?'flex':'none';
-  $('refBoxLocked').style.display= fullyPaid?'none':'flex';
-  if(fullyPaid) $('refUrl').textContent=buildRefUrl(u.username);
+  // Referral link
+  const fp=isFullyPaid(u);
+  $('refBoxPaid').style.display=fp?'flex':'none';
+  $('refBoxLocked').style.display=fp?'none':'flex';
+  if(fp)$('refUrl').textContent=buildRefUrl(u.username);
 
-  const paidCount=u.paidLevels.length;
-  $('paidCount').textContent=paidCount;
-  $('paidAmt').textContent=paidCount*C.LEVEL_AMOUNT+(u.paidSystemFee?C.SYSTEM_FEE_AMOUNT:0);
-  $('remaining').textContent=6-paidCount;
+  const pc=u.paidLevels.length;
+  $('paidCount').textContent=pc;
+  $('paidAmt').textContent=pc*C.LEVEL_AMOUNT+(u.paidSystemFee?C.SYSTEM_FEE_AMOUNT:0);
+  $('remaining').textContent=6-pc;
 
-  $('feeAddr').textContent=C.SYSTEM_FEE_ADDRESS||'(set SYSTEM_FEE_ADDRESS env var)';
+  // Pay all banner — hide if anything already paid
+  const allPaid=u.paidSystemFee&&pc===6;
+  const anyPaid=u.paidSystemFee||pc>0;
+  $('payAllBanner').style.display=(!anyPaid&&!allPaid)?'flex':'none';
+  $('payAllTotal').textContent=(C.SYSTEM_FEE_AMOUNT+C.LEVEL_AMOUNT*6)+' USDT';
+
+  // Fee
+  $('feeAddr').textContent=C.SYSTEM_FEE_ADDRESS||'(set SYSTEM_FEE_ADDRESS)';
   $('feeAmt').innerHTML=`${C.SYSTEM_FEE_AMOUNT} <span style="font-size:.82rem;color:var(--muted)">USDT</span>`;
   $('feeBtn').textContent=`Pay ${C.SYSTEM_FEE_AMOUNT} USDT`;
   if(u.paidSystemFee){
@@ -746,35 +755,29 @@ function renderLevels(){
     const canPay=!isPaid&&u.paidSystemFee&&(i===0||u.paidLevels.includes(i-1));
     const state=isPaid?'paid':canPay?'active':'locked';
     const wallet=C.SYSTEM_WALLETS?.[username]||'—';
-    const action=isPaid
-      ?`<div class="check-ico">✓</div>`
-      :canPay
-        ?`<button class="btn btn-c" style="font-size:.78rem;padding:.4rem .85rem" onclick="openPayModal(${i},'${username}','${wallet}')">Pay</button>`
-        :`<button class="btn" style="font-size:.76rem;padding:.38rem .7rem;opacity:.35;cursor:not-allowed" disabled>Locked</button>`;
-    const statusTxt=isPaid
-      ?`<span style="color:var(--green)">✓ Payment confirmed</span>`
-      :canPay?`<span style="color:var(--cyan)">⚡ Ready to pay</span>`
-             :`<span style="color:var(--muted)">🔒 Pay L${num-1} first</span>`;
-    const refTag=num===6?` <span style="font-size:.62rem;color:var(--green);background:rgba(0,255,136,.1);padding:.1rem .3rem;border-radius:4px">REFERRER</span>`:'';
-    return `
-      <div class="lv-card ${state}">
-        <div class="lv-badge">${num}</div>
-        <div class="lv-info">
-          <div class="lv-uname">${username}${refTag}</div>
-          <div class="lv-wallet" title="${wallet}">${wallet!=='—'?shortAddr(wallet)+' ← '+wallet:'Wallet not set'}</div>
-          <div class="lv-status">${statusTxt}</div>
-        </div>
-        <div>${action}</div>
-      </div>`;
+    const action=isPaid?`<div class="check-ico">✓</div>`
+      :canPay?`<button class="btn btn-c" style="font-size:.78rem;padding:.4rem .85rem" onclick="openPayModal(${i},'${username}','${wallet}')">Pay</button>`
+             :`<button class="btn" style="font-size:.76rem;padding:.38rem .7rem;opacity:.35;cursor:not-allowed" disabled>🔒</button>`;
+    const st=isPaid?`<span style="color:var(--green)">✓ Confirmed</span>`
+      :canPay?`<span style="color:var(--cyan)">⚡ Ready</span>`:`<span style="color:var(--muted)">Pay L${num-1} first</span>`;
+    const rt=num===6?` <span style="font-size:.62rem;color:var(--green);background:rgba(0,255,136,.1);padding:.1rem .3rem;border-radius:4px">REFERRER</span>`:'';
+    return `<div class="lv-card ${state}">
+      <div class="lv-badge">${num}</div>
+      <div class="lv-info">
+        <div class="lv-uname">${username}${rt}</div>
+        <div class="lv-wallet" title="${wallet}">${wallet!=='—'?shortAddr(wallet)+' ← '+wallet:'Wallet not set'}</div>
+        <div class="lv-status">${st}</div>
+      </div><div>${action}</div></div>`;
   }).join('');
 }
 
-// ── Payments ───────────────────────────────────────────────
+// ── Payments ─────────────────────────────────────────────
 function payFee(){
   const C=cfg();
-  pendingPayment={type:'fee',levelIndex:-1,username:'System',address:C.SYSTEM_FEE_ADDRESS};
-  $('mTitle').textContent='System Activation Fee';$('mSub').textContent='One-time node activation fee';
-  $('mAmt').textContent=C.SYSTEM_FEE_AMOUNT;$('mAddr').textContent=C.SYSTEM_FEE_ADDRESS;
+  pendingPayment={type:'fee'};
+  $('mPayAllBreakdown').style.display='none';$('mSinglePay').style.display='block';
+  $('mTitle').textContent='System Activation Fee';$('mSub').textContent='One-time node activation';
+  $('mAmt').textContent=C.SYSTEM_FEE_AMOUNT;$('mAddr').textContent=C.SYSTEM_FEE_ADDRESS||'—';
   $('mTo').textContent=(C.APP_NAME||'SmartNode')+' System';
   $('payModal').classList.remove('hidden');
 }
@@ -782,27 +785,49 @@ async function openPayModal(idx,username,address){
   const C=cfg();
   if(!address||address==='—'){const u=await loadUser(username);address=u?.walletAddress||C.SYSTEM_WALLETS?.[username]||'—'}
   pendingPayment={type:'level',levelIndex:idx,username,address};
-  $('mTitle').textContent=`Pay Level ${idx+1}`;$('mSub').textContent=`Upline payment to Level ${idx+1} node`;
+  $('mPayAllBreakdown').style.display='none';$('mSinglePay').style.display='block';
+  $('mTitle').textContent=`Pay Level ${idx+1}`;$('mSub').textContent=`Upline payment — Level ${idx+1}`;
   $('mAmt').textContent=C.LEVEL_AMOUNT;$('mAddr').textContent=address;$('mTo').textContent=username;
   $('payModal').classList.remove('hidden');
 }
+function openPayAll(){
+  const C=cfg();
+  pendingPayment={type:'all'};
+  const total=C.SYSTEM_FEE_AMOUNT+C.LEVEL_AMOUNT*6;
+  $('mTitle').textContent='Activate Everything';
+  $('mSub').textContent='Pay system fee + all 6 levels in one confirmation';
+  $('mSinglePay').style.display='none';
+  const rows=[
+    ['System Fee →'+(C.APP_NAME||'SmartNode'),C.SYSTEM_FEE_AMOUNT],
+    ...currentUser.uplineMatrix.map((n,i)=>[`Level ${i+1} → ${n}`,C.LEVEL_AMOUNT])
+  ];
+  $('mPayAllBreakdown').style.display='block';
+  $('mPayAllBreakdown').innerHTML=`<div class="payall-breakdown">`
+    +rows.map(([l,a])=>`<div class="pb-row"><span class="pb-label">${l}</span><span class="pb-amt">${a} USDT</span></div>`).join('')
+    +`<div class="pb-row"><span>Total</span><span>${total} USDT</span></div></div>`;
+  $('payModal').classList.remove('hidden');
+}
 function closeModal(){$('payModal').classList.add('hidden');pendingPayment=null}
+
 async function confirmPayment(){
   if(!pendingPayment)return;
   const btn=$('mConfirm');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
   try{
     let updates={};
     if(pendingPayment.type==='fee'){updates.paidSystemFee=true}
-    else{
+    else if(pendingPayment.type==='all'){
+      updates.paidSystemFee=true;
+      updates.paidLevels=[0,1,2,3,4,5];
+    }else{
       const np=[...(currentUser.paidLevels||[])];
       if(!np.includes(pendingPayment.levelIndex))np.push(pendingPayment.levelIndex);
       np.sort((a,b)=>a-b);updates.paidLevels=np;
     }
     currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,updates);
-    const isLast=pendingPayment.levelIndex===5;
-    toast(pendingPayment.type==='fee'?'System fee paid! Level 1 unlocked.'
-      :isLast?'Level 6 paid! Matrix complete! 🎉'
-             :`Level ${pendingPayment.levelIndex+1} paid! Level ${pendingPayment.levelIndex+2} unlocked.`,'ok');
+    toast(pendingPayment.type==='all'?'All payments confirmed! Matrix fully activated! 🎉'
+      :pendingPayment.type==='fee'?'System fee paid! Level 1 unlocked.'
+      :pendingPayment.levelIndex===5?'Level 6 paid! Matrix complete! 🎉'
+      :`Level ${pendingPayment.levelIndex+1} paid! Level ${pendingPayment.levelIndex+2} unlocked.`,'ok');
     closeModal();renderActivation();updateDebug();
   }catch(e){toast('Error: '+e.message,'err')}
   finally{btn.disabled=false;btn.textContent='✓ Confirm'}
@@ -811,121 +836,166 @@ async function confirmPayment(){
 function copyRef(){
   const url=buildRefUrl(currentUser.username);
   navigator.clipboard.writeText(url).then(()=>toast('Referral link copied!','ok'))
-    .catch(()=>{const el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Copied!','ok')});
+    .catch(()=>{const el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');el.remove();toast('Copied!','ok')});
 }
 
-// ── Admin ──────────────────────────────────────────────────
+// ── Profile ──────────────────────────────────────────────
+async function openProfile(){
+  if(!currentUser)return;
+  const profile=await loadProfile(currentUser.username);
+  if(!profile){toast('Could not load profile','err');return}
+  renderProfile(profile,true);
+  showView('viewProfile');
+}
+
+function renderProfile(p,isOwn){
+  $('profileAvBig').textContent=p.avatar||'👤';
+  $('profileName').textContent=p.username;
+  $('profileSince').textContent='Node since '+fmtDate(p.registrationDate);
+  $('profileRef').textContent=p.referrer?'Referred by: '+p.referrer:'Genesis node (no referrer)';
+  const C=cfg();
+  const pc=p.paidLevels.length;
+  const totalPaid=pc*C.LEVEL_AMOUNT+(p.paidSystemFee?C.SYSTEM_FEE_AMOUNT:0);
+  $('profileStats').innerHTML=[
+    ['💰',totalPaid+' USDT','Total Paid','var(--gold)'],
+    ['📊',pc+'/6','Levels Active','var(--green)'],
+    ['👥',p.referralCount||0,'Referrals','var(--cyan)'],
+    ['🔑',p.paidSystemFee?'Active':'Pending','Node Status',p.paidSystemFee?'var(--green)':'var(--gold)'],
+  ].map(([ic,v,l,c])=>`<div class="pstat"><div style="font-size:1.3rem;margin-bottom:.3rem">${ic}</div><div class="pstat-val" style="color:${c}">${v}</div><div class="pstat-lbl">${l}</div></div>`).join('');
+
+  $('profileMatrix').innerHTML=p.uplineMatrix.map((n,i)=>`<div class="lv-chip ${i===5?'lv6':''}"><div class="cn">L${i+1}</div><div class="cv" title="${n}">${n}</div></div>`).join('');
+
+  $('profileEditSection').style.display=isOwn?'block':'none';
+  if(isOwn){
+    selectedAvatar=p.avatar||'👤';
+    $('profileWalletInput').value=p.walletAddress||connectedWallet||'';
+    $('avatarGrid').innerHTML=AVATARS.map(av=>`
+      <div class="av-opt ${av===selectedAvatar?'sel':''}" onclick="selectAvatar('${av}',this)">${av}</div>`).join('');
+  }
+}
+
+function selectAvatar(av,el){
+  selectedAvatar=av;
+  document.querySelectorAll('.av-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+async function saveProfile(){
+  if(!currentUser)return;
+  const btn=event.target;btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const wallet=$('profileWalletInput').value.trim()||null;
+    currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{avatar:selectedAvatar,walletAddress:wallet});
+    toast('Profile saved!','ok');
+    $('userAv').textContent=currentUser.avatar||'👤';
+    if(wallet)connectedWallet=wallet,updateWalletUI();
+  }catch(e){toast('Save failed: '+e.message,'err')}
+  finally{btn.disabled=false;btn.textContent='💾 Save Profile'}
+}
+
+// ── Admin ────────────────────────────────────────────────
 async function adminLogin(){
-  const pwd=$('adminPwdInput').value;
+  const pwd=$('adminPwd').value;
   if(!pwd){toast('Enter password','err');return}
   try{
     await apiPost('/api/admin/login',{password:pwd});
-    adminPassword=pwd;saveAdminSession();
-    $('adminLoginBox').style.display='none';
-    $('adminDash').style.display='block';
-    await loadAdminConfig();
-    await loadUsers();
-  }catch(e){toast('Wrong password','err')}
+    adminPassword=pwd;
+    $('adminLoginBox').style.display='none';$('adminDash').style.display='block';
+    await loadAdminConfig();await loadUsers();
+  }catch{toast('Wrong password','err')}
 }
-function adminLogout(){clearAdminSession();adminPassword='';$('adminLoginBox').style.display='block';$('adminDash').style.display='none';$('adminPwdInput').value=''}
+function adminLogout(){adminPassword='';$('adminLoginBox').style.display='block';$('adminDash').style.display='none';$('adminPwd').value=''}
 
 async function loadAdminConfig(){
   try{
     const C=await apiGet('/api/admin/config',{'X-Admin-Password':adminPassword});
-    const fields=['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE',
-      'FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT','FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT',
-      'FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT','HOW_1','HOW_2','HOW_3','FOOTER_TEXT',
-      'SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'];
-    fields.forEach(k=>{const el=$('cfg_'+k);if(el)el.value=C[k]||''});
-    // Matrix rows
-    const grid=$('matrixAdminGrid');
-    grid.innerHTML='';
+    ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE','FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT',
+     'FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT','FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT',
+     'HOW_1','HOW_2','HOW_3','FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
+    ].forEach(k=>{const el=$('c_'+k);if(el)el.value=C[k]??''});
+    const g=$('matrixAdminGrid');g.innerHTML='';
     for(let i=1;i<=6;i++){
-      const un=C.DEFAULT_MATRIX?.[i-1]||C[`MATRIX_L${i}`]||'';
-      const wa=C.SYSTEM_WALLETS?.[un]||C[`WALLET_L${i}`]||'';
-      grid.innerHTML+=`
-        <div style="grid-column:1/-1;font-size:.72rem;color:var(--green);font-weight:700;margin-top:.6rem;text-transform:uppercase">Level ${i}</div>
-        <div><label class="field-label">Username</label><input class="field-input" id="mx_u${i}" value="${un}" placeholder="Username"/></div>
-        <div><label class="field-label">Wallet Address</label><input class="field-input" id="mx_w${i}" value="${wa}" placeholder="Solana address"/></div>`;
+      const un=C.DEFAULT_MATRIX?.[i-1]||'';
+      const wa=C.SYSTEM_WALLETS?.[un]||'';
+      g.innerHTML+=`<div style="font-size:.72rem;color:var(--green);font-weight:700;margin:.6rem 0 .3rem;text-transform:uppercase">Level ${i}</div>
+        <div class="mx-admin-row">
+          <div><label class="fl">Username</label><input class="fi" id="mx_u${i}" value="${un}" placeholder="Username"/></div>
+          <div><label class="fl">Wallet Address</label><input class="fi" id="mx_w${i}" value="${wa}" placeholder="Solana address"/></div>
+        </div>`;
     }
-  }catch(e){toast('Failed to load config: '+e.message,'err')}
+  }catch(e){toast('Config load failed: '+e.message,'err')}
 }
-
 async function saveConfig(){
   const data={};
-  ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE',
-   'FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT','FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT',
-   'FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT','HOW_1','HOW_2','HOW_3','FOOTER_TEXT',
-   'SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'].forEach(k=>{
-    const el=$('cfg_'+k);if(el&&el.value.trim())data[k]=el.value.trim();
-  });
+  ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE','FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT',
+   'FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT','FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT',
+   'HOW_1','HOW_2','HOW_3','FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
+  ].forEach(k=>{const el=$('c_'+k);if(el&&el.value.trim()!=='')data[k]=el.value.trim()});
   for(let i=1;i<=6;i++){
     const u=$(`mx_u${i}`),w=$(`mx_w${i}`);
-    if(u)data[`MATRIX_L${i}`]=u.value.trim();
-    if(w)data[`WALLET_L${i}`]=w.value.trim();
+    if(u&&u.value.trim())data[`MATRIX_L${i}`]=u.value.trim();
+    if(w&&w.value.trim())data[`WALLET_L${i}`]=w.value.trim();
   }
-  try{
-    await apiPost('/api/admin/config',data,{'X-Admin-Password':adminPassword});
-    toast('Config saved! Refreshing...','ok');
-    setTimeout(()=>location.reload(),1200);
-  }catch(e){toast('Save failed: '+e.message,'err')}
+  try{await apiPost('/api/admin/config',data,{'X-Admin-Password':adminPassword});toast('Saved! Refreshing...','ok');setTimeout(()=>location.reload(),1200)}
+  catch(e){toast('Save failed: '+e.message,'err')}
 }
 
 async function loadUsers(){
-  const tbody=$('usersTableBody');
-  tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem"><span class="spin"></span></td></tr>';
+  const tb=$('usersTableBody');
+  tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem"><span class="spin"></span></td></tr>';
   try{
+    const C=cfg();
     const users=await apiGet('/api/admin/users',{'X-Admin-Password':adminPassword});
-    if(!users.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">No users yet</td></tr>';return}
-    tbody.innerHTML=users.map(u=>`
-      <tr>
-        <td><strong>${u.username}</strong></td>
+    if(!users.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No users yet</td></tr>';return}
+    tb.innerHTML=users.map(u=>{
+      const pc=u.paidLevels.length;
+      const total=pc*C.LEVEL_AMOUNT+(u.paidSystemFee?C.SYSTEM_FEE_AMOUNT:0);
+      return `<tr>
+        <td><span style="font-size:1rem">${u.avatar||'👤'}</span> <strong>${u.username}</strong></td>
         <td>${u.referrer||'<span style="color:var(--muted)">—</span>'}</td>
-        <td>${u.paidSystemFee?'<span class="badge-sm badge-green">Paid</span>':'<span class="badge-sm badge-muted">Pending</span>'}</td>
-        <td><span style="color:var(--cyan);font-weight:700">${u.paidLevels.length}</span>/6</td>
-        <td style="font-family:monospace;font-size:.7rem">${u.walletAddress?shortAddr(u.walletAddress):'<span style="color:var(--muted)">—</span>'}</td>
-        <td style="color:var(--muted)">${new Date(u.registrationDate).toLocaleDateString()}</td>
-      </tr>`).join('');
-  }catch(e){tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--red);padding:2rem">${e.message}</td></tr>`}
+        <td>${u.paidSystemFee?'<span class="badge b-green">✓</span>':'<span class="badge b-muted">✗</span>'}</td>
+        <td><span style="color:var(--cyan);font-weight:700">${pc}</span>/6</td>
+        <td style="color:var(--gold)">${total} USDT</td>
+        <td style="font-family:monospace;font-size:.7rem">${u.walletAddress?shortAddr(u.walletAddress):'—'}</td>
+        <td style="color:var(--muted)">${fmtDate(u.registrationDate)}</td>
+      </tr>`;
+    }).join('');
+  }catch(e){tb.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:1.5rem">${e.message}</td></tr>`}
 }
 
 function switchTab(id,btn){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   $(id).classList.add('active');btn.classList.add('active');
-  if(id==='tabUsers')loadUsers();
+  if(id==='tUsers')loadUsers();
 }
 
-// ── Toast ──────────────────────────────────────────────────
+// ── Toast ────────────────────────────────────────────────
 function toast(msg,type='inf'){
   const el=document.createElement('div');
   el.className=`toast ${type}`;el.textContent=msg;
   $('toastW').appendChild(el);setTimeout(()=>el.remove(),3200);
 }
 
-// ── Debug ──────────────────────────────────────────────────
+// ── Debug ────────────────────────────────────────────────
 function updateDebug(){
   $('dbgRef').textContent=getRef()||'none';
   $('dbgUser').textContent=currentUser?.username||'—';
   $('dbgMatrix').textContent=currentUser?'['+currentUser.uplineMatrix.join(', ')+']':'—';
 }
 
-// ── Init ───────────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────
 async function init(){
   updateDebug();
+  const params=new URLSearchParams(location.search);
+  const token=cfg().CONTROL_TOKEN||'node-matrix-sys';
 
-  // Admin page
-  if(getPage()==='admin'){
-    showView('viewAdmin');
-    if(loadAdminSession()){
-      // restore admin session — need password prompt again for security
-      $('adminLoginBox').style.display='block';
-      $('adminDash').style.display='none';
-    }
-    return;
+  // Admin access via hidden token param
+  if(params.get('sys')===token){
+    showView('viewAdmin');return;
   }
 
-  // Existing user session
+  // Existing session
   const saved=loadSession();
   if(saved){
     const user=await loadUser(saved);
@@ -933,22 +1003,21 @@ async function init(){
       currentUser=user;
       if(window.solana?.isConnected){connectedWallet=window.solana.publicKey?.toString()||null;updateWalletUI()}
       showActivation();return;
-    }else{clearSession()}
+    }else clearSession();
   }
 
-  // Referrer badge on register page
+  // Referrer detection
   const referrer=getRef();
   $('dbgRef').textContent=referrer||'none';
   if(referrer){
     const ru=await loadUser(referrer);
     const badge=$('refBadge');
     if(ru){$('refName').textContent=referrer;badge.style.display='flex'}
-    else{badge.innerHTML=`<span class="bdot" style="background:var(--red)"></span><span style="color:var(--red)">Referrer "${referrer}" not found — default matrix used</span>`;badge.style.display='flex';badge.style.background='rgba(255,71,87,.06)';badge.style.borderColor='rgba(255,71,87,.2)'}
+    else{badge.innerHTML=`<span class="bdot" style="background:var(--red)"></span><span style="color:var(--red)">Referrer "${referrer}" not found</span>`;badge.style.display='flex';badge.style.background='rgba(255,71,87,.06)';badge.style.borderColor='rgba(255,71,87,.2)'}
   }
 
-  // Stats for register page
-  try{const s=await apiGet('/api/stats');$('regTotalCount').textContent=s.totalUsers}catch{$('regTotalCount').textContent='—'}
-  $('regLevelCost').textContent=cfg().LEVEL_AMOUNT||10;
+  try{const s=await apiGet('/api/stats');$('regTotal').textContent=s.totalUsers}catch{$('regTotal').textContent='—'}
+  $('regCost').textContent=cfg().LEVEL_AMOUNT||'—';
 
   await renderMatrixPreview();
   await renderLanding();
