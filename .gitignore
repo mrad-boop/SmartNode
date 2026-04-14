@@ -6,5 +6,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Deployment
+# Deployment artifacts
 .vercel/
+dist/
+
+# Local env (never commit real keys)
+.env

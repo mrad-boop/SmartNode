@@ -1,0 +1,12 @@
+{
+  "name": "smartnode",
+  "version": "1.0.0",
+  "description": "SmartNode — DeFi FIFO Matrix on Solana",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node -e \"process.env.NODE_ENV='development';\" && node build.js && npx serve dist"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

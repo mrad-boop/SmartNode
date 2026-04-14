@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartNode — DeFi Matrix</title>
+  <title>{{APP_TITLE}}</title>
   <style>
     /* ── Reset & Base ────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -413,7 +413,7 @@
 <header class="header">
   <div class="logo">
     <div class="logo-icon">⬡</div>
-    <span class="logo-text">SmartNode</span>
+    <span class="logo-text">{{APP_NAME}}</span>
   </div>
   <div style="display:flex;gap:.6rem;align-items:center">
     <button id="walletBtn" onclick="connectWallet()">
@@ -431,7 +431,7 @@
       <div style="text-align:center;margin-bottom:2rem">
         <div class="hero-badge">⬡ DeFi Matrix Protocol</div>
         <h1 class="hero-title">
-          Join the <span class="neon-green">SmartNode</span><br>Matrix Network
+          Join the <span class="neon-green">{{APP_NAME}}</span><br>Matrix Network
         </h1>
         <p class="hero-sub">Decentralized FIFO referral system on Solana. Earn from 6 upline levels.</p>
       </div>
@@ -592,27 +592,27 @@
 // ══════════════════════════════════════════════════════════
 
 /* ── Constants ──────────────────────────────────────────── */
-const SYSTEM_FEE_ADDRESS = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM';
-const SYSTEM_FEE_AMOUNT  = 10;
-const LEVEL_AMOUNT       = 10;
+const SYSTEM_FEE_ADDRESS = '{{SYSTEM_FEE_ADDRESS}}';
+const SYSTEM_FEE_AMOUNT  = {{SYSTEM_FEE_AMOUNT}};
+const LEVEL_AMOUNT       = {{LEVEL_AMOUNT}};
 
 const DEFAULT_MATRIX = [
-  'Admin_Node',
-  'System_Link',
-  'Global_Alpha',
-  'DeFi_Master',
-  'Prime_Core',
-  'Support_Level'
+  '{{MATRIX_L1}}',
+  '{{MATRIX_L2}}',
+  '{{MATRIX_L3}}',
+  '{{MATRIX_L4}}',
+  '{{MATRIX_L5}}',
+  '{{MATRIX_L6}}'
 ];
 
-// Default wallet addresses for system accounts (read-only placeholders)
+// Default wallet addresses for system accounts (injected at build time)
 const SYSTEM_WALLETS = {
-  'Admin_Node':     'AdmNKXxqZw9yZqWMVHshV2GdNGhBBm3qZBJNm4pVcwuX',
-  'System_Link':    'SysLk3nXzBQxqWMVHshV2GdNGhBBm3qZBJNm4pVcwuX',
-  'Global_Alpha':   'GbALPhv2qZBJNm4pVcwuXAdmNKXxqZw9yZqWMVHshV2',
-  'DeFi_Master':    'DFMstr8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWMNKXx',
-  'Prime_Core':     'PrmCrWMVHshV2GdNGhBBm3qZBJNm4pVcwuXAdmNKXxq',
-  'Support_Level':  'SptLvLVL9zYtAWWMNKXxqZw9yZqWMVHshV2GdNGhBBm3',
+  '{{MATRIX_L1}}': '{{WALLET_L1}}',
+  '{{MATRIX_L2}}': '{{WALLET_L2}}',
+  '{{MATRIX_L3}}': '{{WALLET_L3}}',
+  '{{MATRIX_L4}}': '{{WALLET_L4}}',
+  '{{MATRIX_L5}}': '{{WALLET_L5}}',
+  '{{MATRIX_L6}}': '{{WALLET_L6}}',
 };
 
 /* ── State ──────────────────────────────────────────────── */
@@ -879,7 +879,7 @@ function payFee() {
   document.getElementById('modalSub').textContent = 'One-time node activation fee';
   document.getElementById('modalAmount').textContent = SYSTEM_FEE_AMOUNT;
   document.getElementById('modalAddress').textContent = SYSTEM_FEE_ADDRESS;
-  document.getElementById('modalToName').textContent = 'SmartNode System';
+  document.getElementById('modalToName').textContent = '{{APP_NAME}} System';
   document.getElementById('payModal').classList.remove('hidden');
 }
 
