@@ -1,17 +1,22 @@
 services:
   - type: web
     name: smartnode
-    runtime: static
-    buildCommand: node build.js
-    staticPublishPath: dist
-    pullRequestPreviewsEnabled: true
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
     envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smartnode-db
+          property: connectionString
       - key: APP_NAME
         value: SmartNode
       - key: APP_TITLE
         value: SmartNode — DeFi Matrix
       - key: SYSTEM_FEE_ADDRESS
-        sync: false        # set manually in Render dashboard (your real wallet)
+        sync: false          # ← paste your real Solana wallet in Render dashboard
       - key: SYSTEM_FEE_AMOUNT
         value: "10"
       - key: LEVEL_AMOUNT
@@ -29,28 +34,20 @@ services:
       - key: MATRIX_L6
         value: Support_Level
       - key: WALLET_L1
-        sync: false        # set manually — real Solana address for Admin_Node
+        sync: false          # ← real Solana address for Admin_Node
       - key: WALLET_L2
-        sync: false        # set manually — real Solana address for System_Link
+        sync: false
       - key: WALLET_L3
-        sync: false        # set manually — real Solana address for Global_Alpha
+        sync: false
       - key: WALLET_L4
-        sync: false        # set manually — real Solana address for DeFi_Master
+        sync: false
       - key: WALLET_L5
-        sync: false        # set manually — real Solana address for Prime_Core
+        sync: false
       - key: WALLET_L6
-        sync: false        # set manually — real Solana address for Support_Level
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /index.html
-        name: Cache-Control
-        value: public, max-age=0, must-revalidate
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+        sync: false
+
+databases:
+  - name: smartnode-db
+    databaseName: smartnode
+    user: smartnode
+    plan: free

@@ -1,4 +1,13 @@
-# OS
+# Dependencies
+node_modules/
+
+# Local env (NEVER commit this — has real passwords/keys)
+.env
+
+# Build output (no longer used — server handles everything)
+dist/
+
+# OS junk
 .DS_Store
 Thumbs.db
 
@@ -6,9 +15,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Deployment artifacts
+# Deployment caches
 .vercel/
-dist/
-
-# Local env (never commit real keys)
-.env

@@ -2,9 +2,18 @@
   "name": "smartnode",
   "version": "1.0.0",
   "description": "SmartNode — DeFi FIFO Matrix on Solana",
+  "main": "server.js",
   "scripts": {
-    "build": "node build.js",
-    "dev": "node -e \"process.env.NODE_ENV='development';\" && node build.js && npx serve dist"
+    "start": "node server.js",
+    "dev":   "nodemon server.js"
+  },
+  "dependencies": {
+    "dotenv":  "^16.4.5",
+    "express": "^4.19.2",
+    "pg":      "^8.11.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   },
   "engines": {
     "node": ">=18"
