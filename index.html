@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartNode — DeFi Matrix</title>
+  <style>
+    /* ── Reset & Base ────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #050510;
+      --bg2:      #0a0a1a;
+      --bg3:      #0f0f28;
+      --card:     rgba(255,255,255,0.03);
+      --border:   rgba(0,255,136,0.12);
+      --border2:  rgba(123,47,247,0.25);
+      --green:    #00ff88;
+      --purple:   #7b2ff7;
+      --cyan:     #00d4ff;
+      --gold:     #ffd700;
+      --red:      #ff4757;
+      --text:     #e0e8ff;
+      --muted:    #5a6080;
+      --glow-g:   0 0 20px rgba(0,255,136,0.4);
+      --glow-p:   0 0 20px rgba(123,47,247,0.4);
+      --glow-c:   0 0 20px rgba(0,212,255,0.4);
+    }
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated BG ─────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 10%, rgba(123,47,247,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 90%, rgba(0,255,136,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0,212,255,0.04) 0%, transparent 70%),
+        var(--bg);
+    }
+
+    /* ── Grid overlay ────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Scrollbar ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 3px; }
+
+    /* ── Typography ──────────────────────────────────────── */
+    h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+    .neon-green { color: var(--green); }
+    .neon-purple { color: var(--purple); }
+    .neon-cyan { color: var(--cyan); }
+
+    /* ── Header ──────────────────────────────────────────── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: rgba(5,5,16,0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo {
+      display: flex; align-items: center; gap: .6rem;
+      font-size: 1.4rem; font-weight: 800; letter-spacing: .05em;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--purple), var(--green));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .logo-text { background: linear-gradient(90deg, var(--green), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+      padding: .6rem 1.2rem; border-radius: 8px;
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      border: none; transition: all .2s ease; text-decoration: none;
+    }
+    .btn-green {
+      background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,255,136,0.05));
+      color: var(--green); border: 1px solid rgba(0,255,136,0.35);
+    }
+    .btn-green:hover { background: rgba(0,255,136,0.2); box-shadow: var(--glow-g); transform: translateY(-1px); }
+    .btn-purple {
+      background: linear-gradient(135deg, rgba(123,47,247,0.25), rgba(123,47,247,0.1));
+      color: #c084fc; border: 1px solid var(--border2);
+    }
+    .btn-purple:hover { background: rgba(123,47,247,0.35); box-shadow: var(--glow-p); transform: translateY(-1px); }
+    .btn-cyan {
+      background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.05));
+      color: var(--cyan); border: 1px solid rgba(0,212,255,0.3);
+    }
+    .btn-cyan:hover { background: rgba(0,212,255,0.25); box-shadow: var(--glow-c); transform: translateY(-1px); }
+    .btn-red {
+      background: linear-gradient(135deg, rgba(255,71,87,0.15), rgba(255,71,87,0.05));
+      color: var(--red); border: 1px solid rgba(255,71,87,0.3);
+    }
+    .btn-red:hover { background: rgba(255,71,87,0.25); transform: translateY(-1px); }
+    .btn-gold {
+      background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.06));
+      color: var(--gold); border: 1px solid rgba(255,215,0,0.3);
+    }
+    .btn-gold:hover { background: rgba(255,215,0,0.28); box-shadow: 0 0 20px rgba(255,215,0,0.3); transform: translateY(-1px); }
+    .btn-large { padding: .9rem 2rem; font-size: 1rem; border-radius: 10px; }
+    .btn-full { width: 100%; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* ── Wallet button ───────────────────────────────────── */
+    #walletBtn {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .55rem 1rem; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(123,47,247,0.3), rgba(0,212,255,0.15));
+      color: var(--text); border: 1px solid rgba(123,47,247,0.4);
+      font-size: .85rem; font-weight: 600; cursor: pointer;
+      transition: all .2s ease;
+    }
+    #walletBtn:hover { box-shadow: var(--glow-p); transform: translateY(-1px); }
+    #walletBtn .wallet-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted); transition: background .3s;
+    }
+    #walletBtn.connected .wallet-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+    /* ── Cards ───────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+    }
+    .card-glow-green { box-shadow: inset 0 0 30px rgba(0,255,136,0.03); }
+    .card-glow-purple { border-color: var(--border2); box-shadow: inset 0 0 30px rgba(123,47,247,0.05); }
+
+    /* ── Views ───────────────────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── Centered Container ──────────────────────────────── */
+    .container { max-width: 560px; margin: 0 auto; padding: 2rem 1rem; }
+    .container-wide { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
+
+    /* ── Registration View ───────────────────────────────── */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .3rem .8rem; border-radius: 100px;
+      background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2);
+      font-size: .75rem; color: var(--green); margin-bottom: 1rem;
+    }
+    .hero-title { font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: .5rem; line-height: 1.15; }
+    .hero-sub { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+
+    .form-group { margin-bottom: 1.2rem; }
+    .form-label {
+      display: block; font-size: .8rem; font-weight: 600;
+      color: var(--muted); margin-bottom: .45rem; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%; padding: .75rem 1rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: var(--text);
+      font-size: .95rem; transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,255,136,0.1); }
+    .form-input::placeholder { color: var(--muted); }
+
+    .referrer-badge {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .65rem 1rem; border-radius: 8px;
+      background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2);
+      font-size: .85rem; margin-bottom: 1.2rem;
+    }
+    .referrer-badge .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); flex-shrink: 0; }
+
+    .matrix-preview {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem;
+    }
+    .matrix-preview-title { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .75rem; }
+    .matrix-preview-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+    .matrix-level-chip {
+      padding: .4rem .5rem; border-radius: 6px; text-align: center;
+      background: rgba(123,47,247,0.1); border: 1px solid rgba(123,47,247,0.2);
+      font-size: .7rem;
+    }
+    .matrix-level-chip .lv-num { color: var(--muted); font-size: .65rem; }
+    .matrix-level-chip .lv-name { color: var(--cyan); font-weight: 600; font-size: .72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .matrix-level-chip.lv-6 { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.25); }
+    .matrix-level-chip.lv-6 .lv-name { color: var(--green); }
+
+    /* ── Activation View ─────────────────────────────────── */
+    .activation-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .user-info-pill {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .5rem 1rem; border-radius: 100px;
+      background: rgba(123,47,247,0.12); border: 1px solid var(--border2);
+      font-size: .85rem;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 800;
+    }
+
+    .referral-box {
+      padding: .8rem 1rem; border-radius: 10px;
+      background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2);
+      display: flex; align-items: center; gap: .6rem; margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .referral-url { font-size: .8rem; color: var(--cyan); word-break: break-all; flex: 1; font-family: monospace; }
+    .copy-btn { font-size: .75rem; padding: .3rem .7rem; }
+
+    .section-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* System Fee Card */
+    .fee-card {
+      padding: 1.2rem;
+      background: linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,215,0,0.02));
+      border: 1px solid rgba(255,215,0,0.2); border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .fee-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+    .fee-title { font-size: 1rem; font-weight: 700; }
+    .fee-amount { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
+    .fee-address {
+      font-size: .72rem; font-family: monospace; color: var(--muted);
+      background: rgba(0,0,0,0.3); padding: .4rem .7rem; border-radius: 6px;
+      word-break: break-all; margin-bottom: .75rem;
+    }
+    .fee-status { font-size: .78rem; display: flex; align-items: center; gap: .4rem; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .status-dot.paid { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .status-dot.pending { background: var(--gold); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+
+    /* Matrix Levels */
+    .matrix-grid { display: flex; flex-direction: column; gap: .75rem; }
+    .level-card {
+      position: relative; overflow: hidden;
+      padding: 1rem 1.2rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      display: flex; align-items: center; gap: 1rem;
+      transition: all .25s ease;
+    }
+    .level-card.unlocked { border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.04); }
+    .level-card.active-level { border-color: rgba(0,212,255,0.35); background: rgba(0,212,255,0.06); box-shadow: 0 0 20px rgba(0,212,255,0.08); }
+    .level-card.locked { opacity: .55; }
+    .level-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--muted); border-radius: 3px 0 0 3px;
+    }
+    .level-card.unlocked::before { background: var(--green); }
+    .level-card.active-level::before { background: var(--cyan); }
+
+    .level-num {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .8rem;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .level-card.unlocked .level-num { background: rgba(0,255,136,0.12); border-color: rgba(0,255,136,0.3); color: var(--green); }
+    .level-card.active-level .level-num { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.3); color: var(--cyan); }
+
+    .level-info { flex: 1; min-width: 0; }
+    .level-username { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
+    .level-wallet { font-size: .72rem; font-family: monospace; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .level-status-text { font-size: .7rem; margin-top: .15rem; }
+
+    .level-action { flex-shrink: 0; }
+
+    .check-icon {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(0,255,136,0.15); border: 1px solid rgba(0,255,136,0.3);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green); font-size: .9rem;
+    }
+
+    /* ── Payment Modal ───────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: #0d0d22; border: 1px solid var(--border2);
+      border-radius: 16px; padding: 1.8rem;
+      max-width: 420px; width: 100%;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), var(--glow-p);
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: .4rem; }
+    .modal-sub { font-size: .85rem; color: var(--muted); margin-bottom: 1.3rem; }
+    .modal-amount {
+      font-size: 2.2rem; font-weight: 800; color: var(--green);
+      text-align: center; margin-bottom: .3rem;
+    }
+    .modal-currency { text-align: center; color: var(--muted); font-size: .8rem; margin-bottom: 1.2rem; }
+    .modal-address-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
+    .modal-address {
+      font-family: monospace; font-size: .78rem;
+      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+      padding: .7rem; border-radius: 8px; word-break: break-all;
+      color: var(--cyan); margin-bottom: 1.3rem;
+    }
+    .modal-to-label { font-size: .78rem; color: var(--muted); margin-bottom: .3rem; }
+    .modal-to-name { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 1.3rem; }
+    .modal-btns { display: flex; gap: .75rem; }
+    .modal-btns .btn { flex: 1; }
+
+    /* ── Toast ───────────────────────────────────────────── */
+    .toast-container {
+      position: fixed; bottom: 1.5rem; right: 1rem; z-index: 300;
+      display: flex; flex-direction: column; gap: .5rem; pointer-events: none;
+    }
+    .toast {
+      padding: .7rem 1.1rem; border-radius: 8px;
+      font-size: .85rem; font-weight: 600;
+      background: rgba(15,15,40,0.95); border: 1px solid;
+      backdrop-filter: blur(8px);
+      animation: slideInToast .3s ease, fadeOutToast .3s ease 2.7s forwards;
+      pointer-events: auto;
+    }
+    .toast.success { border-color: rgba(0,255,136,0.4); color: var(--green); }
+    .toast.error { border-color: rgba(255,71,87,0.4); color: var(--red); }
+    .toast.info { border-color: rgba(0,212,255,0.4); color: var(--cyan); }
+    @keyframes slideInToast { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: translateX(0); } }
+    @keyframes fadeOutToast { from { opacity:1; } to { opacity:0; } }
+
+    /* ── Debug Console ───────────────────────────────────── */
+    .debug-console {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(0,0,0,0.92); border-top: 1px solid rgba(0,255,136,0.2);
+      backdrop-filter: blur(8px);
+      font-family: 'Courier New', monospace; font-size: .72rem;
+      padding: .5rem 1rem;
+      display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: center;
+    }
+    .debug-label { color: var(--green); font-weight: 700; font-size: .68rem; letter-spacing: .08em; }
+    .debug-val { color: #a0a8c8; }
+    .debug-sep { color: var(--border); }
+    .debug-title { color: var(--muted); font-size: .65rem; }
+
+    /* ── Stats strip ─────────────────────────────────────── */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: .75rem; margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      padding: .9rem; border-radius: 10px; text-align: center;
+      background: rgba(255,255,255,0.025); border: 1px solid var(--border);
+    }
+    .stat-value { font-size: 1.3rem; font-weight: 800; }
+    .stat-label { font-size: .7rem; color: var(--muted); margin-top: .1rem; }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .header { padding: .75rem 1rem; }
+      .logo { font-size: 1.15rem; }
+      .logo-icon { width: 30px; height: 30px; }
+      .modal { padding: 1.3rem; }
+    }
+    @media (max-width: 380px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* bottom padding for debug console */
+    main { padding-bottom: 4rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ───────────────────────────────────────────── -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <span class="logo-text">SmartNode</span>
+  </div>
+  <div style="display:flex;gap:.6rem;align-items:center">
+    <button id="walletBtn" onclick="connectWallet()">
+      <span class="wallet-dot"></span>
+      <span id="walletBtnTxt">Connect Wallet</span>
+    </button>
+    <button id="logoutBtn" class="btn btn-red" onclick="logout()" style="display:none;font-size:.78rem;padding:.45rem .8rem">Logout</button>
+  </div>
+</header>
+
+<main>
+  <!-- ── REGISTRATION VIEW ──────────────────────────────── -->
+  <div id="viewRegister" class="view">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:2rem">
+        <div class="hero-badge">⬡ DeFi Matrix Protocol</div>
+        <h1 class="hero-title">
+          Join the <span class="neon-green">SmartNode</span><br>Matrix Network
+        </h1>
+        <p class="hero-sub">Decentralized FIFO referral system on Solana. Earn from 6 upline levels.</p>
+      </div>
+
+      <div id="referrerBadge" class="referrer-badge" style="display:none">
+        <span class="badge-dot"></span>
+        <span>Referred by: <strong id="referrerName" class="neon-green"></strong></span>
+      </div>
+
+      <div class="card card-glow-purple" style="margin-bottom:1.5rem">
+        <div class="form-group">
+          <label class="form-label">Choose Username</label>
+          <input id="usernameInput" class="form-input" type="text" placeholder="e.g. BOSS, CryptoKing, Node_01"
+            maxlength="20" oninput="onUsernameInput()" />
+        </div>
+
+        <div class="matrix-preview">
+          <div class="matrix-preview-title">Your Upline Matrix Preview</div>
+          <div class="matrix-preview-levels" id="matrixPreview"></div>
+        </div>
+
+        <button class="btn btn-green btn-large btn-full" onclick="register()">
+          ⬡ Activate Node &amp; Join Matrix
+        </button>
+        <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:.7rem">
+          Free registration. Activation payments happen on next step.
+        </p>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-card">
+          <div class="stat-value neon-green" id="totalUsersCount">0</div>
+          <div class="stat-label">Total Nodes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value neon-cyan">6</div>
+          <div class="stat-label">Matrix Levels</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value neon-purple">10</div>
+          <div class="stat-label">USDT / Level</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ACTIVATION VIEW ───────────────────────────────── -->
+  <div id="viewActivation" class="view">
+    <div class="container-wide">
+
+      <div class="activation-header">
+        <div>
+          <h2 style="font-size:1.4rem;margin-bottom:.2rem">Node Dashboard</h2>
+          <p style="color:var(--muted);font-size:.85rem">Activate your matrix levels to receive payments</p>
+        </div>
+        <div class="user-info-pill">
+          <div class="user-avatar" id="userAvatar">?</div>
+          <div>
+            <div style="font-weight:700;font-size:.9rem" id="displayUsername">—</div>
+            <div style="font-size:.7rem;color:var(--muted)" id="displayWallet">No wallet</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referral Link -->
+      <div class="referral-box">
+        <div style="font-size:.72rem;color:var(--muted);white-space:nowrap">Your Ref Link:</div>
+        <div class="referral-url" id="referralUrl">—</div>
+        <button class="btn btn-cyan copy-btn" onclick="copyReferral()">Copy</button>
+      </div>
+
+      <!-- Progress strip -->
+      <div class="stats-strip" style="margin-bottom:1.5rem">
+        <div class="stat-card">
+          <div class="stat-value" id="paidLevelsCount" style="color:var(--green)">0</div>
+          <div class="stat-label">Levels Paid</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalPaidAmt" style="color:var(--gold)">0</div>
+          <div class="stat-label">USDT Paid</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="levelsRemaining" style="color:var(--cyan)">6</div>
+          <div class="stat-label">Remaining</div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: SYSTEM FEE -->
+      <div class="section-label">Section 1 — System Fee</div>
+      <div class="fee-card" id="feeCard">
+        <div class="fee-header">
+          <div>
+            <div class="fee-title">⚙️ System Activation Fee</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem">One-time fee to activate your node</div>
+          </div>
+          <div class="fee-amount">10 <span style="font-size:.85rem;color:var(--muted)">USDT</span></div>
+        </div>
+        <div class="fee-address" id="feeAddress">Loading...</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+          <div class="fee-status" id="feeStatus">
+            <span class="status-dot pending"></span>
+            <span style="color:var(--gold)">Awaiting Payment</span>
+          </div>
+          <button class="btn btn-gold" id="feeBtn" onclick="payFee()">Pay 10 USDT</button>
+        </div>
+      </div>
+
+      <!-- SECTION 2: MATRIX LEVELS -->
+      <div class="section-label">Section 2 — Upline Matrix Levels</div>
+      <div class="matrix-grid" id="matrixLevels"></div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ── PAYMENT MODAL ──────────────────────────────────────── -->
+<div class="modal-overlay hidden" id="payModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Confirm Payment</div>
+    <div class="modal-sub" id="modalSub">Send USDT on Solana network</div>
+    <div class="modal-amount" id="modalAmount">10</div>
+    <div class="modal-currency">USDT (SPL Token)</div>
+    <div class="modal-address-label">Send To Address</div>
+    <div class="modal-address" id="modalAddress">—</div>
+    <div class="modal-to-label">Recipient</div>
+    <div class="modal-to-name" id="modalToName">—</div>
+    <div class="modal-btns">
+      <button class="btn btn-red" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-green" id="modalConfirmBtn" onclick="confirmPayment()">✓ Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── DEBUG CONSOLE ─────────────────────────────────────── -->
+<div class="debug-console">
+  <span class="debug-title">⬡ Developer Debug Mode</span>
+  <span class="debug-sep">|</span>
+  <span class="debug-label">USER:</span>
+  <span class="debug-val" id="dbgUser">—</span>
+  <span class="debug-sep">|</span>
+  <span class="debug-label">MATRIX:</span>
+  <span class="debug-val" id="dbgMatrix">—</span>
+  <span class="debug-sep">|</span>
+  <span class="debug-label">REF:</span>
+  <span class="debug-val" id="dbgRef">—</span>
+  <span class="debug-sep">|</span>
+  <span class="debug-label">WALLET:</span>
+  <span class="debug-val" id="dbgWallet">—</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  SMARTNODE — DeFi FIFO Matrix System
+//  Storage: localStorage | Network: Solana (Phantom)
+// ══════════════════════════════════════════════════════════
+
+/* ── Constants ──────────────────────────────────────────── */
+const SYSTEM_FEE_ADDRESS = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM';
+const SYSTEM_FEE_AMOUNT  = 10;
+const LEVEL_AMOUNT       = 10;
+
+const DEFAULT_MATRIX = [
+  'Admin_Node',
+  'System_Link',
+  'Global_Alpha',
+  'DeFi_Master',
+  'Prime_Core',
+  'Support_Level'
+];
+
+// Default wallet addresses for system accounts (read-only placeholders)
+const SYSTEM_WALLETS = {
+  'Admin_Node':     'AdmNKXxqZw9yZqWMVHshV2GdNGhBBm3qZBJNm4pVcwuX',
+  'System_Link':    'SysLk3nXzBQxqWMVHshV2GdNGhBBm3qZBJNm4pVcwuX',
+  'Global_Alpha':   'GbALPhv2qZBJNm4pVcwuXAdmNKXxqZw9yZqWMVHshV2',
+  'DeFi_Master':    'DFMstr8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWMNKXx',
+  'Prime_Core':     'PrmCrWMVHshV2GdNGhBBm3qZBJNm4pVcwuXAdmNKXxq',
+  'Support_Level':  'SptLvLVL9zYtAWWMNKXxqZw9yZqWMVHshV2GdNGhBBm3',
+};
+
+/* ── State ──────────────────────────────────────────────── */
+let currentUser      = null;
+let connectedWallet  = null;
+let pendingPayment   = null; // { type:'fee'|'level', levelIndex:0..5, username, address }
+
+/* ── Storage Helpers ────────────────────────────────────── */
+const saveUser    = (u) => localStorage.setItem(`sn_user_${u.username}`, JSON.stringify(u));
+const loadUser    = (n) => { const d = localStorage.getItem(`sn_user_${n}`); return d ? JSON.parse(d) : null; };
+const saveSession = (n) => localStorage.setItem('sn_session', n);
+const loadSession = ()  => localStorage.getItem('sn_session');
+const clearSession= ()  => localStorage.removeItem('sn_session');
+
+function getAllUsernames() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('sn_user_')) out.push(k.slice(8));
+  }
+  return out;
+}
+
+/* ── Matrix Logic (Core FIFO Algorithm) ────────────────── */
+/**
+ * Compute a new user's upline matrix from their referrer.
+ * Algorithm:
+ *   newMatrix = [...referrerMatrix.slice(1), referrerUsername]
+ * i.e., shift off the oldest entry, push referrer at position 6.
+ */
+function computeMatrix(referrerUsername) {
+  if (!referrerUsername) return [...DEFAULT_MATRIX];
+  const referrer = loadUser(referrerUsername);
+  if (!referrer) return [...DEFAULT_MATRIX];
+  // FIFO shift: remove index 0, append referrer at index 5
+  const base = referrer.uplineMatrix.slice(1);       // 5 elements
+  base.push(referrerUsername);                        // + referrer = 6 elements
+  return base;
+}
+
+/* ── URL Helpers ────────────────────────────────────────── */
+function getUrlParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+function buildReferralUrl(username) {
+  const base = window.location.origin + window.location.pathname;
+  return `${base}?ref=${encodeURIComponent(username)}`;
+}
+
+/* ── Wallet (Phantom) ───────────────────────────────────── */
+async function connectWallet() {
+  if (connectedWallet) { toast('Wallet already connected', 'info'); return; }
+  const provider = window.solana;
+  if (!provider || !provider.isPhantom) {
+    toast('Phantom wallet not found. Install at phantom.app', 'error');
+    setTimeout(() => window.open('https://phantom.app/', '_blank'), 1200);
+    return;
+  }
+  try {
+    const resp = await provider.connect();
+    connectedWallet = resp.publicKey.toString();
+    updateWalletUI();
+    toast('Wallet connected: ' + shortAddr(connectedWallet), 'success');
+    if (currentUser) {
+      currentUser.walletAddress = connectedWallet;
+      saveUser(currentUser);
+      document.getElementById('displayWallet').textContent = shortAddr(connectedWallet);
+      updateDebug();
+    }
+  } catch (e) {
+    toast('Wallet connection rejected', 'error');
+  }
+}
+
+function updateWalletUI() {
+  const btn = document.getElementById('walletBtn');
+  const txt = document.getElementById('walletBtnTxt');
+  if (connectedWallet) {
+    btn.classList.add('connected');
+    txt.textContent = shortAddr(connectedWallet);
+  } else {
+    btn.classList.remove('connected');
+    txt.textContent = 'Connect Wallet';
+  }
+  document.getElementById('dbgWallet').textContent = connectedWallet ? shortAddr(connectedWallet) : '—';
+}
+
+function shortAddr(addr) {
+  if (!addr) return '—';
+  return addr.slice(0, 4) + '...' + addr.slice(-4);
+}
+
+/* ── Registration ───────────────────────────────────────── */
+function onUsernameInput() {
+  renderMatrixPreview();
+}
+
+function renderMatrixPreview() {
+  const username = document.getElementById('usernameInput').value.trim();
+  const ref = getUrlParam('ref');
+  const matrix = computeMatrix(ref);
+  const container = document.getElementById('matrixPreview');
+  container.innerHTML = matrix.map((name, i) => `
+    <div class="matrix-level-chip ${i === 5 ? 'lv-6' : ''}">
+      <div class="lv-num">L${i + 1}</div>
+      <div class="lv-name" title="${name}">${name}</div>
+    </div>
+  `).join('');
+}
+
+function register() {
+  const raw = document.getElementById('usernameInput').value.trim();
+  if (!raw) { toast('Please enter a username', 'error'); return; }
+  // Sanitize: alphanum + underscore only
+  const username = raw.replace(/[^a-zA-Z0-9_]/g, '');
+  if (username.length < 3) { toast('Username must be at least 3 characters', 'error'); return; }
+  if (username.length > 20) { toast('Username max 20 characters', 'error'); return; }
+  if (loadUser(username)) { toast(`Username "${username}" is already taken`, 'error'); return; }
+
+  const ref = getUrlParam('ref');
+  const uplineMatrix = computeMatrix(ref);
+
+  const userData = {
+    username,
+    walletAddress: connectedWallet || null,
+    referrer: ref || null,
+    uplineMatrix,          // PERMANENT — never changes after registration
+    paidSystemFee: false,
+    paidLevels: [],        // e.g. [0, 1, 2] means L1, L2, L3 paid
+    registrationDate: Date.now(),
+  };
+
+  saveUser(userData);
+  saveSession(username);
+  currentUser = userData;
+
+  toast(`Node activated! Welcome, ${username}`, 'success');
+  showActivation();
+}
+
+/* ── Session / Login ────────────────────────────────────── */
+function logout() {
+  clearSession();
+  currentUser = null;
+  showView('viewRegister');
+  document.getElementById('logoutBtn').style.display = 'none';
+  updateDebug();
+}
+
+/* ── Views ──────────────────────────────────────────────── */
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showActivation() {
+  if (!currentUser) return;
+  document.getElementById('logoutBtn').style.display = '';
+  renderActivation();
+  showView('viewActivation');
+  updateDebug();
+}
+
+function renderActivation() {
+  const u = currentUser;
+
+  // Header info
+  document.getElementById('displayUsername').textContent = u.username;
+  document.getElementById('userAvatar').textContent = u.username[0].toUpperCase();
+  document.getElementById('displayWallet').textContent = u.walletAddress ? shortAddr(u.walletAddress) : 'No wallet';
+
+  // Referral URL
+  const url = buildReferralUrl(u.username);
+  document.getElementById('referralUrl').textContent = url;
+
+  // Stats
+  const paidCount = u.paidLevels.length;
+  document.getElementById('paidLevelsCount').textContent = paidCount;
+  document.getElementById('totalPaidAmt').textContent = paidCount * LEVEL_AMOUNT + (u.paidSystemFee ? SYSTEM_FEE_AMOUNT : 0);
+  document.getElementById('levelsRemaining').textContent = 6 - paidCount;
+
+  // System Fee section
+  document.getElementById('feeAddress').textContent = SYSTEM_FEE_ADDRESS;
+  if (u.paidSystemFee) {
+    document.getElementById('feeStatus').innerHTML = `
+      <span class="status-dot paid"></span>
+      <span style="color:var(--green)">Paid ✓</span>`;
+    document.getElementById('feeBtn').disabled = true;
+    document.getElementById('feeBtn').textContent = '✓ Paid';
+    document.getElementById('feeCard').style.borderColor = 'rgba(0,255,136,0.25)';
+  } else {
+    document.getElementById('feeStatus').innerHTML = `
+      <span class="status-dot pending"></span>
+      <span style="color:var(--gold)">Awaiting Payment</span>`;
+    document.getElementById('feeBtn').disabled = false;
+    document.getElementById('feeBtn').textContent = 'Pay 10 USDT';
+  }
+
+  // Matrix levels
+  renderMatrixLevels();
+}
+
+function renderMatrixLevels() {
+  const u = currentUser;
+  const matrix = u.uplineMatrix; // The immutable 6-element array saved at registration
+  const container = document.getElementById('matrixLevels');
+  const sysFeeOk = u.paidSystemFee;
+
+  container.innerHTML = matrix.map((username, i) => {
+    const levelNum = i + 1;
+    const isPaid   = u.paidLevels.includes(i);
+    const prevPaid = i === 0 ? sysFeeOk : (sysFeeOk && u.paidLevels.includes(i - 1));
+    const isActive = !isPaid && prevPaid;
+    const isLocked = !isPaid && !prevPaid;
+
+    let cardClass = 'level-card';
+    if (isPaid)   cardClass += ' unlocked';
+    else if (isActive) cardClass += ' active-level';
+    else cardClass += ' locked';
+
+    // Resolve wallet address for this upline user
+    const uplineUser = loadUser(username);
+    const walletAddr = uplineUser?.walletAddress || SYSTEM_WALLETS[username] || 'Wallet not set';
+
+    let actionHTML = '';
+    if (isPaid) {
+      actionHTML = `<div class="check-icon">✓</div>`;
+    } else if (isActive) {
+      actionHTML = `<button class="btn btn-cyan" style="font-size:.8rem;padding:.45rem .9rem"
+        onclick="openPayModal(${i}, '${username}', '${walletAddr}')">Pay</button>`;
+    } else {
+      actionHTML = `<button class="btn" style="font-size:.78rem;padding:.4rem .75rem;opacity:.35;cursor:not-allowed" disabled>Locked</button>`;
+    }
+
+    const statusText = isPaid
+      ? `<span style="color:var(--green);font-size:.72rem">✓ Payment confirmed</span>`
+      : isActive
+        ? `<span style="color:var(--cyan);font-size:.72rem">⚡ Ready to pay</span>`
+        : `<span style="color:var(--muted);font-size:.72rem">🔒 Pay L${levelNum - 1} first</span>`;
+
+    return `
+      <div class="${cardClass}">
+        <div class="level-num">${levelNum}</div>
+        <div class="level-info">
+          <div class="level-username">${username}${levelNum === 6 ? ' <span style="font-size:.65rem;color:var(--green);background:rgba(0,255,136,0.1);padding:.1rem .35rem;border-radius:4px">REFERRER</span>' : ''}</div>
+          <div class="level-wallet" title="${walletAddr}">${walletAddr !== 'Wallet not set' ? shortAddr(walletAddr) + ' ← ' + walletAddr : 'Wallet not configured'}</div>
+          <div class="level-status-text">${statusText}</div>
+        </div>
+        <div class="level-action">${actionHTML}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Payment Flow ───────────────────────────────────────── */
+function payFee() {
+  pendingPayment = {
+    type: 'fee',
+    levelIndex: -1,
+    username: 'System',
+    address: SYSTEM_FEE_ADDRESS
+  };
+  document.getElementById('modalTitle').textContent = 'System Activation Fee';
+  document.getElementById('modalSub').textContent = 'One-time node activation fee';
+  document.getElementById('modalAmount').textContent = SYSTEM_FEE_AMOUNT;
+  document.getElementById('modalAddress').textContent = SYSTEM_FEE_ADDRESS;
+  document.getElementById('modalToName').textContent = 'SmartNode System';
+  document.getElementById('payModal').classList.remove('hidden');
+}
+
+function openPayModal(levelIndex, username, address) {
+  pendingPayment = { type: 'level', levelIndex, username, address };
+  document.getElementById('modalTitle').textContent = `Pay Level ${levelIndex + 1}`;
+  document.getElementById('modalSub').textContent = `Upline payment to your Level ${levelIndex + 1} node`;
+  document.getElementById('modalAmount').textContent = LEVEL_AMOUNT;
+  document.getElementById('modalAddress').textContent = address;
+  document.getElementById('modalToName').textContent = username;
+  document.getElementById('payModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('payModal').classList.add('hidden');
+  pendingPayment = null;
+}
+
+function confirmPayment() {
+  if (!pendingPayment) return;
+
+  // In production: fire actual Solana SPL transaction here.
+  // For this implementation: mark as paid after user confirmation.
+
+  if (pendingPayment.type === 'fee') {
+    currentUser.paidSystemFee = true;
+    toast('System fee confirmed! Level 1 now unlocked.', 'success');
+  } else {
+    const { levelIndex } = pendingPayment;
+    if (!currentUser.paidLevels.includes(levelIndex)) {
+      currentUser.paidLevels.push(levelIndex);
+      currentUser.paidLevels.sort((a, b) => a - b);
+    }
+    const isLast = levelIndex === 5;
+    toast(
+      isLast
+        ? `Level 6 paid! Matrix fully activated! 🎉`
+        : `Level ${levelIndex + 1} confirmed! Level ${levelIndex + 2} unlocked.`,
+      'success'
+    );
+  }
+
+  saveUser(currentUser);
+  closeModal();
+  renderActivation();
+  updateDebug();
+}
+
+/* ── Copy Referral ──────────────────────────────────────── */
+function copyReferral() {
+  const url = buildReferralUrl(currentUser.username);
+  navigator.clipboard.writeText(url)
+    .then(() => toast('Referral link copied!', 'success'))
+    .catch(() => {
+      // Fallback for non-secure contexts
+      const el = document.createElement('textarea');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      toast('Referral link copied!', 'success');
+    });
+}
+
+/* ── Toast Notifications ────────────────────────────────── */
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+/* ── Debug Console ──────────────────────────────────────── */
+function updateDebug() {
+  const ref = getUrlParam('ref');
+  document.getElementById('dbgRef').textContent = ref || 'none';
+  if (currentUser) {
+    document.getElementById('dbgUser').textContent = currentUser.username;
+    document.getElementById('dbgMatrix').textContent =
+      '[' + currentUser.uplineMatrix.join(', ') + ']';
+  } else {
+    document.getElementById('dbgUser').textContent = '—';
+    document.getElementById('dbgMatrix').textContent = '—';
+  }
+}
+
+/* ── Init ───────────────────────────────────────────────── */
+function init() {
+  // Total user count
+  document.getElementById('totalUsersCount').textContent = getAllUsernames().length;
+
+  // Check for existing session
+  const sessionUser = loadSession();
+  if (sessionUser) {
+    const userData = loadUser(sessionUser);
+    if (userData) {
+      currentUser = userData;
+      // Restore wallet if Phantom is available
+      if (window.solana?.isConnected) {
+        connectedWallet = window.solana.publicKey?.toString() || null;
+        updateWalletUI();
+      }
+      showActivation();
+      return;
+    }
+  }
+
+  // New visitor flow
+  const ref = getUrlParam('ref');
+  if (ref) {
+    const refUser = loadUser(ref);
+    const badge = document.getElementById('referrerBadge');
+    const nameEl = document.getElementById('referrerName');
+    if (refUser) {
+      badge.style.display = 'flex';
+      nameEl.textContent = ref;
+    } else {
+      badge.innerHTML = `<span class="badge-dot" style="background:var(--red)"></span>
+        <span style="color:var(--red)">Referrer "${ref}" not found — default matrix will be used</span>`;
+      badge.style.display = 'flex';
+      badge.style.background = 'rgba(255,71,87,0.06)';
+      badge.style.borderColor = 'rgba(255,71,87,0.2)';
+    }
+  }
+
+  renderMatrixPreview();
+  updateDebug();
+  showView('viewRegister');
+
+  // Listen for Phantom events
+  window.solana?.on('connect',    () => { connectedWallet = window.solana.publicKey?.toString(); updateWalletUI(); });
+  window.solana?.on('disconnect', () => { connectedWallet = null; updateWalletUI(); });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
