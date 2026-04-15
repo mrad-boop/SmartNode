@@ -201,6 +201,28 @@
     .av-opt:hover,.av-opt.sel{border-color:var(--green);background:rgba(0,255,136,.12);transform:scale(1.1)}
     .matrix-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem}
 
+    /* ── REFERRAL LEVEL VIEW ── */
+    .ref-level-grid{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem}
+    .ref-lvl-btn{display:flex;flex-direction:column;align-items:center;padding:.7rem 1.1rem;border-radius:12px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);cursor:pointer;
+      transition:all .2s;min-width:70px;color:var(--text);font-size:.82rem;font-weight:700}
+    .ref-lvl-btn:hover{background:rgba(0,255,136,.1);border-color:rgba(0,255,136,.3);transform:translateY(-2px)}
+    .ref-lvl-btn .cnt{font-size:1.3rem;font-weight:800;color:var(--green);line-height:1.1}
+    .ref-lvl-btn .lbl{font-size:.68rem;color:var(--muted);margin-top:.2rem}
+    .ref-lvl-btn.empty{opacity:.4;cursor:default;pointer-events:none}
+    .ref-lvl-total{font-size:.78rem;color:var(--muted);padding:.5rem 0}
+    /* paginated list */
+    .ref-list-card{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:10px;
+      background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);margin-bottom:.5rem;transition:border-color .2s}
+    .ref-list-card:hover{border-color:rgba(0,255,136,.2)}
+    .ref-list-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+      display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .pag-strip{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem}
+    .pag-btn{padding:.35rem .75rem;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);transition:all .2s}
+    .pag-btn.active{background:rgba(0,255,136,.15);border-color:rgba(0,255,136,.35);color:var(--green)}
+    .pag-btn:hover:not(.active){background:rgba(255,255,255,.1)}
+
     /* ── MY REFERRALS ── */
     .ref-tree{padding:.3rem 0}
     .ref-node{position:relative;margin-bottom:.4rem}
@@ -494,9 +516,9 @@
     </div>
 
     <!-- My Referrals section -->
-    <div class="section-lbl" style="margin-bottom:1rem">My Referrals (Direct &amp; Indirect)</div>
+    <div class="section-lbl" style="margin-bottom:1rem">My Referrals</div>
     <div class="card" style="margin-bottom:1.5rem">
-      <div id="myReferralsList"><div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Loading...</div></div>
+      <div id="refLevelButtons"><div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Loading...</div></div>
     </div>
 
     <!-- My Matrices section -->
@@ -531,7 +553,7 @@
           <div class="form-group"><label class="form-label">Phone</label>
             <input id="profilePhone" class="form-input" type="text" placeholder="+1 234 567 8900" maxlength="30"/></div>
           <div class="form-group"><label class="form-label">Country</label>
-            <input id="profileCountry" class="form-input" type="text" placeholder="e.g. France" maxlength="60"/></div>
+            <select id="profileCountry" class="form-input"><option value="">— Select Country —</option></select></div>
         </div>
         <div class="form-group"><label class="form-label">Address</label>
           <input id="profileAddress" class="form-input" type="text" placeholder="Your address"/></div>
@@ -545,6 +567,21 @@
         <button class="btn btn-g btn-full" style="margin-top:.5rem" onclick="saveProfile()">💾 Save Profile</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ REFERRAL LEVEL VIEW ═══ -->
+<div id="viewReferralLevel" class="view">
+  <div class="cwide">
+    <button class="btn btn-p" style="margin-bottom:1.5rem;font-size:.82rem" onclick="backToProfile()">← Back to Profile</button>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+      <div>
+        <h2 style="font-size:1.35rem;margin-bottom:.2rem" id="refLevelTitle">Level Referrals</h2>
+        <p style="color:var(--muted);font-size:.83rem" id="refLevelSubtitle">—</p>
+      </div>
+    </div>
+    <div id="refLevelList"></div>
+    <div class="pag-strip" id="refLevelPagination"></div>
   </div>
 </div>
 
@@ -791,8 +828,61 @@ const clearSession=()=>localStorage.removeItem('sn_session');
 // State
 let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
 let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={},joinMode=false,referralTree=[];
+let refLevelData={},currentRefLevel=1,currentRefPage=1;
+const REF_PAGE_SIZE=10;
 
 const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
+
+// ── Countries ────────────────────────────────────────────
+const COUNTRIES=[
+  {n:'Afghanistan',c:'AF'},{n:'Albania',c:'AL'},{n:'Algeria',c:'DZ'},{n:'Andorra',c:'AD'},{n:'Angola',c:'AO'},
+  {n:'Antigua and Barbuda',c:'AG'},{n:'Argentina',c:'AR'},{n:'Armenia',c:'AM'},{n:'Australia',c:'AU'},{n:'Austria',c:'AT'},
+  {n:'Azerbaijan',c:'AZ'},{n:'Bahamas',c:'BS'},{n:'Bahrain',c:'BH'},{n:'Bangladesh',c:'BD'},{n:'Barbados',c:'BB'},
+  {n:'Belarus',c:'BY'},{n:'Belgium',c:'BE'},{n:'Belize',c:'BZ'},{n:'Benin',c:'BJ'},{n:'Bhutan',c:'BT'},
+  {n:'Bolivia',c:'BO'},{n:'Bosnia and Herzegovina',c:'BA'},{n:'Botswana',c:'BW'},{n:'Brazil',c:'BR'},{n:'Brunei',c:'BN'},
+  {n:'Bulgaria',c:'BG'},{n:'Burkina Faso',c:'BF'},{n:'Burundi',c:'BI'},{n:'Cambodia',c:'KH'},{n:'Cameroon',c:'CM'},
+  {n:'Canada',c:'CA'},{n:'Cape Verde',c:'CV'},{n:'Central African Republic',c:'CF'},{n:'Chad',c:'TD'},{n:'Chile',c:'CL'},
+  {n:'China',c:'CN'},{n:'Colombia',c:'CO'},{n:'Comoros',c:'KM'},{n:'Congo',c:'CG'},{n:'Costa Rica',c:'CR'},
+  {n:'Croatia',c:'HR'},{n:'Cuba',c:'CU'},{n:'Cyprus',c:'CY'},{n:'Czech Republic',c:'CZ'},{n:'DR Congo',c:'CD'},
+  {n:'Denmark',c:'DK'},{n:'Djibouti',c:'DJ'},{n:'Dominican Republic',c:'DO'},{n:'Ecuador',c:'EC'},{n:'Egypt',c:'EG'},
+  {n:'El Salvador',c:'SV'},{n:'Equatorial Guinea',c:'GQ'},{n:'Eritrea',c:'ER'},{n:'Estonia',c:'EE'},{n:'Eswatini',c:'SZ'},
+  {n:'Ethiopia',c:'ET'},{n:'Fiji',c:'FJ'},{n:'Finland',c:'FI'},{n:'France',c:'FR'},{n:'Gabon',c:'GA'},
+  {n:'Gambia',c:'GM'},{n:'Georgia',c:'GE'},{n:'Germany',c:'DE'},{n:'Ghana',c:'GH'},{n:'Greece',c:'GR'},
+  {n:'Grenada',c:'GD'},{n:'Guatemala',c:'GT'},{n:'Guinea',c:'GN'},{n:'Guyana',c:'GY'},{n:'Haiti',c:'HT'},
+  {n:'Honduras',c:'HN'},{n:'Hong Kong',c:'HK'},{n:'Hungary',c:'HU'},{n:'Iceland',c:'IS'},{n:'India',c:'IN'},
+  {n:'Indonesia',c:'ID'},{n:'Iran',c:'IR'},{n:'Iraq',c:'IQ'},{n:'Ireland',c:'IE'},{n:'Israel',c:'IL'},
+  {n:'Italy',c:'IT'},{n:'Ivory Coast',c:'CI'},{n:'Jamaica',c:'JM'},{n:'Japan',c:'JP'},{n:'Jordan',c:'JO'},
+  {n:'Kazakhstan',c:'KZ'},{n:'Kenya',c:'KE'},{n:'Kosovo',c:'XK'},{n:'Kuwait',c:'KW'},{n:'Kyrgyzstan',c:'KG'},
+  {n:'Laos',c:'LA'},{n:'Latvia',c:'LV'},{n:'Lebanon',c:'LB'},{n:'Lesotho',c:'LS'},{n:'Liberia',c:'LR'},
+  {n:'Libya',c:'LY'},{n:'Lithuania',c:'LT'},{n:'Luxembourg',c:'LU'},{n:'Macau',c:'MO'},{n:'Madagascar',c:'MG'},
+  {n:'Malawi',c:'MW'},{n:'Malaysia',c:'MY'},{n:'Maldives',c:'MV'},{n:'Mali',c:'ML'},{n:'Malta',c:'MT'},
+  {n:'Mauritania',c:'MR'},{n:'Mauritius',c:'MU'},{n:'Mexico',c:'MX'},{n:'Moldova',c:'MD'},{n:'Monaco',c:'MC'},
+  {n:'Mongolia',c:'MN'},{n:'Montenegro',c:'ME'},{n:'Morocco',c:'MA'},{n:'Mozambique',c:'MZ'},{n:'Myanmar',c:'MM'},
+  {n:'Namibia',c:'NA'},{n:'Nepal',c:'NP'},{n:'Netherlands',c:'NL'},{n:'New Zealand',c:'NZ'},{n:'Nicaragua',c:'NI'},
+  {n:'Niger',c:'NE'},{n:'Nigeria',c:'NG'},{n:'North Korea',c:'KP'},{n:'North Macedonia',c:'MK'},{n:'Norway',c:'NO'},
+  {n:'Oman',c:'OM'},{n:'Pakistan',c:'PK'},{n:'Palestine',c:'PS'},{n:'Panama',c:'PA'},{n:'Paraguay',c:'PY'},
+  {n:'Peru',c:'PE'},{n:'Philippines',c:'PH'},{n:'Poland',c:'PL'},{n:'Portugal',c:'PT'},{n:'Puerto Rico',c:'PR'},
+  {n:'Qatar',c:'QA'},{n:'Romania',c:'RO'},{n:'Russia',c:'RU'},{n:'Rwanda',c:'RW'},{n:'Saudi Arabia',c:'SA'},
+  {n:'Senegal',c:'SN'},{n:'Serbia',c:'RS'},{n:'Sierra Leone',c:'SL'},{n:'Singapore',c:'SG'},{n:'Slovakia',c:'SK'},
+  {n:'Slovenia',c:'SI'},{n:'Somalia',c:'SO'},{n:'South Africa',c:'ZA'},{n:'South Korea',c:'KR'},{n:'South Sudan',c:'SS'},
+  {n:'Spain',c:'ES'},{n:'Sri Lanka',c:'LK'},{n:'Sudan',c:'SD'},{n:'Suriname',c:'SR'},{n:'Sweden',c:'SE'},
+  {n:'Switzerland',c:'CH'},{n:'Syria',c:'SY'},{n:'Taiwan',c:'TW'},{n:'Tajikistan',c:'TJ'},{n:'Tanzania',c:'TZ'},
+  {n:'Thailand',c:'TH'},{n:'Timor-Leste',c:'TL'},{n:'Togo',c:'TG'},{n:'Trinidad and Tobago',c:'TT'},{n:'Tunisia',c:'TN'},
+  {n:'Turkey',c:'TR'},{n:'Turkmenistan',c:'TM'},{n:'UAE',c:'AE'},{n:'Uganda',c:'UG'},{n:'Ukraine',c:'UA'},
+  {n:'United Kingdom',c:'GB'},{n:'United States',c:'US'},{n:'Uruguay',c:'UY'},{n:'Uzbekistan',c:'UZ'},
+  {n:'Venezuela',c:'VE'},{n:'Vietnam',c:'VN'},{n:'Yemen',c:'YE'},{n:'Zambia',c:'ZM'},{n:'Zimbabwe',c:'ZW'},
+];
+// Build flag lookup: country name → emoji flag
+const CFLAG={};
+COUNTRIES.forEach(({n,c})=>{CFLAG[n]=[...c].map(x=>String.fromCodePoint(127397+x.charCodeAt(0))).join('')});
+function cFlag(name){return CFLAG[name]||''}
+function cDisplay(name){if(!name)return '';const f=cFlag(name);return f?f+'\u00a0'+name:name}
+
+// Populate country <select> once DOM is ready
+function populateCountrySelect(){
+  const sel=$('profileCountry');if(!sel||sel.options.length>1)return;
+  COUNTRIES.forEach(({n})=>{const o=document.createElement('option');o.value=n;o.textContent=cFlag(n)+' '+n;sel.appendChild(o)});
+}
 
 // ── API ─────────────────────────────────────────────────
 async function apiFetch(method,path,body,hdrs={}){
@@ -1076,7 +1166,7 @@ function renderLevels(){
       :canPay?`<span style="color:var(--cyan)">⚡ Ready</span>`:`<span style="color:var(--muted)">Pay L${num-1} first</span>`;
     const rt=num===6?` <span style="font-size:.62rem;color:var(--green);background:rgba(0,255,136,.1);padding:.1rem .3rem;border-radius:4px">REFERRER</span>`:'';
     const displayName=nodeInfo.nickname||username;
-    const meta=[nodeInfo.country,wallet!=='—'?wallet.slice(0,4)+'...':''].filter(Boolean).join(' · ');
+    const meta=[cDisplay(nodeInfo.country),wallet!=='—'?wallet.slice(0,4)+'...':''].filter(Boolean).join('  ·  ');
     return `<div class="lv-card ${state}">
       <div class="lv-badge">${num}</div>
       <div class="lv-info">
@@ -1167,50 +1257,103 @@ async function openProfile(){
   if(!profile){toast('Could not load profile','err');return}
   myMatricesData=matrices||{};
   referralTree=Array.isArray(tree)?tree:[];
+  refLevelData=flatByDepth(referralTree);
   renderProfile(profile,true);
-  renderReferralTree();
+  populateCountrySelect();
+  $('profileCountry').value=profile.country||'';
+  renderReferralLevels();
   renderMyMatrices('all');
   showView('viewProfile');
 }
 
-function renderReferralTree(){
-  const list=$('myReferralsList');
-  if(!referralTree.length){
-    list.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:.85rem">No referrals yet. Share your link to start building your network.</div>';
+function flatByDepth(nodes,acc={}){
+  for(const n of nodes){
+    if(!acc[n.depth])acc[n.depth]=[];
+    acc[n.depth].push(n);
+    if(n.children?.length)flatByDepth(n.children,acc);
+  }
+  return acc;
+}
+
+function countAllNodes(nodes){return nodes.reduce((s,n)=>s+1+countAllNodes(n.children||[]),0)}
+
+function renderReferralLevels(){
+  const el=$('refLevelButtons');
+  const direct=referralTree.length;
+  const total=countAllNodes(referralTree);
+  const indirect=total-direct;
+  if(!total){
+    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:.85rem">No referrals yet — share your link to build your network.</div>';
     return;
   }
-  function countAll(nodes){return nodes.reduce((s,n)=>s+1+countAll(n.children||[]),0)}
-  const total=countAll(referralTree);
-  let html=`<div style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem">${total} total node${total!==1?'s':''} in your downline</div><div class="ref-tree">`;
-  function renderNode(node){
-    const C=cfg();
-    const displayName=node.nickname||node.username;
-    const sub=[node.country,node.walletAddress?node.walletAddress.slice(0,4)+'...':''].filter(Boolean).join(' · ');
-    const pc=node.paidLevels.length;
-    const active=node.paidSystemFee&&pc===6;
-    const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
-    const dc=depthColors[(node.depth-1)%depthColors.length];
-    let out=`<div class="ref-node">
-      <div class="ref-row">
-        <div class="ref-av">${node.avatar||'👤'}</div>
-        <span class="ref-depth" style="background:${dc}22;color:${dc}">L${node.depth}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:.85rem">${displayName}</div>
-          <div style="font-size:.7rem;color:var(--muted)">${sub||node.username}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <span class="ref-paid ${active?'yes':'no'}">${active?'✓ Active':'⏳ '+pc+'/6'}</span>
-          ${(node.children&&node.children.length)?`<div style="font-size:.62rem;color:var(--muted);margin-top:.15rem">${node.children.length} sub-ref</div>`:''}
-        </div>
-      </div>`;
-    if(node.children&&node.children.length){
-      out+=`<div class="ref-children">${node.children.map(renderNode).join('')}</div>`;
-    }
-    return out+'</div>';
+  const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
+  let html=`<div class="ref-lvl-total">
+    <span style="color:var(--green);font-weight:700">${direct}</span> direct &nbsp;·&nbsp;
+    <span style="color:var(--cyan);font-weight:700">${indirect}</span> indirect &nbsp;·&nbsp;
+    <span style="color:var(--text);font-weight:700">${total}</span> total
+  </div><div class="ref-level-grid">`;
+  for(let d=1;d<=6;d++){
+    const items=refLevelData[d]||[];
+    const cnt=items.length;
+    const col=depthColors[d-1];
+    html+=`<button class="ref-lvl-btn${cnt===0?' empty':''}" onclick="openRefLevel(${d})" style="border-color:${col}33">
+      <span class="cnt" style="color:${col}">${cnt}</span>
+      <span style="color:${col};font-weight:800;font-size:.9rem">L${d}</span>
+      <span class="lbl">${d===1?'Direct':'Indirect'}</span>
+    </button>`;
   }
-  html+=referralTree.map(renderNode).join('')+'</div>';
-  list.innerHTML=html;
+  html+='</div>';
+  el.innerHTML=html;
 }
+
+function openRefLevel(level){
+  currentRefLevel=level;currentRefPage=1;
+  const items=refLevelData[level]||[];
+  const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
+  const col=depthColors[level-1];
+  $('refLevelTitle').innerHTML=`<span style="color:${col}">Level ${level}</span> Referrals`;
+  $('refLevelSubtitle').textContent=`${items.length} node${items.length!==1?'s':''} at depth ${level}`;
+  renderRefLevelPage();
+  showView('viewReferralLevel');
+}
+
+function renderRefLevelPage(){
+  const items=refLevelData[currentRefLevel]||[];
+  const pages=Math.max(1,Math.ceil(items.length/REF_PAGE_SIZE));
+  const start=(currentRefPage-1)*REF_PAGE_SIZE;
+  const page=items.slice(start,start+REF_PAGE_SIZE);
+
+  $('refLevelList').innerHTML=page.length?page.map(n=>{
+    const displayName=n.nickname||n.username;
+    const pc=n.paidLevels.length;
+    const active=n.paidSystemFee&&pc===6;
+    const countryTxt=cDisplay(n.country);
+    const walletTxt=n.walletAddress?n.walletAddress.slice(0,4)+'...':'';
+    const sub=[countryTxt,walletTxt].filter(Boolean).join('  ·  ');
+    return `<div class="ref-list-card">
+      <div class="ref-list-av">${n.avatar||'👤'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:.9rem">${displayName}</div>
+        <div style="font-size:.73rem;color:var(--muted);margin-top:.15rem">${sub||n.username}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:.68rem;padding:.15rem .5rem;border-radius:8px;font-weight:700;${active?'background:rgba(0,255,136,.1);color:var(--green)':'background:rgba(255,165,0,.08);color:#ffa500'}">${active?'✓ Active':'⏳ '+pc+'/6'}</div>
+        ${n.children?.length?`<div style="font-size:.62rem;color:var(--muted);margin-top:.2rem">${n.children.length} sub-ref</div>`:''}
+      </div>
+    </div>`;
+  }).join(''):'<div style="text-align:center;color:var(--muted);padding:1.5rem">No entries</div>';
+
+  // Pagination
+  if(pages<=1){$('refLevelPagination').innerHTML='';return}
+  let pag='';
+  if(currentRefPage>1)pag+=`<button class="pag-btn" onclick="goRefPage(${currentRefPage-1})">‹</button>`;
+  for(let i=1;i<=pages;i++)pag+=`<button class="pag-btn${i===currentRefPage?' active':''}" onclick="goRefPage(${i})">${i}</button>`;
+  if(currentRefPage<pages)pag+=`<button class="pag-btn" onclick="goRefPage(${currentRefPage+1})">›</button>`;
+  $('refLevelPagination').innerHTML=pag;
+}
+
+function goRefPage(p){currentRefPage=p;renderRefLevelPage();window.scrollTo(0,0)}
+function backToProfile(){showView('viewProfile')}
 
 function filterMyMatrices(pos,btn){
   document.querySelectorAll('.mxf-btn').forEach(b=>b.classList.remove('active'));
@@ -1245,7 +1388,7 @@ function renderMyMatrices(pos){
     const myPos=m.myPosition; // 0-based index
     const isPaid=m.paidLevels.includes(myPos);
     const displayName=m.nickname||m.username;
-    const sub=[m.country,m.walletAddress?m.walletAddress.slice(0,4)+'...':''].filter(Boolean).join(' · ');
+    const sub=[cDisplay(m.country),m.walletAddress?m.walletAddress.slice(0,4)+'...':''].filter(Boolean).join('  ·  ');
     const slots=m.uplineMatrix.map((uname,idx)=>{
       const isMine=idx===myPos;
       const slotPaid=m.paidLevels.includes(idx);
@@ -1277,16 +1420,20 @@ function renderProfile(p,isOwn){
   $('profileRef').textContent=p.referrer?'Referred by: '+p.referrer:'Genesis node (no referrer)';
   const C=cfg();
   const totalReceived=(p.totalReceivedCount||0)*C.LEVEL_AMOUNT;
+  const directRefs=p.referralCount||0;
+  const totalNodes=countAllNodes(referralTree);
+  const indirectRefs=Math.max(0,totalNodes-directRefs);
   $('profileStats').innerHTML=[
     ['💸',totalReceived+' USDT','Total Received','var(--green)'],
-    ['👥',p.referralCount||0,'Referrals','var(--cyan)'],
+    ['👥',`<span style="color:var(--green)">${directRefs}</span> <span style="font-size:.75rem;color:var(--muted)">direct</span>`,'Referrals','var(--cyan)'],
+    ['🔗',`<span style="color:var(--cyan)">${indirectRefs}</span> <span style="font-size:.75rem;color:var(--muted)">indirect</span>`,'Network','#c084fc'],
     ['🔑',p.paidSystemFee?'Active':'Pending','Node Status',p.paidSystemFee?'var(--green)':'var(--gold)'],
   ].map(([ic,v,l,c])=>`<div class="pstat"><div style="font-size:1.3rem;margin-bottom:.3rem">${ic}</div><div class="pstat-val" style="color:${c}">${v}</div><div class="pstat-lbl">${l}</div></div>`).join('');
 
   $('profileMatrix').innerHTML=p.uplineMatrix.map((n,i)=>{
     const info=p.matrixInfo?.[n]||{};
     const label=info.nickname||n;
-    const sub=[info.country,info.walletAddress?info.walletAddress.slice(0,4):''].filter(Boolean).join(' · ');
+    const sub=[cDisplay(info.country),info.walletAddress?info.walletAddress.slice(0,4):''].filter(Boolean).join(' · ');
     return `<div class="lv-chip ${i===5?'lv6':''}"><div class="cn">L${i+1}</div><div class="cv" title="${n}">${label}</div>${sub?`<div style="font-size:.58rem;color:var(--muted);margin-top:.1rem">${sub}</div>`:''}</div>`;
   }).join('');
 
@@ -1498,7 +1645,7 @@ async function init(){
   window.solflare?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
 }
 
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded',()=>{populateCountrySelect();init();});
 </script>
 </body>
 </html>
