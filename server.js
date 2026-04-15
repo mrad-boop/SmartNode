@@ -173,6 +173,15 @@ app.patch('/api/user/:username', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Matrices a user appears in, grouped by position
+app.get('/api/my-matrices/:username', async (req, res) => {
+  try {
+    const user = await db.getUser(req.params.username);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(await db.getMatricesContaining(req.params.username));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

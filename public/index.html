@@ -201,6 +201,34 @@
     .av-opt:hover,.av-opt.sel{border-color:var(--green);background:rgba(0,255,136,.12);transform:scale(1.1)}
     .matrix-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem}
 
+    /* ── MY MATRICES ── */
+    .mx-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem}
+    .mxf-btn{padding:.35rem .8rem;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);transition:all .2s}
+    .mxf-btn.active{background:rgba(123,47,247,.25);border-color:var(--border2);color:#c084fc}
+    .mxf-btn .cnt{display:inline-block;margin-left:.3rem;background:rgba(255,255,255,.1);
+      border-radius:10px;padding:.05rem .35rem;font-size:.65rem}
+    .mxf-btn.active .cnt{background:rgba(123,47,247,.35)}
+    .mx-node-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;
+      padding:1rem;margin-bottom:.75rem;transition:border-color .2s}
+    .mx-node-card:hover{border-color:rgba(123,47,247,.3)}
+    .mx-node-hdr{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+    .mx-node-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+      display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+    .mx-slots{display:grid;grid-template-columns:repeat(6,1fr);gap:.3rem}
+    .mx-slot{padding:.35rem .2rem;border-radius:6px;text-align:center;background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);font-size:.62rem}
+    .mx-slot.mine{background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.4)}
+    .mx-slot.paid-slot{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.25)}
+    .mx-slot .sl-pos{color:var(--muted);font-size:.56rem;margin-bottom:.1rem}
+    .mx-slot .sl-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      color:var(--text);font-size:.63rem}
+    .mx-slot.mine .sl-name{color:var(--gold)}
+    .mx-slot.paid-slot .sl-name{color:var(--green)}
+    .paid-pill{font-size:.65rem;padding:.12rem .45rem;border-radius:10px;font-weight:700;margin-left:auto}
+    .paid-pill.yes{background:rgba(0,255,136,.12);color:var(--green)}
+    .paid-pill.no{background:rgba(255,165,0,.1);color:#ffa500}
+
     /* ── ADMIN ── */
     .admin-login{max-width:380px;margin:4rem auto;padding:0 1rem}
     .admin-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
@@ -450,6 +478,21 @@
       <div class="matrix-mini" id="profileMatrix"></div>
     </div>
 
+    <!-- My Matrices section -->
+    <div class="section-lbl" style="margin-bottom:1rem">Matrices I Appear In</div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="mx-filter" id="mxFilter">
+        <button class="mxf-btn active" data-pos="all" onclick="filterMyMatrices('all',this)">All <span class="cnt" id="mxCntAll">0</span></button>
+        <button class="mxf-btn" data-pos="L1" onclick="filterMyMatrices('L1',this)">L1 <span class="cnt" id="mxCntL1">0</span></button>
+        <button class="mxf-btn" data-pos="L2" onclick="filterMyMatrices('L2',this)">L2 <span class="cnt" id="mxCntL2">0</span></button>
+        <button class="mxf-btn" data-pos="L3" onclick="filterMyMatrices('L3',this)">L3 <span class="cnt" id="mxCntL3">0</span></button>
+        <button class="mxf-btn" data-pos="L4" onclick="filterMyMatrices('L4',this)">L4 <span class="cnt" id="mxCntL4">0</span></button>
+        <button class="mxf-btn" data-pos="L5" onclick="filterMyMatrices('L5',this)">L5 <span class="cnt" id="mxCntL5">0</span></button>
+        <button class="mxf-btn" data-pos="L6" onclick="filterMyMatrices('L6',this)">L6 <span class="cnt" id="mxCntL6">0</span></button>
+      </div>
+      <div id="myMatricesList"><div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Loading...</div></div>
+    </div>
+
     <!-- Edit section (only for own profile) -->
     <div id="profileEditSection">
       <div class="section-lbl">Edit Profile</div>
@@ -681,7 +724,7 @@ const clearSession=()=>localStorage.removeItem('sn_session');
 
 // State
 let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
-let adminPassword='',selectedAvatar=null,matrixNodes={};
+let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={};
 
 const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
 
@@ -983,10 +1026,73 @@ function copyRef(){
 async function openProfile(){
   if(!currentUser)return;
   if(!connectedWallet){toast('Connect your wallet to access your profile','inf');connectWallet();return;}
-  const profile=await loadProfile(currentUser.username);
+  const [profile,matrices]=await Promise.all([
+    loadProfile(currentUser.username),
+    apiGet(`/api/my-matrices/${encodeURIComponent(currentUser.username)}`).catch(()=>({}))
+  ]);
   if(!profile){toast('Could not load profile','err');return}
+  myMatricesData=matrices||{};
   renderProfile(profile,true);
+  renderMyMatrices('all');
   showView('viewProfile');
+}
+
+function filterMyMatrices(pos,btn){
+  document.querySelectorAll('.mxf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMyMatrices(pos);
+}
+
+function renderMyMatrices(pos){
+  const positions=['L1','L2','L3','L4','L5','L6'];
+  // Update counts
+  let total=0;
+  positions.forEach(p=>{
+    const n=(myMatricesData[p]||[]).length;
+    total+=n;
+    const el=$('mxCnt'+p);if(el)el.textContent=n;
+  });
+  $('mxCntAll').textContent=total;
+
+  // Gather items to show
+  const items=pos==='all'
+    ? positions.flatMap(p=>(myMatricesData[p]||[]).map(m=>({...m,posLabel:p})))
+    : (myMatricesData[pos]||[]).map(m=>({...m,posLabel:pos}));
+
+  const list=$('myMatricesList');
+  if(!items.length){
+    list.innerHTML=`<div style="text-align:center;color:var(--muted);padding:2rem;font-size:.85rem">
+      ${pos==='all'?'You don\'t appear in any matrix yet.':'No matrices where you are at position '+pos+'.'}
+    </div>`;return;
+  }
+
+  list.innerHTML=items.map(m=>{
+    const myPos=m.myPosition; // 0-based index
+    const isPaid=m.paidLevels.includes(myPos);
+    const displayName=m.nickname||m.username;
+    const sub=[m.country,m.walletAddress?m.walletAddress.slice(0,4)+'...':''].filter(Boolean).join(' · ');
+    const slots=m.uplineMatrix.map((uname,idx)=>{
+      const isMine=idx===myPos;
+      const slotPaid=m.paidLevels.includes(idx);
+      const cls='mx-slot'+(isMine?' mine':slotPaid?' paid-slot':'');
+      const label=uname.length>8?uname.slice(0,7)+'…':uname;
+      return `<div class="${cls}"><div class="sl-pos">L${idx+1}</div><div class="sl-name" title="${uname}">${label}</div></div>`;
+    }).join('');
+    return `<div class="mx-node-card">
+      <div class="mx-node-hdr">
+        <div class="mx-node-av">${m.avatar}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:.9rem">${displayName}</div>
+          <div style="font-size:.72rem;color:var(--muted)">${sub||m.username}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.25rem">
+          <span style="font-size:.72rem;background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.25);padding:.1rem .45rem;border-radius:10px;font-weight:700">${m.posLabel}</span>
+          <span class="paid-pill ${isPaid?'yes':'no'}">${isPaid?'✓ Paid':'⏳ Pending'}</span>
+        </div>
+      </div>
+      <div class="mx-slots">${slots}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderProfile(p,isOwn){

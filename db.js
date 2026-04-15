@@ -121,6 +121,31 @@ async function getConfig() {
   return cfg;
 }
 
+async function getMatricesContaining(username) {
+  const { rows } = await pool.query(
+    'SELECT username, upline_list, paid_levels, avatar, nickname, country, wallet_address FROM users ORDER BY registration_date DESC'
+  );
+  const result = { L1:[], L2:[], L3:[], L4:[], L5:[], L6:[] };
+  for (const row of rows) {
+    const ul = Array.isArray(row.upline_list) ? row.upline_list : [];
+    ul.forEach((name, idx) => {
+      if (name === username) {
+        result[`L${idx + 1}`].push({
+          username:     row.username,
+          uplineMatrix: ul,
+          paidLevels:   Array.isArray(row.paid_levels) ? row.paid_levels : [],
+          avatar:       row.avatar || '👤',
+          nickname:     row.nickname || '',
+          country:      row.country || '',
+          walletAddress: row.wallet_address || '',
+          myPosition:   idx,
+        });
+      }
+    });
+  }
+  return result;
+}
+
 async function getTotalReceived(username) {
   const { rows } = await pool.query('SELECT upline_list, paid_levels FROM users');
   let count = 0;
@@ -145,6 +170,6 @@ async function setConfigBulk(entries) {
 module.exports = {
   migrate,
   getUser, usernameExists, createUser, updateUser,
-  countUsers, getAllUsers, getReferralCount, getTotalReceived,
+  countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining,
   getConfig, setConfigBulk,
 };
