@@ -582,10 +582,44 @@
           <div class="fg" style="grid-column:1/-1"><label class="fl">F3 Text</label><input class="fi" id="c_FEAT_3_TEXT"/></div>
         </div>
       </div>
+      <div class="admin-card"><div class="admin-card-title">Landing — CTA Buttons</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">Join Button Text</label><input class="fi" id="c_CTA_JOIN"/></div>
+          <div class="fg"><label class="fl">Connect Wallet Button Text</label><input class="fi" id="c_CTA_WALLET"/></div>
+        </div>
+      </div>
+      <div class="admin-card"><div class="admin-card-title">Landing — Stats Labels</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">Stat 1 Label</label><input class="fi" id="c_STAT_1_LBL"/></div>
+          <div class="fg"><label class="fl">Stat 2 Label</label><input class="fi" id="c_STAT_2_LBL"/></div>
+          <div class="fg"><label class="fl">Stat 3 Label</label><input class="fi" id="c_STAT_3_LBL"/></div>
+          <div class="fg"><label class="fl">Stat 4 Label</label><input class="fi" id="c_STAT_4_LBL"/></div>
+        </div>
+      </div>
       <div class="admin-card"><div class="admin-card-title">How It Works</div>
-        <div class="fg"><label class="fl">Step 1</label><input class="fi" id="c_HOW_1"/></div>
-        <div class="fg"><label class="fl">Step 2</label><input class="fi" id="c_HOW_2"/></div>
-        <div class="fg"><label class="fl">Step 3</label><input class="fi" id="c_HOW_3"/></div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">Section Title</label><input class="fi" id="c_HOW_TITLE"/></div>
+          <div class="fg"><label class="fl">Section Subtitle</label><input class="fi" id="c_HOW_SUBTITLE"/></div>
+          <div class="fg"><label class="fl">Step 1 Name</label><input class="fi" id="c_HOW_STEP_1"/></div>
+          <div class="fg"><label class="fl">Step 2 Name</label><input class="fi" id="c_HOW_STEP_2"/></div>
+          <div class="fg"><label class="fl">Step 3 Name</label><input class="fi" id="c_HOW_STEP_3"/></div>
+        </div>
+        <div class="fg"><label class="fl">Step 1 Description</label><input class="fi" id="c_HOW_1"/></div>
+        <div class="fg"><label class="fl">Step 2 Description</label><input class="fi" id="c_HOW_2"/></div>
+        <div class="fg"><label class="fl">Step 3 Description</label><input class="fi" id="c_HOW_3"/></div>
+      </div>
+      <div class="admin-card"><div class="admin-card-title">Register Page</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">Title</label><input class="fi" id="c_REG_TITLE"/></div>
+          <div class="fg"><label class="fl">Subtitle</label><input class="fi" id="c_REG_SUBTITLE"/></div>
+        </div>
+      </div>
+      <div class="admin-card"><div class="admin-card-title">Dashboard Page</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">Title</label><input class="fi" id="c_DASH_TITLE"/></div>
+          <div class="fg"><label class="fl">Subtitle</label><input class="fi" id="c_DASH_SUBTITLE"/></div>
+        </div>
+        <div class="fg"><label class="fl">Referral Locked Message</label><textarea class="fi fta" id="c_REF_LOCKED_TXT" style="min-height:55px"></textarea></div>
       </div>
       <div class="admin-card"><div class="admin-card-title">Footer</div>
         <div class="fg"><textarea class="fi fta" id="c_FOOTER_TEXT"></textarea></div>
@@ -614,13 +648,24 @@
 
     <!-- Users tab -->
     <div id="tUsers" class="tab-pane">
+      <!-- Create user -->
+      <div class="admin-card" style="margin-bottom:1.2rem">
+        <div class="admin-card-title">➕ Create User</div>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">Username *</label><input class="fi" id="newUsername" placeholder="min 3 chars, letters/numbers/_"/></div>
+          <div class="fg"><label class="fl">Wallet (optional)</label><input class="fi" id="newWallet" placeholder="Solana address"/></div>
+          <div class="fg"><label class="fl">Referrer (optional)</label><input class="fi" id="newReferrer" placeholder="existing username"/></div>
+        </div>
+        <button class="btn btn-g" onclick="adminCreateUser()">Create Node</button>
+      </div>
+
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
         <span style="color:var(--muted);font-size:.83rem">All registered nodes</span>
         <button class="btn btn-c" style="font-size:.78rem" onclick="loadUsers()">↺ Refresh</button>
       </div>
       <div class="table-wrap">
         <table class="users-table">
-          <thead><tr><th>User</th><th>Ref</th><th>Fee</th><th>Levels</th><th>Total Paid</th><th>Wallet</th><th>Date</th></tr></thead>
+          <thead><tr><th>User</th><th>Ref</th><th>Fee</th><th>Levels</th><th>Wallet</th><th>Date</th><th></th></tr></thead>
           <tbody id="usersTableBody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
         </table>
       </div>
@@ -742,18 +787,29 @@ async function loadUser(u){try{return await apiGet(`/api/user/${encodeURICompone
 async function loadProfile(u){try{return await apiGet(`/api/profile/${encodeURIComponent(u)}`)}catch{return null}}
 
 // ── Wallet ───────────────────────────────────────────────
+function isMobile(){return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)}
+
 function connectWallet(){
   if(connectedWallet){toast('Wallet already connected: '+shortAddr(connectedWallet),'inf');return}
+  // If already inside Phantom's in-app browser → connect directly, no modal needed
+  if(window.solana?.isPhantom && isMobile()){connectPhantom();return}
   openWalletModal();
 }
+
 function openWalletModal(){
-  // Update badges based on what's detected
   const hasPhantom=!!window.solana?.isPhantom;
   const hasSolflare=!!window.solflare?.isSolflare;
+  const mobile=isMobile();
+
+  // Inside Phantom's mobile browser → skip modal, connect directly
+  if(hasPhantom && mobile){connectPhantom();return}
+
   $('wBadgePhantom').textContent=hasPhantom?'Detected':'Not installed';
   $('wBadgePhantom').className='wo-badge'+(hasPhantom?'':' off');
   $('wBadgeSolflare').textContent=hasSolflare?'Detected':'Not installed';
   $('wBadgeSolflare').className='wo-badge'+(hasSolflare?'':' off');
+  // Show deep link button only on mobile without Phantom browser
+  $('woptMobile').style.display=(mobile&&!hasPhantom)?'flex':'none';
   $('manualWalletAddr').value='';
   $('walletModal').classList.remove('hidden');
 }
@@ -761,7 +817,10 @@ function closeWalletModal(){$('walletModal').classList.add('hidden')}
 
 async function connectPhantom(){
   const p=window.solana;
-  if(!p?.isPhantom){toast('Phantom extension not found — use Mobile or Manual option','err');return}
+  if(!p?.isPhantom){
+    if(isMobile()){openPhantomDeepLink();return}
+    toast('Phantom not found — use Manual option or install Phantom extension','err');return;
+  }
   try{
     const r=await p.connect();
     await onWalletConnected(r.publicKey.toString(),'Phantom');
@@ -771,7 +830,7 @@ async function connectPhantom(){
 
 async function connectSolflare(){
   const s=window.solflare;
-  if(!s?.isSolflare){toast('Solflare extension not found — use Mobile or Manual option','err');return}
+  if(!s?.isSolflare){toast('Solflare extension not found — use Manual option','err');return}
   try{
     await s.connect();
     await onWalletConnected(s.publicKey.toString(),'Solflare');
@@ -779,12 +838,12 @@ async function connectSolflare(){
   }catch{toast('Solflare connection cancelled','err')}
 }
 
-function openPhantomMobile(e){
-  e.preventDefault();
-  // Deep link: opens current page inside Phantom's in-app browser (wallet auto-available)
-  const url=encodeURIComponent(window.location.href);
-  window.location.href='https://phantom.app/ul/browse/'+url+'?ref='+url;
+function openPhantomDeepLink(){
+  const dappUrl=encodeURIComponent(window.location.href);
+  const ref=encodeURIComponent(window.location.origin);
+  window.location.href=`https://phantom.app/ul/browse/${dappUrl}?ref=${ref}`;
 }
+function openPhantomMobile(e){e.preventDefault();openPhantomDeepLink();}
 
 async function connectManual(){
   const addr=$('manualWalletAddr').value.trim();
@@ -860,11 +919,25 @@ async function renderLanding(){
   $('landSub').textContent=C.HERO_SUBTITLE||'';
   $('landAmt').textContent=C.LEVEL_AMOUNT||'—';
   try{const s=await apiGet('/api/stats');$('landUsers').textContent=s.totalUsers}catch{$('landUsers').textContent='—'}
+  // CTA buttons
+  const joinBtn=document.querySelector('[onclick="joinMatrix()"]');
+  const walletBtn2=document.querySelector('.land-cta [onclick="connectWallet()"]');
+  if(joinBtn)joinBtn.textContent=C.CTA_JOIN||'Join the Matrix →';
+  if(walletBtn2)walletBtn2.textContent=C.CTA_WALLET||'Connect Wallet';
+  // Stats labels
+  const statLbls=document.querySelectorAll('.ls-lbl');
+  const lbls=[C.STAT_1_LBL||'Active Nodes',C.STAT_2_LBL||'Matrix Levels',C.STAT_3_LBL||'USDT Per Level',C.STAT_4_LBL||'Solana Network'];
+  statLbls.forEach((el,i)=>{if(lbls[i])el.textContent=lbls[i]});
   $('featGrid').innerHTML=[[C.FEAT_1_ICON||'⬡',C.FEAT_1_TITLE||'6-Level Matrix',C.FEAT_1_TEXT||''],
     [C.FEAT_2_ICON||'◎',C.FEAT_2_TITLE||'Solana Powered',C.FEAT_2_TEXT||''],
     [C.FEAT_3_ICON||'⚡',C.FEAT_3_TITLE||'Instant Payments',C.FEAT_3_TEXT||'']
   ].map(([i,t,x])=>`<div class="feat-card"><div class="feat-icon">${i}</div><div class="feat-title">${t}</div><div class="feat-text">${x}</div></div>`).join('');
-  $('howSteps').innerHTML=[['Register',C.HOW_1||''],['Activate',C.HOW_2||''],['Earn',C.HOW_3||'']]
+  // How section title/subtitle
+  const howH=document.querySelector('.how-section h2');
+  const howP=document.querySelector('.how-section p');
+  if(howH)howH.textContent=C.HOW_TITLE||'How It Works';
+  if(howP)howP.textContent=C.HOW_SUBTITLE||'Three simple steps to start earning';
+  $('howSteps').innerHTML=[[C.HOW_STEP_1||'Register',C.HOW_1||''],[C.HOW_STEP_2||'Activate',C.HOW_2||''],[C.HOW_STEP_3||'Earn',C.HOW_3||'']]
     .map(([t,x],i)=>`<div class="how-step"><div class="how-num">${i+1}</div><div style="font-size:.9rem;font-weight:700;margin-bottom:.4rem">${t}</div><div style="font-size:.82rem;color:var(--muted);line-height:1.55">${x}</div></div>`).join('');
   $('landFooter').textContent=C.FOOTER_TEXT||'';
 }
@@ -919,6 +992,13 @@ function isFullyPaid(u){return u.paidSystemFee&&u.paidLevels.length===6}
 
 function renderActivation(){
   const u=currentUser,C=cfg();
+  // Apply configurable dashboard texts
+  const dashTitle=document.querySelector('#viewActivation h2');
+  const dashSub=document.querySelector('#viewActivation .act-hdr p');
+  if(dashTitle)dashTitle.textContent=C.DASH_TITLE||'Node Dashboard';
+  if(dashSub)dashSub.textContent=C.DASH_SUBTITLE||'Activate your matrix levels to receive payments';
+  const refLockedSpan=document.querySelector('#refBoxLocked span:last-child');
+  if(refLockedSpan)refLockedSpan.innerHTML=C.REF_LOCKED_TXT||'Your referral link unlocks after completing <strong style="color:var(--gold)">all payments</strong> — system fee + 6 levels.';
   $('dispUser').textContent=u.username;
   $('userAv').textContent=u.avatar||'👤';
   $('dispWallet').textContent=u.walletAddress?shortAddr(u.walletAddress):'No wallet';
@@ -1201,7 +1281,10 @@ async function loadAdminConfig(){
     const C=await apiGet('/api/admin/config',{'X-Admin-Password':adminPassword});
     ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE','FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT',
      'FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT','FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT',
-     'HOW_1','HOW_2','HOW_3','FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
+     'HOW_TITLE','HOW_SUBTITLE','HOW_1','HOW_2','HOW_3','HOW_STEP_1','HOW_STEP_2','HOW_STEP_3',
+     'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
+     'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
+     'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
     ].forEach(k=>{const el=$('c_'+k);if(el)el.value=C[k]??''});
     const g=$('matrixAdminGrid');g.innerHTML='';
     for(let i=1;i<=6;i++){
@@ -1219,7 +1302,10 @@ async function saveConfig(){
   const data={};
   ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE','FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT',
    'FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT','FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT',
-   'HOW_1','HOW_2','HOW_3','FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
+   'HOW_TITLE','HOW_SUBTITLE','HOW_1','HOW_2','HOW_3','HOW_STEP_1','HOW_STEP_2','HOW_STEP_3',
+   'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
+   'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
+   'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
   ].forEach(k=>{const el=$('c_'+k);if(el&&el.value.trim()!=='')data[k]=el.value.trim()});
   for(let i=1;i<=6;i++){
     const u=$(`mx_u${i}`),w=$(`mx_w${i}`);
@@ -1234,23 +1320,42 @@ async function loadUsers(){
   const tb=$('usersTableBody');
   tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem"><span class="spin"></span></td></tr>';
   try{
-    const C=cfg();
     const users=await apiGet('/api/admin/users',{'X-Admin-Password':adminPassword});
     if(!users.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No users yet</td></tr>';return}
     tb.innerHTML=users.map(u=>{
       const pc=u.paidLevels.length;
-      const total=pc*C.LEVEL_AMOUNT+(u.paidSystemFee?C.SYSTEM_FEE_AMOUNT:0);
       return `<tr>
-        <td><span style="font-size:1rem">${u.avatar||'👤'}</span> <strong>${u.username}</strong></td>
+        <td><span style="font-size:1rem">${u.avatar||'👤'}</span> <strong>${u.username}</strong>${u.nickname?'<div style="font-size:.68rem;color:var(--muted)">'+u.nickname+'</div>':''}</td>
         <td>${u.referrer||'<span style="color:var(--muted)">—</span>'}</td>
         <td>${u.paidSystemFee?'<span class="badge b-green">✓</span>':'<span class="badge b-muted">✗</span>'}</td>
         <td><span style="color:var(--cyan);font-weight:700">${pc}</span>/6</td>
-        <td style="color:var(--gold)">${total} USDT</td>
         <td style="font-family:monospace;font-size:.7rem">${u.walletAddress?shortAddr(u.walletAddress):'—'}</td>
-        <td style="color:var(--muted)">${fmtDate(u.registrationDate)}</td>
+        <td style="color:var(--muted);font-size:.72rem">${fmtDate(u.registrationDate)}</td>
+        <td><button class="btn btn-r" style="font-size:.7rem;padding:.25rem .55rem" onclick="adminDeleteUser('${u.username}')">✕</button></td>
       </tr>`;
     }).join('');
   }catch(e){tb.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:1.5rem">${e.message}</td></tr>`}
+}
+
+async function adminDeleteUser(username){
+  if(!confirm(`Delete user "${username}"? This cannot be undone.`))return;
+  try{
+    await apiFetch('DELETE',`/api/admin/users/${encodeURIComponent(username)}`,null,{'X-Admin-Password':adminPassword});
+    toast(`User "${username}" deleted`,'ok');loadUsers();
+  }catch(e){toast('Delete failed: '+e.message,'err')}
+}
+
+async function adminCreateUser(){
+  const username=$('newUsername').value.trim();
+  const wallet=$('newWallet').value.trim()||null;
+  const referrer=$('newReferrer').value.trim()||null;
+  if(!username){toast('Username required','err');return}
+  try{
+    const user=await apiPost('/api/admin/create-user',{username,walletAddress:wallet,referrer},{'X-Admin-Password':adminPassword});
+    toast(`User "${user.username}" created!`,'ok');
+    $('newUsername').value='';$('newWallet').value='';$('newReferrer').value='';
+    loadUsers();
+  }catch(e){toast('Create failed: '+e.message,'err')}
 }
 
 function switchTab(id,btn){

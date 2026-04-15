@@ -31,9 +31,25 @@ function buildAppConfig(dbCfg) {
     FEAT_3_ICON:   dbCfg.FEAT_3_ICON  || '⚡',
     FEAT_3_TITLE:  dbCfg.FEAT_3_TITLE || 'Instant Payments',
     FEAT_3_TEXT:   dbCfg.FEAT_3_TEXT  || 'USDT payments go directly to upline wallets. No middlemen, no delays.',
+    HOW_TITLE:     dbCfg.HOW_TITLE    || 'How It Works',
+    HOW_SUBTITLE:  dbCfg.HOW_SUBTITLE || 'Three simple steps to start earning',
     HOW_1:         dbCfg.HOW_1 || 'Connect your Phantom wallet and choose a username to register your node.',
     HOW_2:         dbCfg.HOW_2 || 'Pay the system activation fee and unlock each of your 6 upline levels.',
     HOW_3:         dbCfg.HOW_3 || 'Share your referral link. Every new node you bring earns you a level payment.',
+    HOW_STEP_1:    dbCfg.HOW_STEP_1 || 'Register',
+    HOW_STEP_2:    dbCfg.HOW_STEP_2 || 'Activate',
+    HOW_STEP_3:    dbCfg.HOW_STEP_3 || 'Earn',
+    CTA_JOIN:      dbCfg.CTA_JOIN    || 'Join the Matrix →',
+    CTA_WALLET:    dbCfg.CTA_WALLET  || 'Connect Wallet',
+    STAT_1_LBL:    dbCfg.STAT_1_LBL || 'Active Nodes',
+    STAT_2_LBL:    dbCfg.STAT_2_LBL || 'Matrix Levels',
+    STAT_3_LBL:    dbCfg.STAT_3_LBL || 'USDT Per Level',
+    STAT_4_LBL:    dbCfg.STAT_4_LBL || 'Solana Network',
+    REG_TITLE:     dbCfg.REG_TITLE   || 'Register Your Node',
+    REG_SUBTITLE:  dbCfg.REG_SUBTITLE|| 'Free registration — activation payments on next step.',
+    DASH_TITLE:    dbCfg.DASH_TITLE  || 'Node Dashboard',
+    DASH_SUBTITLE: dbCfg.DASH_SUBTITLE||'Activate your matrix levels to receive payments',
+    REF_LOCKED_TXT:dbCfg.REF_LOCKED_TXT||'Your referral link unlocks after completing all payments — system fee + 6 levels.',
     FOOTER_TEXT:   dbCfg.FOOTER_TEXT || 'SmartNode is a decentralized peer-to-peer matrix system. Payments are final and non-refundable.',
     SYSTEM_FEE_ADDRESS: dbCfg.SYSTEM_FEE_ADDRESS || process.env.SYSTEM_FEE_ADDRESS || '',
     SYSTEM_FEE_AMOUNT:  Number(dbCfg.SYSTEM_FEE_AMOUNT || process.env.SYSTEM_FEE_AMOUNT || 10),
@@ -93,6 +109,29 @@ app.post('/api/admin/config', adminAuth, async (req, res) => {
 app.get('/api/admin/users', adminAuth, async (req, res) => {
   try { res.json(await db.getAllUsers()); }
   catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/admin/users/:username', adminAuth, async (req, res) => {
+  try { await db.deleteUser(req.params.username); res.json({ ok: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/create-user', adminAuth, async (req, res) => {
+  try {
+    let { username, walletAddress, referrer } = req.body;
+    username = String(username || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
+    if (username.length < 3) return res.status(400).json({ error: 'Username must be at least 3 characters' });
+    if (await db.usernameExists(username)) return res.status(409).json({ error: `Username "${username}" already taken` });
+    if (walletAddress && await db.walletExists(walletAddress)) return res.status(409).json({ error: 'Wallet already used' });
+    const appCfg = buildAppConfig(await db.getConfig());
+    let uplineMatrix = [...appCfg.DEFAULT_MATRIX];
+    if (referrer) {
+      const refUser = await db.getUser(referrer);
+      if (refUser) uplineMatrix = [...refUser.uplineMatrix.slice(1), referrer];
+    }
+    const user = await db.createUser({ username, walletAddress: walletAddress || null, referrer: referrer || null, uplineMatrix });
+    res.status(201).json(user);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ── Public API ────────────────────────────────────────────────

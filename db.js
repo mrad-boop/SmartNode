@@ -131,6 +131,10 @@ async function getConfig() {
   return cfg;
 }
 
+async function deleteUser(username) {
+  await pool.query('DELETE FROM users WHERE username = $1', [username]);
+}
+
 async function getMatricesContaining(username) {
   const { rows } = await pool.query(
     'SELECT username, upline_list, paid_levels, avatar, nickname, country, wallet_address FROM users ORDER BY registration_date DESC'
@@ -181,6 +185,6 @@ module.exports = {
   migrate,
   getUser, usernameExists, createUser, updateUser,
   countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining,
-  getUserByWallet, walletExists,
+  getUserByWallet, walletExists, deleteUser,
   getConfig, setConfigBulk,
 };
