@@ -62,6 +62,19 @@
     #walletBtn:hover{box-shadow:var(--glow-p);transform:translateY(-1px)}
     #walletBtn .wdot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
     #walletBtn.connected .wdot{background:var(--green);box-shadow:0 0 6px var(--green)}
+    /* wallet options modal */
+    .wallet-opt{display:flex;align-items:center;gap:.85rem;width:100%;padding:.85rem 1rem;border-radius:10px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);color:var(--text);
+      font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:.6rem;text-decoration:none}
+    .wallet-opt:hover{background:rgba(123,47,247,.15);border-color:var(--border2);transform:translateX(3px)}
+    .wallet-opt:last-child{margin-bottom:0}
+    .wallet-opt .wo-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+    .wallet-opt .wo-badge{margin-left:auto;font-size:.65rem;padding:.15rem .45rem;border-radius:4px;background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+    .wallet-opt .wo-badge.mob{background:rgba(0,212,255,.1);color:var(--cyan);border-color:rgba(0,212,255,.2)}
+    .wallet-opt .wo-badge.off{background:rgba(255,255,255,.05);color:var(--muted);border-color:transparent}
+    .wallet-divider{text-align:center;font-size:.72rem;color:var(--muted);margin:.75rem 0;position:relative}
+    .wallet-divider::before,.wallet-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:rgba(255,255,255,.07)}
+    .wallet-divider::before{left:0}.wallet-divider::after{right:0}
     /* admin link — looks like a subtle node icon, not obvious */
     .sys-link{font-size:.75rem;color:rgba(255,255,255,.18);text-decoration:none;padding:.3rem .5rem;
       border-radius:5px;transition:all .2s;letter-spacing:.05em}
@@ -574,6 +587,48 @@
 
 </main>
 
+<!-- WALLET MODAL -->
+<div class="modal-ov hidden" id="walletModal">
+  <div class="modal" style="max-width:400px">
+    <div class="m-title">Connect Wallet</div>
+    <div class="m-sub" style="margin-bottom:1.3rem">Choose how to connect on any device</div>
+
+    <!-- Phantom extension -->
+    <button class="wallet-opt" id="woptPhantom" onclick="connectPhantom()">
+      <div class="wo-icon" style="background:rgba(171,114,255,.15)">👻</div>
+      <div><div>Phantom</div><div style="font-size:.72rem;color:var(--muted);font-weight:400">Browser extension</div></div>
+      <span class="wo-badge" id="wBadgePhantom">Detected</span>
+    </button>
+
+    <!-- Solflare extension -->
+    <button class="wallet-opt" id="woptSolflare" onclick="connectSolflare()">
+      <div class="wo-icon" style="background:rgba(255,165,0,.12)">🔆</div>
+      <div><div>Solflare</div><div style="font-size:.72rem;color:var(--muted);font-weight:400">Browser extension</div></div>
+      <span class="wo-badge" id="wBadgeSolflare">Detected</span>
+    </button>
+
+    <!-- Phantom Mobile deep link -->
+    <a class="wallet-opt" id="woptMobile" href="#" onclick="openPhantomMobile(event)">
+      <div class="wo-icon" style="background:rgba(0,212,255,.1)">📱</div>
+      <div><div>Phantom App</div><div style="font-size:.72rem;color:var(--muted);font-weight:400">iOS &amp; Android — opens app</div></div>
+      <span class="wo-badge mob">Mobile</span>
+    </a>
+
+    <div class="wallet-divider">or enter manually</div>
+
+    <!-- Manual address -->
+    <div style="margin-bottom:.6rem">
+      <input id="manualWalletAddr" class="form-input" type="text"
+        placeholder="Paste your Solana wallet address"
+        style="margin-bottom:.6rem"
+        onkeydown="if(event.key==='Enter')connectManual()"/>
+      <button class="btn btn-p btn-full" onclick="connectManual()">Use This Address</button>
+    </div>
+
+    <button class="btn btn-r btn-full" style="margin-top:.4rem;font-size:.8rem" onclick="closeWalletModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- PAYMENT MODAL -->
 <div class="modal-ov hidden" id="payModal">
   <div class="modal">
@@ -644,20 +699,67 @@ async function loadUser(u){try{return await apiGet(`/api/user/${encodeURICompone
 async function loadProfile(u){try{return await apiGet(`/api/profile/${encodeURIComponent(u)}`)}catch{return null}}
 
 // ── Wallet ───────────────────────────────────────────────
-async function connectWallet(){
-  if(connectedWallet){toast('Wallet already connected','inf');return}
+function connectWallet(){
+  if(connectedWallet){toast('Wallet already connected: '+shortAddr(connectedWallet),'inf');return}
+  openWalletModal();
+}
+function openWalletModal(){
+  // Update badges based on what's detected
+  const hasPhantom=!!window.solana?.isPhantom;
+  const hasSolflare=!!window.solflare?.isSolflare;
+  $('wBadgePhantom').textContent=hasPhantom?'Detected':'Not installed';
+  $('wBadgePhantom').className='wo-badge'+(hasPhantom?'':' off');
+  $('wBadgeSolflare').textContent=hasSolflare?'Detected':'Not installed';
+  $('wBadgeSolflare').className='wo-badge'+(hasSolflare?'':' off');
+  $('manualWalletAddr').value='';
+  $('walletModal').classList.remove('hidden');
+}
+function closeWalletModal(){$('walletModal').classList.add('hidden')}
+
+async function connectPhantom(){
   const p=window.solana;
-  if(!p?.isPhantom){toast('Phantom not found — install at phantom.app','err');setTimeout(()=>window.open('https://phantom.app/','_blank'),1200);return}
+  if(!p?.isPhantom){toast('Phantom extension not found — use Mobile or Manual option','err');return}
   try{
     const r=await p.connect();
-    connectedWallet=r.publicKey.toString();updateWalletUI();
-    toast('Wallet: '+shortAddr(connectedWallet),'ok');
-    if(currentUser){
-      currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{walletAddress:connectedWallet});
-      $('dispWallet').textContent=shortAddr(connectedWallet);updateDebug();
-    }
-  }catch{toast('Wallet rejected','err')}
+    await onWalletConnected(r.publicKey.toString(),'Phantom');
+    closeWalletModal();
+  }catch{toast('Phantom connection cancelled','err')}
 }
+
+async function connectSolflare(){
+  const s=window.solflare;
+  if(!s?.isSolflare){toast('Solflare extension not found — use Mobile or Manual option','err');return}
+  try{
+    await s.connect();
+    await onWalletConnected(s.publicKey.toString(),'Solflare');
+    closeWalletModal();
+  }catch{toast('Solflare connection cancelled','err')}
+}
+
+function openPhantomMobile(e){
+  e.preventDefault();
+  // Deep link: opens current page inside Phantom's in-app browser (wallet auto-available)
+  const url=encodeURIComponent(window.location.href);
+  window.location.href='https://phantom.app/ul/browse/'+url+'?ref='+url;
+}
+
+async function connectManual(){
+  const addr=$('manualWalletAddr').value.trim();
+  if(!addr){toast('Paste your wallet address first','err');return}
+  if(addr.length<32||addr.length>44){toast('Invalid Solana address length','err');return}
+  await onWalletConnected(addr,'Manual');
+  closeWalletModal();
+}
+
+async function onWalletConnected(address,method){
+  connectedWallet=address;updateWalletUI();
+  toast((method||'Wallet')+': '+shortAddr(address),'ok');
+  if(currentUser){
+    currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{walletAddress:address});
+    $('dispWallet').textContent=shortAddr(address);updateDebug();
+  }
+}
+
 function updateWalletUI(){
   const btn=$('walletBtn');
   if(connectedWallet){btn.classList.add('connected');$('walletTxt').textContent=shortAddr(connectedWallet)}
@@ -1080,6 +1182,8 @@ async function init(){
 
   window.solana?.on('connect',()=>{connectedWallet=window.solana.publicKey?.toString();updateWalletUI()});
   window.solana?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
+  window.solflare?.on('connect',()=>{connectedWallet=window.solflare.publicKey?.toString();updateWalletUI()});
+  window.solflare?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
 }
 
 document.addEventListener('DOMContentLoaded',init);
