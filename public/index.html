@@ -374,6 +374,37 @@
     main{padding-bottom:4.5rem}
     @media(max-width:520px){.hdr{padding:.7rem 1rem}.logo{font-size:1.1rem}.logo-icon{width:28px;height:28px}}
     @media(max-width:380px){.stats-strip{grid-template-columns:repeat(2,1fr)}}
+
+    /* ── THEME SWITCHER ── */
+    .theme-sw{display:flex;gap:.3rem;align-items:center}
+    .th-btn{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);
+      cursor:pointer;transition:all .2s;padding:0;flex-shrink:0}
+    .th-btn.th1{background:linear-gradient(135deg,#7b2ff7,#00ff88)}
+    .th-btn.th2{background:linear-gradient(135deg,#e65c00,#ffc107)}
+    .th-btn.active{border-color:rgba(255,255,255,.65);transform:scale(1.25)}
+    .th-btn:hover:not(.active){transform:scale(1.15)}
+
+    /* ── THEME 2 : Gold Matrix ── */
+    html[data-theme="2"]{
+      --bg:#070503;--bg2:#0e0a06;
+      --card:rgba(255,255,255,0.03);
+      --border:rgba(255,180,0,0.14);--border2:rgba(220,100,0,0.28);
+      --green:#ffc107;--purple:#e65c00;--cyan:#ffe082;
+      --gold:#ffd700;--red:#ff4757;--text:#fff3e0;--muted:#8d6e63;
+      --glow-g:0 0 20px rgba(255,193,7,0.45);
+      --glow-p:0 0 20px rgba(230,92,0,0.4);
+      --glow-c:0 0 20px rgba(255,224,130,0.4);
+    }
+    html[data-theme="2"] body::before{background:
+      radial-gradient(ellipse 80% 60% at 10% 10%,rgba(220,100,0,.13) 0%,transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 90%,rgba(255,193,7,.09) 0%,transparent 60%),var(--bg)}
+    html[data-theme="2"] body::after{
+      background-image:linear-gradient(rgba(255,193,7,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,193,7,.022) 1px,transparent 1px);
+      background-size:40px 40px}
+    html[data-theme="2"] .modal{background:#100a04}
+    html[data-theme="2"] select.form-input option{background:#0d0905;color:#fff3e0}
+    html[data-theme="2"] select.form-input option:hover,
+    html[data-theme="2"] select.form-input option:checked{background:#1a0a00;color:#ffc107}
   </style>
 </head>
 <body>
@@ -385,6 +416,10 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
+    <div class="theme-sw">
+      <button class="th-btn th1 active" onclick="setTheme(1)" title="Theme 1 — Cyber Green"></button>
+      <button class="th-btn th2" onclick="setTheme(2)" title="Theme 2 — Gold Matrix"></button>
+    </div>
     <!-- Admin link: looks like a harmless node indicator -->
     <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
     <button id="walletBtn" onclick="connectWallet()">
@@ -1711,7 +1746,20 @@ async function init(){
   window.solflare?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
 }
 
-document.addEventListener('DOMContentLoaded',()=>{populateCountrySelect();init();});
+/* ── THEME ── */
+function setTheme(n){
+  document.documentElement.dataset.theme=String(n);
+  localStorage.setItem('sn_theme',n);
+  document.querySelectorAll('.th-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.querySelector('.th'+n);
+  if(btn)btn.classList.add('active');
+}
+function loadTheme(){
+  const t=parseInt(localStorage.getItem('sn_theme')||'1',10);
+  setTheme(isNaN(t)?1:t);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{loadTheme();populateCountrySelect();init();});
 </script>
 </body>
 </html>
