@@ -375,14 +375,15 @@
     @media(max-width:520px){.hdr{padding:.7rem 1rem}.logo{font-size:1.1rem}.logo-icon{width:28px;height:28px}}
     @media(max-width:380px){.stats-strip{grid-template-columns:repeat(2,1fr)}}
 
-    /* ── THEME SWITCHER ── */
-    .theme-sw{display:flex;gap:.3rem;align-items:center}
-    .th-btn{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);
-      cursor:pointer;transition:all .2s;padding:0;flex-shrink:0}
-    .th-btn.th1{background:linear-gradient(135deg,#7b2ff7,#00ff88)}
-    .th-btn.th2{background:linear-gradient(135deg,#e65c00,#ffc107)}
-    .th-btn.active{border-color:rgba(255,255,255,.65);transform:scale(1.25)}
-    .th-btn:hover:not(.active){transform:scale(1.15)}
+    /* ── ADMIN THEME PICKER ── */
+    .theme-picks{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.2rem}
+    .theme-pick{padding:.75rem 1.1rem;border-radius:10px;cursor:pointer;
+      border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);
+      transition:all .2s;min-width:140px;text-align:center;font-size:.8rem;color:var(--text)}
+    .theme-pick:hover{border-color:rgba(255,255,255,.2)}
+    .theme-pick.sel{border-color:var(--green);background:rgba(0,255,136,.07)}
+    .tc-swatch{height:36px;border-radius:6px;margin-bottom:.5rem;
+      display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:1.3rem}
 
     /* ── THEME 2 : Gold Matrix ── */
     html[data-theme="2"]{
@@ -416,10 +417,6 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
-    <div class="theme-sw">
-      <button class="th-btn th1 active" onclick="setTheme(1)" title="Theme 1 — Cyber Green"></button>
-      <button class="th-btn th2" onclick="setTheme(2)" title="Theme 2 — Gold Matrix"></button>
-    </div>
     <!-- Admin link: looks like a harmless node indicator -->
     <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
     <button id="walletBtn" onclick="connectWallet()">
@@ -697,6 +694,24 @@
 
     <!-- Content tab -->
     <div id="tContent" class="tab-pane active">
+      <div class="admin-card">
+        <div class="admin-card-title">🎨 Site Theme</div>
+        <div class="theme-picks">
+          <div class="theme-pick sel" id="tpick_1" onclick="selectThemePick(1)">
+            <div class="tc-swatch" style="background:linear-gradient(135deg,#050510,#1a0a3a)">
+              <span style="color:#00ff88">●</span><span style="color:#7b2ff7">●</span><span style="color:#00d4ff">●</span>
+            </div>
+            Theme 1 — Cyber Green
+          </div>
+          <div class="theme-pick" id="tpick_2" onclick="selectThemePick(2)">
+            <div class="tc-swatch" style="background:linear-gradient(135deg,#070503,#2a1200)">
+              <span style="color:#ffc107">●</span><span style="color:#e65c00">●</span><span style="color:#ffe082">●</span>
+            </div>
+            Theme 2 — Gold Matrix
+          </div>
+        </div>
+        <input type="hidden" id="c_THEME" value="1"/>
+      </div>
       <div class="admin-card"><div class="admin-card-title">Branding</div>
         <div class="fgrid">
           <div class="fg"><label class="fl">App Name</label><input class="fi" id="c_APP_NAME"/></div>
@@ -1604,8 +1619,9 @@ async function loadAdminConfig(){
      'HOW_TITLE','HOW_SUBTITLE','HOW_1','HOW_2','HOW_3','HOW_STEP_1','HOW_STEP_2','HOW_STEP_3',
      'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
      'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
-     'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
+     'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
     ].forEach(k=>{const el=$('c_'+k);if(el)el.value=C[k]??''});
+    selectThemePick(parseInt(C.THEME||'1',10));
     const g=$('matrixAdminGrid');g.innerHTML='';
     for(let i=1;i<=6;i++){
       const un=C.DEFAULT_MATRIX?.[i-1]||'';
@@ -1625,7 +1641,7 @@ async function saveConfig(){
    'HOW_TITLE','HOW_SUBTITLE','HOW_1','HOW_2','HOW_3','HOW_STEP_1','HOW_STEP_2','HOW_STEP_3',
    'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
    'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
-   'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT'
+   'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
   ].forEach(k=>{const el=$('c_'+k);if(el&&el.value.trim()!=='')data[k]=el.value.trim()});
   for(let i=1;i<=6;i++){
     const u=$(`mx_u${i}`),w=$(`mx_w${i}`);
@@ -1747,19 +1763,19 @@ async function init(){
 }
 
 /* ── THEME ── */
-function setTheme(n){
-  document.documentElement.dataset.theme=String(n);
-  localStorage.setItem('sn_theme',n);
-  document.querySelectorAll('.th-btn').forEach(b=>b.classList.remove('active'));
-  const btn=document.querySelector('.th'+n);
-  if(btn)btn.classList.add('active');
+function applyTheme(n){
+  document.documentElement.dataset.theme=String(n||1);
 }
-function loadTheme(){
-  const t=parseInt(localStorage.getItem('sn_theme')||'1',10);
-  setTheme(isNaN(t)?1:t);
+function selectThemePick(n){
+  document.querySelectorAll('.theme-pick').forEach(c=>c.classList.remove('sel'));
+  const card=document.getElementById('tpick_'+n);
+  if(card)card.classList.add('sel');
+  const inp=document.getElementById('c_THEME');
+  if(inp)inp.value=String(n);
+  applyTheme(n);
 }
 
-document.addEventListener('DOMContentLoaded',()=>{loadTheme();populateCountrySelect();init();});
+document.addEventListener('DOMContentLoaded',()=>{applyTheme(cfg().THEME||'1');populateCountrySelect();init();});
 </script>
 </body>
 </html>

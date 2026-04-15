@@ -51,6 +51,7 @@ function buildAppConfig(dbCfg) {
     DASH_SUBTITLE: dbCfg.DASH_SUBTITLE||'Activate your matrix levels to enable payment reception',
     REF_LOCKED_TXT:dbCfg.REF_LOCKED_TXT||'Your referral link becomes available once all activation payments are complete — system fee + all 6 levels.',
     FOOTER_TEXT:   dbCfg.FOOTER_TEXT || 'SmartNode is a decentralized peer-to-peer matrix participation system. It is not an investment product, savings account, or regulated financial service. All payments are final and non-refundable. Participation does not guarantee income, returns, or profitability of any kind.',
+    THEME:         dbCfg.THEME || process.env.THEME || '1',
     SYSTEM_FEE_ADDRESS: dbCfg.SYSTEM_FEE_ADDRESS || process.env.SYSTEM_FEE_ADDRESS || '',
     SYSTEM_FEE_AMOUNT:  Number(dbCfg.SYSTEM_FEE_AMOUNT || process.env.SYSTEM_FEE_AMOUNT || 10),
     LEVEL_AMOUNT:       Number(dbCfg.LEVEL_AMOUNT      || process.env.LEVEL_AMOUNT      || 5),
