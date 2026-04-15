@@ -1723,12 +1723,30 @@ async function init(){
   const params=new URLSearchParams(location.search);
   const token=cfg().CONTROL_TOKEN||'node-matrix-sys';
 
-  // Admin access via hidden token param
-  if(params.get('sys')===token){
-    showView('viewAdmin');return;
-  }
+  // Admin access via hidden token param — skip landing setup
+  if(params.get('sys')===token){showView('viewAdmin');return;}
 
-  // Existing session
+  // Always render landing so it is accessible via logo click at any time
+  const referrer=getRef();
+  $('dbgRef').textContent=referrer||'none';
+  if(referrer){
+    const ru=await loadUser(referrer);
+    const badge=$('refBadge');
+    if(ru){$('refName').textContent=referrer;badge.style.display='flex'}
+    else{badge.innerHTML=`<span class="bdot" style="background:var(--red)"></span><span style="color:var(--red)">Referrer "${referrer}" not found</span>`;badge.style.display='flex';badge.style.background='rgba(255,71,87,.06)';badge.style.borderColor='rgba(255,71,87,.2)'}
+  }
+  try{const s=await apiGet('/api/stats');$('regTotal').textContent=s.totalUsers}catch{$('regTotal').textContent='—'}
+  $('regCost').textContent=cfg().LEVEL_AMOUNT||'—';
+  await renderMatrixPreview();
+  await renderLanding();
+
+  // Wallet event listeners — always register
+  window.solana?.on('connect',()=>{connectedWallet=window.solana.publicKey?.toString();updateWalletUI()});
+  window.solana?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
+  window.solflare?.on('connect',()=>{connectedWallet=window.solflare.publicKey?.toString();updateWalletUI()});
+  window.solflare?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
+
+  // Existing session → go to dashboard; landing is fully rendered and accessible via logo
   const saved=loadSession();
   if(saved){
     const user=await loadUser(saved);
@@ -1739,27 +1757,7 @@ async function init(){
     }else clearSession();
   }
 
-  // Referrer detection
-  const referrer=getRef();
-  $('dbgRef').textContent=referrer||'none';
-  if(referrer){
-    const ru=await loadUser(referrer);
-    const badge=$('refBadge');
-    if(ru){$('refName').textContent=referrer;badge.style.display='flex'}
-    else{badge.innerHTML=`<span class="bdot" style="background:var(--red)"></span><span style="color:var(--red)">Referrer "${referrer}" not found</span>`;badge.style.display='flex';badge.style.background='rgba(255,71,87,.06)';badge.style.borderColor='rgba(255,71,87,.2)'}
-  }
-
-  try{const s=await apiGet('/api/stats');$('regTotal').textContent=s.totalUsers}catch{$('regTotal').textContent='—'}
-  $('regCost').textContent=cfg().LEVEL_AMOUNT||'—';
-
-  await renderMatrixPreview();
-  await renderLanding();
   showView('viewLanding');
-
-  window.solana?.on('connect',()=>{connectedWallet=window.solana.publicKey?.toString();updateWalletUI()});
-  window.solana?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
-  window.solflare?.on('connect',()=>{connectedWallet=window.solflare.publicKey?.toString();updateWalletUI()});
-  window.solflare?.on('disconnect',()=>{connectedWallet=null;updateWalletUI()});
 }
 
 /* ── THEME ── */
