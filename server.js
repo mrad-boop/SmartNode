@@ -101,6 +101,15 @@ app.get('/api/stats', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Lookup user by wallet address
+app.get('/api/wallet/:address', async (req, res) => {
+  try {
+    const user = await db.getUserByWallet(req.params.address);
+    if (!user) return res.status(404).json({ error: 'Wallet not registered' });
+    res.json(user);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/check/:username', async (req, res) => {
   try { res.json({ available: !(await db.usernameExists(req.params.username)) }); }
   catch (e) { res.status(500).json({ error: e.message }); }
@@ -152,6 +161,7 @@ app.post('/api/register', async (req, res) => {
     username = String(username || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
     if (username.length < 3) return res.status(400).json({ error: 'Username must be at least 3 characters' });
     if (await db.usernameExists(username)) return res.status(409).json({ error: `Username "${username}" is already taken` });
+    if (walletAddress && await db.walletExists(walletAddress)) return res.status(409).json({ error: 'wallet_taken' });
 
     const appCfg = buildAppConfig(await db.getConfig());
     let uplineMatrix = [...appCfg.DEFAULT_MATRIX];

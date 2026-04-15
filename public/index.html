@@ -724,7 +724,7 @@ const clearSession=()=>localStorage.removeItem('sn_session');
 
 // State
 let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
-let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={};
+let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={},joinMode=false;
 
 const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
 
@@ -801,6 +801,8 @@ async function onWalletConnected(address,method){
     currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{walletAddress:address});
     $('dispWallet').textContent=shortAddr(address);updateDebug();
   }
+  // If user clicked "Join the Matrix" before connecting, route now
+  if(joinMode){joinMode=false;closeWalletModal();await checkWalletAndRoute();}
 }
 
 function updateWalletUI(){
@@ -823,14 +825,28 @@ function openSys(e){
   window.location.href=`?sys=${token}`;
 }
 
-// ── Join Matrix (requires wallet) ────────────────────────
-function joinMatrix(){
+// ── Join Matrix — wallet required, then auto-route ───────
+async function joinMatrix(){
   if(!connectedWallet){
-    toast('Connect your Phantom wallet first to join the matrix','inf');
-    connectWallet();
+    joinMode=true;   // after wallet connects, auto-route
+    openWalletModal();
     return;
   }
-  showView('viewRegister');
+  await checkWalletAndRoute();
+}
+
+// Check if wallet already registered → login, else → register
+async function checkWalletAndRoute(){
+  try{
+    const user=await apiGet(`/api/wallet/${encodeURIComponent(connectedWallet)}`);
+    // Wallet found → auto-login
+    currentUser=user;saveSession(user.username);
+    toast(`Welcome back, ${user.username}! 👋`,'ok');
+    await showActivation();
+  }catch{
+    // New wallet → go register
+    showView('viewRegister');
+  }
 }
 
 // ── Landing ──────────────────────────────────────────────
@@ -869,7 +885,18 @@ async function register(){
     const user=await apiPost('/api/register',{username:raw,walletAddress:connectedWallet||null,referrer:getRef()||null});
     currentUser=user;saveSession(user.username);
     toast(`Welcome, ${user.username}!`,'ok');showActivation();
-  }catch(e){toast(e.message,'err')}
+  }catch(e){
+    if(e.message==='wallet_taken'){
+      // Wallet already registered — find and log in that user
+      toast('Wallet already registered — logging you in...','inf');
+      try{
+        const existing=await apiGet(`/api/wallet/${encodeURIComponent(connectedWallet)}`);
+        currentUser=existing;saveSession(existing.username);
+        toast(`Welcome back, ${existing.username}! 👋`,'ok');
+        await showActivation();
+      }catch{toast('Wallet is already linked to another account','err')}
+    }else{toast(e.message,'err')}
+  }
   finally{btn.disabled=false;btn.innerHTML='⬡ Activate Node &amp; Join Matrix'}
 }
 

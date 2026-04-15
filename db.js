@@ -63,6 +63,16 @@ async function getUser(username) {
   return normalize(rows[0]);
 }
 
+async function getUserByWallet(walletAddress) {
+  const { rows } = await pool.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
+  return normalize(rows[0]);
+}
+
+async function walletExists(walletAddress) {
+  const { rows } = await pool.query('SELECT 1 FROM users WHERE wallet_address = $1', [walletAddress]);
+  return rows.length > 0;
+}
+
 async function usernameExists(username) {
   const { rows } = await pool.query('SELECT 1 FROM users WHERE username = $1', [username]);
   return rows.length > 0;
@@ -171,5 +181,6 @@ module.exports = {
   migrate,
   getUser, usernameExists, createUser, updateUser,
   countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining,
+  getUserByWallet, walletExists,
   getConfig, setConfigBulk,
 };
