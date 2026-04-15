@@ -116,6 +116,9 @@
       border-radius:8px;color:var(--text);font-size:.95rem;transition:border-color .2s,box-shadow .2s;outline:none}
     .form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,.1)}
     .form-input::placeholder{color:var(--muted)}
+    select.form-input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a6080' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.2rem}
+    select.form-input option{background:#0d0d22;color:#e0e8ff;padding:.5rem .8rem}
+    select.form-input option:hover,select.form-input option:checked{background:#1a0a3a;color:#00ff88}
     .form-group{margin-bottom:1.1rem}
     .stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
     .stat-card{padding:.9rem;border-radius:10px;text-align:center;background:rgba(255,255,255,.025);border:1px solid var(--border)}
@@ -524,16 +527,7 @@
     <!-- My Matrices section -->
     <div class="section-lbl" style="margin-bottom:1rem">Matrices I Appear In</div>
     <div class="card" style="margin-bottom:1.5rem">
-      <div class="mx-filter" id="mxFilter">
-        <button class="mxf-btn active" data-pos="all" onclick="filterMyMatrices('all',this)">All <span class="cnt" id="mxCntAll">0</span></button>
-        <button class="mxf-btn" data-pos="L1" onclick="filterMyMatrices('L1',this)">L1 <span class="cnt" id="mxCntL1">0</span></button>
-        <button class="mxf-btn" data-pos="L2" onclick="filterMyMatrices('L2',this)">L2 <span class="cnt" id="mxCntL2">0</span></button>
-        <button class="mxf-btn" data-pos="L3" onclick="filterMyMatrices('L3',this)">L3 <span class="cnt" id="mxCntL3">0</span></button>
-        <button class="mxf-btn" data-pos="L4" onclick="filterMyMatrices('L4',this)">L4 <span class="cnt" id="mxCntL4">0</span></button>
-        <button class="mxf-btn" data-pos="L5" onclick="filterMyMatrices('L5',this)">L5 <span class="cnt" id="mxCntL5">0</span></button>
-        <button class="mxf-btn" data-pos="L6" onclick="filterMyMatrices('L6',this)">L6 <span class="cnt" id="mxCntL6">0</span></button>
-      </div>
-      <div id="myMatricesList"><div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Loading...</div></div>
+      <div id="mxLevelButtons"><div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Loading...</div></div>
     </div>
 
     <!-- Edit section (only for own profile) -->
@@ -582,6 +576,19 @@
     </div>
     <div id="refLevelList"></div>
     <div class="pag-strip" id="refLevelPagination"></div>
+  </div>
+</div>
+
+<!-- ═══ MATRIX LEVEL VIEW ═══ -->
+<div id="viewMatrixLevel" class="view">
+  <div class="cwide">
+    <button class="btn btn-p" style="margin-bottom:1.5rem;font-size:.82rem" onclick="backToProfile()">← Back to Profile</button>
+    <div style="margin-bottom:1.5rem">
+      <h2 style="font-size:1.35rem;margin-bottom:.2rem" id="mxLevelTitle">Position Level</h2>
+      <p style="color:var(--muted);font-size:.83rem" id="mxLevelSubtitle">—</p>
+    </div>
+    <div id="mxLevelList"></div>
+    <div class="pag-strip" id="mxLevelPagination"></div>
   </div>
 </div>
 
@@ -829,6 +836,7 @@ const clearSession=()=>localStorage.removeItem('sn_session');
 let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
 let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={},joinMode=false,referralTree=[];
 let refLevelData={},currentRefLevel=1,currentRefPage=1;
+let currentMxLevel='L1',currentMxPage=1;
 const REF_PAGE_SIZE=10;
 
 const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
@@ -1262,7 +1270,7 @@ async function openProfile(){
   populateCountrySelect();
   $('profileCountry').value=profile.country||'';
   renderReferralLevels();
-  renderMyMatrices('all');
+  renderMyMatrices();
   showView('viewProfile');
 }
 
@@ -1355,37 +1363,51 @@ function renderRefLevelPage(){
 function goRefPage(p){currentRefPage=p;renderRefLevelPage();window.scrollTo(0,0)}
 function backToProfile(){showView('viewProfile')}
 
-function filterMyMatrices(pos,btn){
-  document.querySelectorAll('.mxf-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderMyMatrices(pos);
+function renderMyMatrices(){
+  const positions=['L1','L2','L3','L4','L5','L6'];
+  const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
+  let total=0;
+  positions.forEach(p=>total+=(myMatricesData[p]||[]).length);
+
+  const el=$('mxLevelButtons');
+  if(!total){
+    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:.85rem">You don\'t appear in any matrix yet.</div>';
+    return;
+  }
+  let html=`<div class="ref-lvl-total"><span style="color:var(--text);font-weight:700">${total}</span> matrix${total!==1?'es':''} you appear in</div><div class="ref-level-grid">`;
+  positions.forEach((p,i)=>{
+    const cnt=(myMatricesData[p]||[]).length;
+    const col=depthColors[i];
+    html+=`<button class="ref-lvl-btn${cnt===0?' empty':''}" onclick="openMxLevel('${p}')" style="border-color:${col}33">
+      <span class="cnt" style="color:${col}">${cnt}</span>
+      <span style="color:${col};font-weight:800;font-size:.9rem">${p}</span>
+      <span class="lbl">Position</span>
+    </button>`;
+  });
+  html+='</div>';
+  el.innerHTML=html;
 }
 
-function renderMyMatrices(pos){
-  const positions=['L1','L2','L3','L4','L5','L6'];
-  // Update counts
-  let total=0;
-  positions.forEach(p=>{
-    const n=(myMatricesData[p]||[]).length;
-    total+=n;
-    const el=$('mxCnt'+p);if(el)el.textContent=n;
-  });
-  $('mxCntAll').textContent=total;
+function openMxLevel(pos){
+  currentMxLevel=pos;currentMxPage=1;
+  const items=myMatricesData[pos]||[];
+  const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
+  const idx=['L1','L2','L3','L4','L5','L6'].indexOf(pos);
+  const col=depthColors[idx]||'var(--green)';
+  $('mxLevelTitle').innerHTML=`Matrices where I am at <span style="color:${col}">position ${pos}</span>`;
+  $('mxLevelSubtitle').textContent=`${items.length} matrix${items.length!==1?'es':''} found`;
+  renderMxLevelPage();
+  showView('viewMatrixLevel');
+}
 
-  // Gather items to show
-  const items=pos==='all'
-    ? positions.flatMap(p=>(myMatricesData[p]||[]).map(m=>({...m,posLabel:p})))
-    : (myMatricesData[pos]||[]).map(m=>({...m,posLabel:pos}));
+function renderMxLevelPage(){
+  const items=(myMatricesData[currentMxLevel]||[]);
+  const pages=Math.max(1,Math.ceil(items.length/REF_PAGE_SIZE));
+  const start=(currentMxPage-1)*REF_PAGE_SIZE;
+  const page=items.slice(start,start+REF_PAGE_SIZE);
 
-  const list=$('myMatricesList');
-  if(!items.length){
-    list.innerHTML=`<div style="text-align:center;color:var(--muted);padding:2rem;font-size:.85rem">
-      ${pos==='all'?'You don\'t appear in any matrix yet.':'No matrices where you are at position '+pos+'.'}
-    </div>`;return;
-  }
-
-  list.innerHTML=items.map(m=>{
-    const myPos=m.myPosition; // 0-based index
+  $('mxLevelList').innerHTML=page.length?page.map(m=>{
+    const myPos=m.myPosition;
     const isPaid=m.paidLevels.includes(myPos);
     const displayName=m.nickname||m.username;
     const sub=[cDisplay(m.country),m.walletAddress?m.walletAddress.slice(0,4)+'...':''].filter(Boolean).join('  ·  ');
@@ -1396,22 +1418,28 @@ function renderMyMatrices(pos){
       const label=uname.length>8?uname.slice(0,7)+'…':uname;
       return `<div class="${cls}"><div class="sl-pos">L${idx+1}</div><div class="sl-name" title="${uname}">${label}</div></div>`;
     }).join('');
-    return `<div class="mx-node-card">
+    return `<div class="mx-node-card" style="margin-bottom:.75rem">
       <div class="mx-node-hdr">
-        <div class="mx-node-av">${m.avatar}</div>
+        <div class="mx-node-av">${m.avatar||'👤'}</div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:.9rem">${displayName}</div>
           <div style="font-size:.72rem;color:var(--muted)">${sub||m.username}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.25rem">
-          <span style="font-size:.72rem;background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.25);padding:.1rem .45rem;border-radius:10px;font-weight:700">${m.posLabel}</span>
-          <span class="paid-pill ${isPaid?'yes':'no'}">${isPaid?'✓ Paid':'⏳ Pending'}</span>
-        </div>
+        <span class="paid-pill ${isPaid?'yes':'no'}">${isPaid?'✓ Paid':'⏳ Pending'}</span>
       </div>
       <div class="mx-slots">${slots}</div>
     </div>`;
-  }).join('');
+  }).join(''):'<div style="text-align:center;color:var(--muted);padding:1.5rem">No entries</div>';
+
+  if(pages<=1){$('mxLevelPagination').innerHTML='';return}
+  let pag='';
+  if(currentMxPage>1)pag+=`<button class="pag-btn" onclick="goMxPage(${currentMxPage-1})">‹</button>`;
+  for(let i=1;i<=pages;i++)pag+=`<button class="pag-btn${i===currentMxPage?' active':''}" onclick="goMxPage(${i})">${i}</button>`;
+  if(currentMxPage<pages)pag+=`<button class="pag-btn" onclick="goMxPage(${currentMxPage+1})">›</button>`;
+  $('mxLevelPagination').innerHTML=pag;
 }
+
+function goMxPage(p){currentMxPage=p;renderMxLevelPage();window.scrollTo(0,0)}
 
 function renderProfile(p,isOwn){
   $('profileAvBig').textContent=p.avatar||'👤';
