@@ -24,6 +24,13 @@ async function migrate() {
     -- Add avatar column if upgrading from older schema
     ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(10) NOT NULL DEFAULT '👤';
 
+    -- Add profile info columns if upgrading from older schema
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name   VARCHAR(100) NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS nickname    VARCHAR(50)  NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS user_address TEXT        NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone       VARCHAR(30)  NOT NULL DEFAULT '';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS country     VARCHAR(60)  NOT NULL DEFAULT '';
+
     CREATE TABLE IF NOT EXISTS site_config (
       key   VARCHAR(64) PRIMARY KEY,
       value TEXT        NOT NULL
@@ -42,6 +49,11 @@ function normalize(row) {
     paidSystemFee:    row.paid_system_fee,
     paidLevels:       row.paid_levels,
     avatar:           row.avatar || '👤',
+    fullName:         row.full_name    || '',
+    nickname:         row.nickname     || '',
+    address:          row.user_address || '',
+    phone:            row.phone        || '',
+    country:          row.country      || '',
     registrationDate: row.registration_date,
   };
 }
@@ -65,13 +77,18 @@ async function createUser({ username, walletAddress, referrer, uplineMatrix }) {
   return normalize(rows[0]);
 }
 
-async function updateUser(username, { walletAddress, paidSystemFee, paidLevels, avatar }) {
+async function updateUser(username, { walletAddress, paidSystemFee, paidLevels, avatar, fullName, nickname, address, phone, country }) {
   const sets = [], vals = [];
   let i = 1;
   if (walletAddress !== undefined) { sets.push(`wallet_address = $${i++}`);  vals.push(walletAddress); }
   if (paidSystemFee !== undefined) { sets.push(`paid_system_fee = $${i++}`); vals.push(paidSystemFee); }
   if (paidLevels    !== undefined) { sets.push(`paid_levels = $${i++}`);     vals.push(JSON.stringify(paidLevels)); }
   if (avatar        !== undefined) { sets.push(`avatar = $${i++}`);          vals.push(avatar); }
+  if (fullName      !== undefined) { sets.push(`full_name = $${i++}`);       vals.push(fullName); }
+  if (nickname      !== undefined) { sets.push(`nickname = $${i++}`);        vals.push(nickname); }
+  if (address       !== undefined) { sets.push(`user_address = $${i++}`);    vals.push(address); }
+  if (phone         !== undefined) { sets.push(`phone = $${i++}`);           vals.push(phone); }
+  if (country       !== undefined) { sets.push(`country = $${i++}`);         vals.push(country); }
   if (!sets.length) return getUser(username);
   vals.push(username);
   const { rows } = await pool.query(
@@ -104,6 +121,17 @@ async function getConfig() {
   return cfg;
 }
 
+async function getTotalReceived(username) {
+  const { rows } = await pool.query('SELECT upline_list, paid_levels FROM users');
+  let count = 0;
+  for (const row of rows) {
+    const ul = Array.isArray(row.upline_list) ? row.upline_list : [];
+    const pl = Array.isArray(row.paid_levels) ? row.paid_levels : [];
+    ul.forEach((name, idx) => { if (name === username && pl.includes(idx)) count++; });
+  }
+  return count;
+}
+
 async function setConfigBulk(entries) {
   for (const [key, value] of Object.entries(entries)) {
     await pool.query(
@@ -117,6 +145,6 @@ async function setConfigBulk(entries) {
 module.exports = {
   migrate,
   getUser, usernameExists, createUser, updateUser,
-  countUsers, getAllUsers, getReferralCount,
+  countUsers, getAllUsers, getReferralCount, getTotalReceived,
   getConfig, setConfigBulk,
 };

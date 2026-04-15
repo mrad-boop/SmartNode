@@ -285,7 +285,7 @@
     <h1 class="land-title" id="landTitle">The DeFi <span class="hl">Matrix Network</span></h1>
     <p class="land-sub" id="landSub"></p>
     <div class="land-cta">
-      <button class="btn btn-g btn-xl" onclick="showView('viewRegister')">Join the Matrix →</button>
+      <button class="btn btn-g btn-xl" onclick="joinMatrix()">Join the Matrix →</button>
       <button class="btn btn-p btn-xl" onclick="connectWallet()">Connect Wallet</button>
     </div>
     <div class="land-stats">
@@ -445,12 +445,27 @@
         <div class="avatar-grid" id="avatarGrid"></div>
       </div>
       <div class="card card-p" style="margin-bottom:1rem">
+        <div class="admin-card-title">Personal Information</div>
+        <div class="fgrid">
+          <div class="form-group"><label class="form-label">Full Name</label>
+            <input id="profileFullName" class="form-input" type="text" placeholder="Your full name" maxlength="100"/></div>
+          <div class="form-group"><label class="form-label">Nickname</label>
+            <input id="profileNickname" class="form-input" type="text" placeholder="Shown in matrix" maxlength="50"/></div>
+          <div class="form-group"><label class="form-label">Phone</label>
+            <input id="profilePhone" class="form-input" type="text" placeholder="+1 234 567 8900" maxlength="30"/></div>
+          <div class="form-group"><label class="form-label">Country</label>
+            <input id="profileCountry" class="form-input" type="text" placeholder="e.g. France" maxlength="60"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Address</label>
+          <input id="profileAddress" class="form-input" type="text" placeholder="Your address"/></div>
+      </div>
+      <div class="card card-p" style="margin-bottom:1rem">
         <div class="admin-card-title">Wallet Address</div>
         <div class="form-group">
           <label class="form-label">Solana Wallet</label>
           <input id="profileWalletInput" class="form-input" type="text" placeholder="Paste Solana address or click Connect Wallet above"/>
         </div>
-        <button class="btn btn-g" onclick="saveProfile()">💾 Save Profile</button>
+        <button class="btn btn-g btn-full" style="margin-top:.5rem" onclick="saveProfile()">💾 Save Profile</button>
       </div>
     </div>
   </div>
@@ -611,7 +626,7 @@ const clearSession=()=>localStorage.removeItem('sn_session');
 
 // State
 let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
-let adminPassword='',selectedAvatar=null;
+let adminPassword='',selectedAvatar=null,matrixNodes={};
 
 const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
 
@@ -663,6 +678,16 @@ function openSys(e){
   window.location.href=`?sys=${token}`;
 }
 
+// ── Join Matrix (requires wallet) ────────────────────────
+function joinMatrix(){
+  if(!connectedWallet){
+    toast('Connect your Phantom wallet first to join the matrix','inf');
+    connectWallet();
+    return;
+  }
+  showView('viewRegister');
+}
+
 // ── Landing ──────────────────────────────────────────────
 async function renderLanding(){
   const C=cfg();
@@ -707,7 +732,17 @@ async function register(){
 function logout(){clearSession();currentUser=null;$('logoutBtn').style.display='none';showView('viewLanding');updateDebug()}
 
 // ── Dashboard ────────────────────────────────────────────
-function showActivation(){$('logoutBtn').style.display='';renderActivation();showView('viewActivation');updateDebug()}
+async function showActivation(){
+  $('logoutBtn').style.display='';
+  // Load matrix node details for display
+  if(currentUser){
+    try{
+      const names=currentUser.uplineMatrix.join(',');
+      matrixNodes=await apiGet(`/api/matrix-nodes?u=${encodeURIComponent(names)}`);
+    }catch{matrixNodes={}}
+  }
+  renderActivation();showView('viewActivation');updateDebug();
+}
 function isFullyPaid(u){return u.paidSystemFee&&u.paidLevels.length===6}
 
 function renderActivation(){
@@ -754,18 +789,21 @@ function renderLevels(){
     const num=i+1,isPaid=u.paidLevels.includes(i);
     const canPay=!isPaid&&u.paidSystemFee&&(i===0||u.paidLevels.includes(i-1));
     const state=isPaid?'paid':canPay?'active':'locked';
-    const wallet=C.SYSTEM_WALLETS?.[username]||'—';
+    const nodeInfo=matrixNodes[username]||{};
+    const wallet=nodeInfo.walletAddress||C.SYSTEM_WALLETS?.[username]||'—';
     const action=isPaid?`<div class="check-ico">✓</div>`
       :canPay?`<button class="btn btn-c" style="font-size:.78rem;padding:.4rem .85rem" onclick="openPayModal(${i},'${username}','${wallet}')">Pay</button>`
              :`<button class="btn" style="font-size:.76rem;padding:.38rem .7rem;opacity:.35;cursor:not-allowed" disabled>🔒</button>`;
     const st=isPaid?`<span style="color:var(--green)">✓ Confirmed</span>`
       :canPay?`<span style="color:var(--cyan)">⚡ Ready</span>`:`<span style="color:var(--muted)">Pay L${num-1} first</span>`;
     const rt=num===6?` <span style="font-size:.62rem;color:var(--green);background:rgba(0,255,136,.1);padding:.1rem .3rem;border-radius:4px">REFERRER</span>`:'';
+    const displayName=nodeInfo.nickname||username;
+    const meta=[nodeInfo.country,wallet!=='—'?wallet.slice(0,4)+'...':''].filter(Boolean).join(' · ');
     return `<div class="lv-card ${state}">
       <div class="lv-badge">${num}</div>
       <div class="lv-info">
-        <div class="lv-uname">${username}${rt}</div>
-        <div class="lv-wallet" title="${wallet}">${wallet!=='—'?shortAddr(wallet)+' ← '+wallet:'Wallet not set'}</div>
+        <div class="lv-uname">${displayName}${rt}</div>
+        <div class="lv-wallet">${meta||'No info yet'}</div>
         <div class="lv-status">${st}</div>
       </div><div>${action}</div></div>`;
   }).join('');
@@ -842,6 +880,7 @@ function copyRef(){
 // ── Profile ──────────────────────────────────────────────
 async function openProfile(){
   if(!currentUser)return;
+  if(!connectedWallet){toast('Connect your wallet to access your profile','inf');connectWallet();return;}
   const profile=await loadProfile(currentUser.username);
   if(!profile){toast('Could not load profile','err');return}
   renderProfile(profile,true);
@@ -854,21 +893,29 @@ function renderProfile(p,isOwn){
   $('profileSince').textContent='Node since '+fmtDate(p.registrationDate);
   $('profileRef').textContent=p.referrer?'Referred by: '+p.referrer:'Genesis node (no referrer)';
   const C=cfg();
-  const pc=p.paidLevels.length;
-  const totalPaid=pc*C.LEVEL_AMOUNT+(p.paidSystemFee?C.SYSTEM_FEE_AMOUNT:0);
+  const totalReceived=(p.totalReceivedCount||0)*C.LEVEL_AMOUNT;
   $('profileStats').innerHTML=[
-    ['💰',totalPaid+' USDT','Total Paid','var(--gold)'],
-    ['📊',pc+'/6','Levels Active','var(--green)'],
+    ['💸',totalReceived+' USDT','Total Received','var(--green)'],
     ['👥',p.referralCount||0,'Referrals','var(--cyan)'],
     ['🔑',p.paidSystemFee?'Active':'Pending','Node Status',p.paidSystemFee?'var(--green)':'var(--gold)'],
   ].map(([ic,v,l,c])=>`<div class="pstat"><div style="font-size:1.3rem;margin-bottom:.3rem">${ic}</div><div class="pstat-val" style="color:${c}">${v}</div><div class="pstat-lbl">${l}</div></div>`).join('');
 
-  $('profileMatrix').innerHTML=p.uplineMatrix.map((n,i)=>`<div class="lv-chip ${i===5?'lv6':''}"><div class="cn">L${i+1}</div><div class="cv" title="${n}">${n}</div></div>`).join('');
+  $('profileMatrix').innerHTML=p.uplineMatrix.map((n,i)=>{
+    const info=p.matrixInfo?.[n]||{};
+    const label=info.nickname||n;
+    const sub=[info.country,info.walletAddress?info.walletAddress.slice(0,4):''].filter(Boolean).join(' · ');
+    return `<div class="lv-chip ${i===5?'lv6':''}"><div class="cn">L${i+1}</div><div class="cv" title="${n}">${label}</div>${sub?`<div style="font-size:.58rem;color:var(--muted);margin-top:.1rem">${sub}</div>`:''}</div>`;
+  }).join('');
 
   $('profileEditSection').style.display=isOwn?'block':'none';
   if(isOwn){
     selectedAvatar=p.avatar||'👤';
     $('profileWalletInput').value=p.walletAddress||connectedWallet||'';
+    $('profileFullName').value=p.fullName||'';
+    $('profileNickname').value=p.nickname||'';
+    $('profilePhone').value=p.phone||'';
+    $('profileCountry').value=p.country||'';
+    $('profileAddress').value=p.address||'';
     $('avatarGrid').innerHTML=AVATARS.map(av=>`
       <div class="av-opt ${av===selectedAvatar?'sel':''}" onclick="selectAvatar('${av}',this)">${av}</div>`).join('');
   }
@@ -885,7 +932,15 @@ async function saveProfile(){
   const btn=event.target;btn.disabled=true;btn.textContent='Saving...';
   try{
     const wallet=$('profileWalletInput').value.trim()||null;
-    currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{avatar:selectedAvatar,walletAddress:wallet});
+    currentUser=await apiPatch(`/api/user/${encodeURIComponent(currentUser.username)}`,{
+      avatar:selectedAvatar,
+      walletAddress:wallet,
+      fullName:$('profileFullName').value.trim()||'',
+      nickname:$('profileNickname').value.trim()||'',
+      phone:$('profilePhone').value.trim()||'',
+      country:$('profileCountry').value.trim()||'',
+      address:$('profileAddress').value.trim()||'',
+    });
     toast('Profile saved!','ok');
     $('userAv').textContent=currentUser.avatar||'👤';
     if(wallet)connectedWallet=wallet,updateWalletUI();

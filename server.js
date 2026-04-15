@@ -114,13 +114,35 @@ app.get('/api/user/:username', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Public profile endpoint (includes referral count)
+// Public profile endpoint (includes referral count, total received, matrix node details)
 app.get('/api/profile/:username', async (req, res) => {
   try {
     const user = await db.getUser(req.params.username);
     if (!user) return res.status(404).json({ error: 'User not found' });
-    const referralCount = await db.getReferralCount(req.params.username);
-    res.json({ ...user, referralCount });
+    const [referralCount, totalReceivedCount] = await Promise.all([
+      db.getReferralCount(req.params.username),
+      db.getTotalReceived(req.params.username),
+    ]);
+    // Fetch public info for each upline matrix node
+    const matrixInfo = {};
+    await Promise.all(user.uplineMatrix.map(async uname => {
+      const mu = await db.getUser(uname);
+      if (mu) matrixInfo[uname] = { nickname: mu.nickname, country: mu.country, walletAddress: mu.walletAddress };
+    }));
+    res.json({ ...user, referralCount, totalReceivedCount, matrixInfo });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Matrix node public info (batch)
+app.get('/api/matrix-nodes', async (req, res) => {
+  try {
+    const names = String(req.query.u || '').split(',').filter(Boolean).slice(0, 10);
+    const info = {};
+    await Promise.all(names.map(async uname => {
+      const u = await db.getUser(uname);
+      if (u) info[uname] = { nickname: u.nickname, country: u.country, walletAddress: u.walletAddress };
+    }));
+    res.json(info);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -144,8 +166,8 @@ app.post('/api/register', async (req, res) => {
 
 app.patch('/api/user/:username', async (req, res) => {
   try {
-    const { walletAddress, paidSystemFee, paidLevels, avatar } = req.body;
-    const user = await db.updateUser(req.params.username, { walletAddress, paidSystemFee, paidLevels, avatar });
+    const { walletAddress, paidSystemFee, paidLevels, avatar, fullName, nickname, address, phone, country } = req.body;
+    const user = await db.updateUser(req.params.username, { walletAddress, paidSystemFee, paidLevels, avatar, fullName, nickname, address, phone, country });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (e) { res.status(500).json({ error: e.message }); }
