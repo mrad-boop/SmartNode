@@ -201,6 +201,21 @@
     .av-opt:hover,.av-opt.sel{border-color:var(--green);background:rgba(0,255,136,.12);transform:scale(1.1)}
     .matrix-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem}
 
+    /* ── MY REFERRALS ── */
+    .ref-tree{padding:.3rem 0}
+    .ref-node{position:relative;margin-bottom:.4rem}
+    .ref-row{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-radius:9px;
+      background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);cursor:default;transition:border-color .2s}
+    .ref-row:hover{border-color:rgba(0,255,136,.2)}
+    .ref-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+      display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+    .ref-depth{display:inline-block;width:18px;height:18px;border-radius:4px;text-align:center;
+      line-height:18px;font-size:.62rem;font-weight:800;background:rgba(123,47,247,.2);color:#c084fc;flex-shrink:0}
+    .ref-children{margin-left:1.4rem;padding-left:.8rem;border-left:1px solid rgba(255,255,255,.06);margin-top:.3rem}
+    .ref-paid{font-size:.62rem;padding:.1rem .4rem;border-radius:8px;margin-left:auto;flex-shrink:0}
+    .ref-paid.yes{background:rgba(0,255,136,.1);color:var(--green)}
+    .ref-paid.no{background:rgba(255,165,0,.08);color:#ffa500}
+
     /* ── MY MATRICES ── */
     .mx-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem}
     .mxf-btn{padding:.35rem .8rem;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;
@@ -476,6 +491,12 @@
     <div class="section-lbl" style="margin-bottom:1rem">Upline Matrix</div>
     <div class="card" style="margin-bottom:1.5rem">
       <div class="matrix-mini" id="profileMatrix"></div>
+    </div>
+
+    <!-- My Referrals section -->
+    <div class="section-lbl" style="margin-bottom:1rem">My Referrals (Direct &amp; Indirect)</div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div id="myReferralsList"><div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.85rem">Loading...</div></div>
     </div>
 
     <!-- My Matrices section -->
@@ -769,7 +790,7 @@ const clearSession=()=>localStorage.removeItem('sn_session');
 
 // State
 let currentUser=null,connectedWallet=null,pendingPayment=null,previewTimer=null;
-let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={},joinMode=false;
+let adminPassword='',selectedAvatar=null,matrixNodes={},myMatricesData={},joinMode=false,referralTree=[];
 
 const AVATARS=['👤','🦊','🐺','🐉','🦁','🐯','🦅','🦋','🌙','⚡','🔥','💎','🌊','🍀','🎯','🚀','⬡','🌟','💫','🎭','👑','🤖'];
 
@@ -974,7 +995,12 @@ async function register(){
 }
 
 // ── Auth ─────────────────────────────────────────────────
-function logout(){clearSession();currentUser=null;$('logoutBtn').style.display='none';showView('viewLanding');updateDebug()}
+function logout(){
+  clearSession();currentUser=null;connectedWallet=null;
+  $('logoutBtn').style.display='none';
+  updateWalletUI();updateDebug();
+  renderLanding();showView('viewLanding');
+}
 
 // ── Dashboard ────────────────────────────────────────────
 async function showActivation(){
@@ -1133,15 +1159,57 @@ function copyRef(){
 async function openProfile(){
   if(!currentUser)return;
   if(!connectedWallet){toast('Connect your wallet to access your profile','inf');connectWallet();return;}
-  const [profile,matrices]=await Promise.all([
+  const [profile,matrices,tree]=await Promise.all([
     loadProfile(currentUser.username),
-    apiGet(`/api/my-matrices/${encodeURIComponent(currentUser.username)}`).catch(()=>({}))
+    apiGet(`/api/my-matrices/${encodeURIComponent(currentUser.username)}`).catch(()=>({})),
+    apiGet(`/api/referrals/${encodeURIComponent(currentUser.username)}`).catch(()=>[])
   ]);
   if(!profile){toast('Could not load profile','err');return}
   myMatricesData=matrices||{};
+  referralTree=Array.isArray(tree)?tree:[];
   renderProfile(profile,true);
+  renderReferralTree();
   renderMyMatrices('all');
   showView('viewProfile');
+}
+
+function renderReferralTree(){
+  const list=$('myReferralsList');
+  if(!referralTree.length){
+    list.innerHTML='<div style="text-align:center;color:var(--muted);padding:2rem;font-size:.85rem">No referrals yet. Share your link to start building your network.</div>';
+    return;
+  }
+  function countAll(nodes){return nodes.reduce((s,n)=>s+1+countAll(n.children||[]),0)}
+  const total=countAll(referralTree);
+  let html=`<div style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem">${total} total node${total!==1?'s':''} in your downline</div><div class="ref-tree">`;
+  function renderNode(node){
+    const C=cfg();
+    const displayName=node.nickname||node.username;
+    const sub=[node.country,node.walletAddress?node.walletAddress.slice(0,4)+'...':''].filter(Boolean).join(' · ');
+    const pc=node.paidLevels.length;
+    const active=node.paidSystemFee&&pc===6;
+    const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
+    const dc=depthColors[(node.depth-1)%depthColors.length];
+    let out=`<div class="ref-node">
+      <div class="ref-row">
+        <div class="ref-av">${node.avatar||'👤'}</div>
+        <span class="ref-depth" style="background:${dc}22;color:${dc}">L${node.depth}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:.85rem">${displayName}</div>
+          <div style="font-size:.7rem;color:var(--muted)">${sub||node.username}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="ref-paid ${active?'yes':'no'}">${active?'✓ Active':'⏳ '+pc+'/6'}</span>
+          ${(node.children&&node.children.length)?`<div style="font-size:.62rem;color:var(--muted);margin-top:.15rem">${node.children.length} sub-ref</div>`:''}
+        </div>
+      </div>`;
+    if(node.children&&node.children.length){
+      out+=`<div class="ref-children">${node.children.map(renderNode).join('')}</div>`;
+    }
+    return out+'</div>';
+  }
+  html+=referralTree.map(renderNode).join('')+'</div>';
+  list.innerHTML=html;
 }
 
 function filterMyMatrices(pos,btn){
@@ -1274,7 +1342,11 @@ async function adminLogin(){
     await loadAdminConfig();await loadUsers();
   }catch{toast('Wrong password','err')}
 }
-function adminLogout(){adminPassword='';$('adminLoginBox').style.display='block';$('adminDash').style.display='none';$('adminPwd').value=''}
+function adminLogout(){
+  adminPassword='';
+  $('adminLoginBox').style.display='block';$('adminDash').style.display='none';$('adminPwd').value='';
+  renderLanding();showView('viewLanding');
+}
 
 async function loadAdminConfig(){
   try{
@@ -1338,6 +1410,8 @@ async function loadUsers(){
 }
 
 async function adminDeleteUser(username){
+  const C=cfg();
+  if(C.DEFAULT_MATRIX&&C.DEFAULT_MATRIX.includes(username)){toast('System nodes cannot be deleted','err');return}
   if(!confirm(`Delete user "${username}"? This cannot be undone.`))return;
   try{
     await apiFetch('DELETE',`/api/admin/users/${encodeURIComponent(username)}`,null,{'X-Admin-Password':adminPassword});

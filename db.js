@@ -117,6 +117,13 @@ async function getAllUsers() {
   return rows.map(normalize);
 }
 
+async function getDirectReferrals(username) {
+  const { rows } = await pool.query(
+    'SELECT * FROM users WHERE referrer = $1 ORDER BY registration_date DESC', [username]
+  );
+  return rows.map(normalize);
+}
+
 async function getReferralCount(username) {
   const { rows } = await pool.query(
     'SELECT COUNT(*) AS n FROM users WHERE referrer = $1', [username]
@@ -185,6 +192,6 @@ module.exports = {
   migrate,
   getUser, usernameExists, createUser, updateUser,
   countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining,
-  getUserByWallet, walletExists, deleteUser,
+  getUserByWallet, walletExists, deleteUser, getDirectReferrals,
   getConfig, setConfigBulk,
 };

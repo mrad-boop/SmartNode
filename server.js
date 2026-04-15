@@ -112,8 +112,13 @@ app.get('/api/admin/users', adminAuth, async (req, res) => {
 });
 
 app.delete('/api/admin/users/:username', adminAuth, async (req, res) => {
-  try { await db.deleteUser(req.params.username); res.json({ ok: true }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    const appCfg = buildAppConfig(await db.getConfig());
+    if (appCfg.DEFAULT_MATRIX.includes(req.params.username))
+      return res.status(403).json({ error: 'System nodes cannot be deleted' });
+    await db.deleteUser(req.params.username);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/admin/create-user', adminAuth, async (req, res) => {
@@ -219,6 +224,33 @@ app.patch('/api/user/:username', async (req, res) => {
     const user = await db.updateUser(req.params.username, { walletAddress, paidSystemFee, paidLevels, avatar, fullName, nickname, address, phone, country });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Full referral tree (direct + indirect up to 6 levels deep)
+app.get('/api/referrals/:username', async (req, res) => {
+  try {
+    const user = await db.getUser(req.params.username);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // BFS to build downline tree, up to depth 6
+    async function buildTree(uname, depth) {
+      if (depth > 6) return [];
+      const directs = await db.getDirectReferrals(uname);
+      return Promise.all(directs.map(async r => ({
+        username:    r.username,
+        nickname:    r.nickname,
+        country:     r.country,
+        avatar:      r.avatar,
+        walletAddress: r.walletAddress,
+        paidSystemFee: r.paidSystemFee,
+        paidLevels:  r.paidLevels,
+        depth,
+        children:    await buildTree(r.username, depth + 1),
+      })));
+    }
+    const tree = await buildTree(req.params.username, 1);
+    res.json(tree);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
