@@ -974,11 +974,13 @@ COUNTRIES.forEach(({n,c})=>{CFLAG[n]=[...c].map(x=>String.fromCodePoint(127397+x
 function cFlag(name){return CFLAG[name]||''}
 function cDisplay(name){if(!name)return '';const f=cFlag(name);return f?f+'\u00a0'+name:name}
 
-// Populate country <select> once DOM is ready
-function populateCountrySelect(){
-  const sel=$('profileCountry');if(!sel||sel.options.length>1)return;
+// Fill any country <select> — accepts an id string or a DOM element
+function fillCountrySelect(idOrEl){
+  const sel=typeof idOrEl==='string'?$(idOrEl):idOrEl;
+  if(!sel||sel.options.length>1)return;
   COUNTRIES.forEach(({n})=>{const o=document.createElement('option');o.value=n;o.textContent=cFlag(n)+' '+n;sel.appendChild(o)});
 }
+function populateCountrySelect(){fillCountrySelect('profileCountry');}
 
 // ── API ─────────────────────────────────────────────────
 async function apiFetch(method,path,body,hdrs={}){
@@ -1627,10 +1629,17 @@ async function loadAdminConfig(){
       const un=C.DEFAULT_MATRIX?.[i-1]||'';
       const wa=C.SYSTEM_WALLETS?.[un]||'';
       g.innerHTML+=`<div style="font-size:.72rem;color:var(--green);font-weight:700;margin:.6rem 0 .3rem;text-transform:uppercase">Level ${i}</div>
-        <div class="mx-admin-row">
+        <div class="mx-admin-row" style="grid-template-columns:1fr 1fr 1fr">
           <div><label class="fl">Username</label><input class="fi" id="mx_u${i}" value="${un}" placeholder="Username"/></div>
           <div><label class="fl">Wallet Address</label><input class="fi" id="mx_w${i}" value="${wa}" placeholder="Solana address"/></div>
+          <div><label class="fl">Country</label><select class="fi" id="mx_c${i}"><option value="">— Select Country —</option></select></div>
         </div>`;
+    }
+    // Populate country selects and restore saved values
+    for(let i=1;i<=6;i++){
+      fillCountrySelect(`mx_c${i}`);
+      const sel=$(`mx_c${i}`);
+      if(sel)sel.value=C[`COUNTRY_L${i}`]||'';
     }
   }catch(e){toast('Config load failed: '+e.message,'err')}
 }
@@ -1644,9 +1653,10 @@ async function saveConfig(){
    'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
   ].forEach(k=>{const el=$('c_'+k);if(el&&el.value.trim()!=='')data[k]=el.value.trim()});
   for(let i=1;i<=6;i++){
-    const u=$(`mx_u${i}`),w=$(`mx_w${i}`);
+    const u=$(`mx_u${i}`),w=$(`mx_w${i}`),c=$(`mx_c${i}`);
     if(u&&u.value.trim())data[`MATRIX_L${i}`]=u.value.trim();
     if(w&&w.value.trim())data[`WALLET_L${i}`]=w.value.trim();
+    data[`COUNTRY_L${i}`]=c?.value||'';
   }
   try{await apiPost('/api/admin/config',data,{'X-Admin-Password':adminPassword});toast('Saved! Refreshing...','ok');setTimeout(()=>location.reload(),1200)}
   catch(e){toast('Save failed: '+e.message,'err')}
