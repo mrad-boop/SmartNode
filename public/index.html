@@ -2203,14 +2203,14 @@ async function adminEditUser(username){
     $('eu_address').value=u.address||'';
     setCountryVal('eu_country',u.country||'');
     $('eu_sysFee').checked=!!u.paidSystemFee;
-    [1,2,3,4,5,6].forEach(i=>{const cb=$(`eu_lv${i}`);if(cb)cb.checked=(u.paidLevels||[]).includes(i);});
+    [0,1,2,3,4,5].forEach(i=>{const cb=$(`eu_lv${i+1}`);if(cb)cb.checked=(u.paidLevels||[]).includes(i);});
   }catch(e){toast('Failed to load user: '+e.message,'err');return}
   $('editUserModal').classList.remove('hidden');
 }
 function closeEditUserModal(){$('editUserModal').classList.add('hidden')}
 async function adminSaveUser(){
   if(!_editingUsername)return;
-  const paidLevels=[1,2,3,4,5,6].filter(i=>$(`eu_lv${i}`)?.checked);
+  const paidLevels=[0,1,2,3,4,5].filter(i=>$(`eu_lv${i+1}`)?.checked);
   const body={
     walletAddress:$('eu_wallet').value.trim()||null,
     fullName:$('eu_fullName').value.trim()||null,
