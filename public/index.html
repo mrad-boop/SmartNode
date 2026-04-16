@@ -1311,8 +1311,10 @@ async function register(){
 
 // ── Auth ─────────────────────────────────────────────────
 function logout(){
+  stopSessionWatch();
   clearSession();currentUser=null;connectedWallet=null;
   $('logoutBtn').style.display='none';
+  $('sysLink').style.display='';
   updateWalletUI();updateDebug();
   renderLanding();showView('viewLanding');
 }
@@ -1320,6 +1322,8 @@ function logout(){
 // ── Dashboard ────────────────────────────────────────────
 async function showActivation(){
   $('logoutBtn').style.display='';
+  $('sysLink').style.display='none';
+  startSessionWatch();
   // Load matrix node details for display
   if(currentUser){
     try{
@@ -1730,13 +1734,17 @@ async function adminLogin(){
   try{
     await apiPost('/api/admin/login',{password:pwd});
     adminPassword=pwd;
+    $('sysLink').style.display='none';
     $('adminLoginBox').style.display='none';$('adminDash').style.display='block';
+    startSessionWatch();
     await loadAdminConfig();await loadUsers();
   }catch{toast('Wrong password','err')}
 }
 function adminLogout(){
+  stopSessionWatch();
   adminPassword='';
   $('adminLoginBox').style.display='block';$('adminDash').style.display='none';$('adminPwd').value='';
+  $('sysLink').style.display='';
   renderLanding();showView('viewLanding');
 }
 
@@ -1884,7 +1892,7 @@ async function init(){
   const token=cfg().CONTROL_TOKEN||'node-matrix-sys';
 
   // Admin access via hidden token param — skip landing setup
-  if(params.get('sys')===token){showView('viewAdmin');return;}
+  if(params.get('sys')===token){$('sysLink').style.display='none';showView('viewAdmin');return;}
 
   // Always render landing so it is accessible via logo click at any time
   const referrer=getRef();
@@ -1919,6 +1927,29 @@ async function init(){
 
   showView('viewLanding');
 }
+
+/* ── SESSION TIMEOUT (5 min inactivity) ── */
+const INACTIVITY_MS=5*60*1000;
+let _lastAct=Date.now(),_sessTimer=null;
+function _bumpActivity(){_lastAct=Date.now();}
+['click','keydown','mousemove','touchstart','scroll'].forEach(ev=>
+  document.addEventListener(ev,_bumpActivity,{passive:true}));
+
+function startSessionWatch(){
+  clearInterval(_sessTimer);_lastAct=Date.now();
+  _sessTimer=setInterval(()=>{
+    if(Date.now()-_lastAct<INACTIVITY_MS)return;
+    clearInterval(_sessTimer);_sessTimer=null;
+    if(adminPassword){
+      toast('Admin session expired — 5 min inactivity','inf');
+      adminLogout();
+    }else if(currentUser){
+      toast('Session expired — please reconnect your wallet','inf');
+      logout();
+    }
+  },20000);
+}
+function stopSessionWatch(){clearInterval(_sessTimer);_sessTimer=null;}
 
 /* ── THEME ── */
 function applyTheme(n){
