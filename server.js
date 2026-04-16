@@ -130,16 +130,23 @@ app.delete('/api/admin/users/:username', adminAuth, async (req, res) => {
 
 app.post('/api/admin/create-user', adminAuth, async (req, res) => {
   try {
-    let { username, walletAddress, referrer } = req.body;
+    let { username, walletAddress, referrer, customMatrix } = req.body;
     username = String(username || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
     if (username.length < 3) return res.status(400).json({ error: 'Username must be at least 3 characters' });
     if (await db.usernameExists(username)) return res.status(409).json({ error: `Username "${username}" already taken` });
     if (walletAddress && await db.walletExists(walletAddress)) return res.status(409).json({ error: 'Wallet already used' });
-    const appCfg = buildAppConfig(await db.getConfig());
-    let uplineMatrix = [...appCfg.DEFAULT_MATRIX];
-    if (referrer) {
-      const refUser = await db.getUser(referrer);
-      if (refUser) uplineMatrix = [...refUser.uplineMatrix.slice(1), referrer];
+
+    let uplineMatrix;
+    if (Array.isArray(customMatrix) && customMatrix.length === 6) {
+      // Admin-defined custom upline — sanitize each entry
+      uplineMatrix = customMatrix.map(u => String(u || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20));
+    } else {
+      const appCfg = buildAppConfig(await db.getConfig());
+      uplineMatrix = [...appCfg.DEFAULT_MATRIX];
+      if (referrer) {
+        const refUser = await db.getUser(referrer);
+        if (refUser) uplineMatrix = [...refUser.uplineMatrix.slice(1), referrer];
+      }
     }
     const user = await db.createUser({ username, walletAddress: walletAddress || null, referrer: referrer || null, uplineMatrix });
     res.status(201).json(user);

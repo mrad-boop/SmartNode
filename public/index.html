@@ -837,8 +837,31 @@
         <div class="fgrid">
           <div class="fg"><label class="fl">Username *</label><input class="fi" id="newUsername" placeholder="min 3 chars, letters/numbers/_"/></div>
           <div class="fg"><label class="fl">Wallet (optional)</label><input class="fi" id="newWallet" placeholder="Solana address"/></div>
-          <div class="fg"><label class="fl">Referrer (optional)</label><input class="fi" id="newReferrer" placeholder="existing username"/></div>
+          <div class="fg"><label class="fl">Referrer (optional)</label><input class="fi" id="newReferrer" placeholder="existing username — ignored if custom matrix is set"/></div>
         </div>
+
+        <!-- Custom matrix toggle -->
+        <div style="margin:.8rem 0 .5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <button type="button" class="btn btn-p" id="cmxToggleBtn" style="font-size:.75rem;padding:.3rem .75rem" onclick="toggleCustomMatrix()">
+            ⚙ Set Custom Upline Matrix
+          </button>
+          <span style="font-size:.72rem;color:var(--muted)">optional — define exactly who receives payments from this node's referrals</span>
+        </div>
+        <div id="customMxFields" style="display:none;padding:.85rem;background:rgba(123,47,247,.06);border:1px solid rgba(123,47,247,.2);border-radius:10px;margin-bottom:.85rem">
+          <p style="font-size:.75rem;color:var(--muted);margin-bottom:.8rem">
+            💡 Fill all 6 levels. Anyone who registers via <strong>this node's referral link</strong> will have their upline derived from these addresses.
+            Leave all empty to use referrer / default matrix logic instead.
+          </p>
+          <div class="fgrid">
+            <div class="fg"><label class="fl">L1 — first to receive payment</label><input class="fi" id="cmx_1" placeholder="username"/></div>
+            <div class="fg"><label class="fl">L2</label><input class="fi" id="cmx_2" placeholder="username"/></div>
+            <div class="fg"><label class="fl">L3</label><input class="fi" id="cmx_3" placeholder="username"/></div>
+            <div class="fg"><label class="fl">L4</label><input class="fi" id="cmx_4" placeholder="username"/></div>
+            <div class="fg"><label class="fl">L5</label><input class="fi" id="cmx_5" placeholder="username"/></div>
+            <div class="fg"><label class="fl">L6 — last to receive</label><input class="fi" id="cmx_6" placeholder="username"/></div>
+          </div>
+        </div>
+
         <button class="btn btn-g" onclick="adminCreateUser()">Create Node</button>
       </div>
 
@@ -1796,15 +1819,39 @@ async function adminDeleteUser(username){
   }catch(e){toast('Delete failed: '+e.message,'err')}
 }
 
+function toggleCustomMatrix(){
+  const box=$('customMxFields');
+  const open=box.style.display==='none';
+  box.style.display=open?'block':'none';
+  const btn=$('cmxToggleBtn');
+  btn.style.borderColor=open?'var(--green)':'';
+  btn.style.color=open?'var(--green)':'';
+  btn.textContent=open?'✕ Hide Custom Matrix':'⚙ Set Custom Upline Matrix';
+}
+
 async function adminCreateUser(){
   const username=$('newUsername').value.trim();
   const wallet=$('newWallet').value.trim()||null;
   const referrer=$('newReferrer').value.trim()||null;
   if(!username){toast('Username required','err');return}
+
+  // Check if custom matrix is set
+  let customMatrix=null;
+  const cmxVals=[1,2,3,4,5,6].map(i=>($(`cmx_${i}`)?.value||'').trim());
+  const filled=cmxVals.filter(Boolean).length;
+  if(filled>0){
+    if(filled<6){toast('Fill all 6 levels for the custom matrix, or leave all empty','err');return}
+    customMatrix=cmxVals;
+  }
+
   try{
-    const user=await apiPost('/api/admin/create-user',{username,walletAddress:wallet,referrer},{'X-Admin-Password':adminPassword});
-    toast(`User "${user.username}" created!`,'ok');
+    const body={username,walletAddress:wallet,referrer};
+    if(customMatrix)body.customMatrix=customMatrix;
+    const user=await apiPost('/api/admin/create-user',body,{'X-Admin-Password':adminPassword});
+    const shareLink=`${location.origin}${location.pathname}?ref=${user.username}`;
+    toast(`✓ Node "${user.username}" created! Share: ?ref=${user.username}`,'ok');
     $('newUsername').value='';$('newWallet').value='';$('newReferrer').value='';
+    for(let i=1;i<=6;i++){const el=$(`cmx_${i}`);if(el)el.value='';}
     loadUsers();
   }catch(e){toast('Create failed: '+e.message,'err')}
 }
