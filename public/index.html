@@ -1111,8 +1111,8 @@
       </div>
       <div class="table-wrap">
         <table class="users-table">
-          <thead><tr><th>User</th><th>Ref</th><th>Fee</th><th>Levels</th><th>Wallet</th><th>Date</th><th></th></tr></thead>
-          <tbody id="usersTableBody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
+          <thead><tr><th>User</th><th>Country</th><th>Ref</th><th>Fee</th><th>Levels</th><th>Wallet</th><th>Date</th><th></th></tr></thead>
+          <tbody id="usersTableBody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1120,6 +1120,59 @@
 </div>
 
 </main>
+
+<!-- ADMIN EDIT USER MODAL -->
+<div class="modal-ov hidden" id="editUserModal">
+  <div class="modal" style="max-width:540px;max-height:90vh;overflow-y:auto">
+    <div class="m-title" id="editUserTitle">✏ Edit User</div>
+
+    <div class="fgrid" style="margin-bottom:.9rem">
+      <div class="fg">
+        <label class="fl">Full Name</label>
+        <input class="fi" id="eu_fullName" placeholder="Full name"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Nickname</label>
+        <input class="fi" id="eu_nickname" placeholder="Display nickname"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Solana Wallet</label>
+        <input class="fi" id="eu_wallet" placeholder="Wallet address"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Country</label>
+        <select class="fi" id="eu_country"><option value="">— Select country —</option></select>
+      </div>
+      <div class="fg">
+        <label class="fl">Phone</label>
+        <input class="fi" id="eu_phone" placeholder="+1 234 567 8900"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Address</label>
+        <input class="fi" id="eu_address" placeholder="Physical address"/>
+      </div>
+    </div>
+
+    <div style="padding:.85rem;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);border-radius:10px;margin-bottom:1rem">
+      <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:.7rem;text-transform:uppercase;letter-spacing:.06em">Payment Status</div>
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.85rem">
+          <input type="checkbox" id="eu_sysFee" style="width:16px;height:16px;accent-color:var(--green)"/>
+          System Fee Paid
+        </label>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Levels paid (check each level that is paid):</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap" id="eu_levelsWrap">
+        <!-- built by JS -->
+      </div>
+    </div>
+
+    <div style="display:flex;gap:.7rem;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn btn-p" onclick="closeEditUserModal()">Cancel</button>
+      <button class="btn btn-g" onclick="adminSaveUser()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
 
 <!-- WALLET MODAL -->
 <div class="modal-ov hidden" id="walletModal">
@@ -1205,6 +1258,7 @@ const $=id=>document.getElementById(id);
 const getRef=()=>new URLSearchParams(location.search).get('ref');
 
 function shortAddr(a){return a?a.slice(0,4)+'...'+a.slice(-4):'—'}
+function countryFlag(cc){if(!cc||cc.length!==2)return cc||'—';return String.fromCodePoint(127397+cc.toUpperCase().charCodeAt(0))+String.fromCodePoint(127397+cc.toUpperCase().charCodeAt(1))}
 function buildRefUrl(u){return location.origin+location.pathname+'?ref='+encodeURIComponent(u)}
 function fmtDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—'}
 
@@ -2095,20 +2149,25 @@ async function loadUsers(){
   tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem"><span class="spin"></span></td></tr>';
   try{
     const users=await apiGet('/api/admin/users',{'X-Admin-Password':adminPassword});
-    if(!users.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No users yet</td></tr>';return}
+    if(!users.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No users yet</td></tr>';return}
     tb.innerHTML=users.map(u=>{
       const pc=u.paidLevels.length;
+      const flag=u.country?countryFlag(u.country):'—';
       return `<tr>
-        <td><span style="font-size:1rem">${u.avatar||'👤'}</span> <strong>${u.username}</strong>${u.nickname?'<div style="font-size:.68rem;color:var(--muted)">'+u.nickname+'</div>':''}</td>
-        <td>${u.referrer||'<span style="color:var(--muted)">—</span>'}</td>
+        <td><span style="font-size:1rem">${u.avatar||'👤'}</span> <strong>${u.username}</strong>${u.nickname?'<br><span style="font-size:.68rem;color:var(--muted)">'+u.nickname+'</span>':''}${u.fullName?'<br><span style="font-size:.68rem;color:var(--muted)">'+u.fullName+'</span>':''}</td>
+        <td style="font-size:1.1rem" title="${u.country||''}">${flag}</td>
+        <td style="font-size:.78rem">${u.referrer||'<span style="color:var(--muted)">—</span>'}</td>
         <td>${u.paidSystemFee?'<span class="badge b-green">✓</span>':'<span class="badge b-muted">✗</span>'}</td>
         <td><span style="color:var(--cyan);font-weight:700">${pc}</span>/6</td>
         <td style="font-family:monospace;font-size:.7rem">${u.walletAddress?shortAddr(u.walletAddress):'—'}</td>
         <td style="color:var(--muted);font-size:.72rem">${fmtDate(u.registrationDate)}</td>
-        <td><button class="btn btn-r" style="font-size:.7rem;padding:.25rem .55rem" onclick="adminDeleteUser('${u.username}')">✕</button></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-c" style="font-size:.7rem;padding:.25rem .55rem;margin-right:.3rem" onclick="adminEditUser('${u.username}')">✏</button>
+          <button class="btn btn-r" style="font-size:.7rem;padding:.25rem .55rem" onclick="adminDeleteUser('${u.username}')">✕</button>
+        </td>
       </tr>`;
     }).join('');
-  }catch(e){tb.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:1.5rem">${e.message}</td></tr>`}
+  }catch(e){tb.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--red);padding:1.5rem">${e.message}</td></tr>`}
 }
 
 async function adminDeleteUser(username){
@@ -2119,6 +2178,54 @@ async function adminDeleteUser(username){
     await apiFetch('DELETE',`/api/admin/users/${encodeURIComponent(username)}`,null,{'X-Admin-Password':adminPassword});
     toast(`User "${username}" deleted`,'ok');loadUsers();
   }catch(e){toast('Delete failed: '+e.message,'err')}
+}
+
+let _euCountryBuilt=false;
+let _editingUsername='';
+async function adminEditUser(username){
+  _editingUsername=username;
+  $('editUserTitle').textContent=`✏ Edit — ${username}`;
+  // Build level checkboxes once
+  const lw=$('eu_levelsWrap');
+  if(!lw.children.length){
+    lw.innerHTML=[1,2,3,4,5,6].map(i=>`<label style="display:flex;align-items:center;gap:.35rem;cursor:pointer;font-size:.82rem;padding:.3rem .6rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px">
+      <input type="checkbox" id="eu_lv${i}" value="${i}" style="accent-color:var(--green)"/> L${i}</label>`).join('');
+  }
+  // Build country dropdown once
+  if(!_euCountryBuilt){_euCountryBuilt=true;buildCountrySelect('eu_country',true);}
+  // Load current user data
+  try{
+    const u=await apiGet(`/api/user/${encodeURIComponent(username)}`);
+    $('eu_fullName').value=u.fullName||'';
+    $('eu_nickname').value=u.nickname||'';
+    $('eu_wallet').value=u.walletAddress||'';
+    $('eu_phone').value=u.phone||'';
+    $('eu_address').value=u.address||'';
+    setCountryVal('eu_country',u.country||'');
+    $('eu_sysFee').checked=!!u.paidSystemFee;
+    [1,2,3,4,5,6].forEach(i=>{const cb=$(`eu_lv${i}`);if(cb)cb.checked=(u.paidLevels||[]).includes(i);});
+  }catch(e){toast('Failed to load user: '+e.message,'err');return}
+  $('editUserModal').classList.remove('hidden');
+}
+function closeEditUserModal(){$('editUserModal').classList.add('hidden')}
+async function adminSaveUser(){
+  if(!_editingUsername)return;
+  const paidLevels=[1,2,3,4,5,6].filter(i=>$(`eu_lv${i}`)?.checked);
+  const body={
+    walletAddress:$('eu_wallet').value.trim()||null,
+    fullName:$('eu_fullName').value.trim()||null,
+    nickname:$('eu_nickname').value.trim()||null,
+    phone:$('eu_phone').value.trim()||null,
+    address:$('eu_address').value.trim()||null,
+    country:$('eu_country').value||null,
+    paidSystemFee:$('eu_sysFee').checked,
+    paidLevels,
+  };
+  try{
+    await apiFetch('PUT',`/api/admin/users/${encodeURIComponent(_editingUsername)}`,body,{'X-Admin-Password':adminPassword});
+    toast(`✓ ${_editingUsername} updated`,'ok');
+    closeEditUserModal();loadUsers();
+  }catch(e){toast('Save failed: '+e.message,'err')}
 }
 
 let _cmxBuilt=false;
@@ -2302,7 +2409,12 @@ function selectThemePick(n){
   applyTheme(n);
 }
 
-document.addEventListener('DOMContentLoaded',()=>{applyTheme(cfg().THEME||'1');buildCountrySelect('profileCountry');init();});
+document.addEventListener('DOMContentLoaded',()=>{
+  applyTheme(cfg().THEME||'1');buildCountrySelect('profileCountry');init();
+  // Close modals on overlay click
+  $('editUserModal')?.addEventListener('click',e=>{if(e.target===$('editUserModal'))closeEditUserModal();});
+  $('walletModal')?.addEventListener('click',e=>{if(e.target===$('walletModal'))closeWalletModal();});
+});
 </script>
 </body>
 </html>
