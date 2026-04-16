@@ -130,7 +130,7 @@ app.delete('/api/admin/users/:username', adminAuth, async (req, res) => {
 
 app.put('/api/admin/users/:username', adminAuth, async (req, res) => {
   try {
-    const { walletAddress, fullName, nickname, address, phone, country, paidSystemFee, paidLevels } = req.body;
+    const { walletAddress, fullName, nickname, address, phone, country, paidSystemFee, paidLevels, referrer } = req.body;
     const updates = {};
     if (walletAddress !== undefined) updates.walletAddress = walletAddress || null;
     if (fullName      !== undefined) updates.fullName      = fullName      || '';
@@ -140,6 +140,7 @@ app.put('/api/admin/users/:username', adminAuth, async (req, res) => {
     if (country       !== undefined) updates.country       = country       || '';
     if (paidSystemFee !== undefined) updates.paidSystemFee = Boolean(paidSystemFee);
     if (Array.isArray(paidLevels))   updates.paidLevels    = paidLevels.map(Number).filter(n => n >= 0 && n <= 5);
+    if (referrer      !== undefined) updates.referrer      = referrer      || null;
     const user = await db.updateUser(req.params.username, updates);
     res.json(user);
   } catch (e) { res.status(500).json({ error: e.message }); }

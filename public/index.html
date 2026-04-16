@@ -1151,6 +1151,11 @@
         <label class="fl">Address</label>
         <input class="fi" id="eu_address" placeholder="Physical address"/>
       </div>
+      <div class="fg" style="grid-column:1/-1">
+        <label class="fl" style="color:var(--gold)">⚠ Referral Source <span style="font-weight:400;text-transform:none;font-size:.68rem;color:var(--muted)">(who brought this user in — leave blank for genesis node)</span></label>
+        <input class="fi" id="eu_referrer" placeholder="username of referrer — clear to remove wrong referral link"/>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:.3rem">Changing this affects who appears in whose downline tree. Only edit to fix incorrect data.</div>
+      </div>
     </div>
 
     <div style="padding:.85rem;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);border-radius:10px;margin-bottom:1rem">
@@ -2201,6 +2206,7 @@ async function adminEditUser(username){
     $('eu_wallet').value=u.walletAddress||'';
     $('eu_phone').value=u.phone||'';
     $('eu_address').value=u.address||'';
+    $('eu_referrer').value=u.referrer||'';
     setCountryVal('eu_country',u.country||'');
     $('eu_sysFee').checked=!!u.paidSystemFee;
     [0,1,2,3,4,5].forEach(i=>{const cb=$(`eu_lv${i+1}`);if(cb)cb.checked=(u.paidLevels||[]).includes(i);});
@@ -2218,6 +2224,7 @@ async function adminSaveUser(){
     phone:$('eu_phone').value.trim()||null,
     address:$('eu_address').value.trim()||null,
     country:$('eu_country').value||null,
+    referrer:$('eu_referrer').value.trim()||null,
     paidSystemFee:$('eu_sysFee').checked,
     paidLevels,
   };

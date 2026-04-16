@@ -87,7 +87,7 @@ async function createUser({ username, walletAddress, referrer, uplineMatrix }) {
   return normalize(rows[0]);
 }
 
-async function updateUser(username, { walletAddress, paidSystemFee, paidLevels, avatar, fullName, nickname, address, phone, country }) {
+async function updateUser(username, { walletAddress, paidSystemFee, paidLevels, avatar, fullName, nickname, address, phone, country, referrer }) {
   const sets = [], vals = [];
   let i = 1;
   if (walletAddress !== undefined) { sets.push(`wallet_address = $${i++}`);  vals.push(walletAddress); }
@@ -99,6 +99,7 @@ async function updateUser(username, { walletAddress, paidSystemFee, paidLevels, 
   if (address       !== undefined) { sets.push(`user_address = $${i++}`);    vals.push(address); }
   if (phone         !== undefined) { sets.push(`phone = $${i++}`);           vals.push(phone); }
   if (country       !== undefined) { sets.push(`country = $${i++}`);         vals.push(country); }
+  if (referrer      !== undefined) { sets.push(`referrer = $${i++}`);        vals.push(referrer); }
   if (!sets.length) return getUser(username);
   vals.push(username);
   const { rows } = await pool.query(
