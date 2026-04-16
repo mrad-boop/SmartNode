@@ -114,9 +114,10 @@
     .wallet-divider::before,.wallet-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:rgba(255,255,255,.07)}
     .wallet-divider::before{left:0}.wallet-divider::after{right:0}
     /* admin link — looks like a subtle node icon, not obvious */
-    .sys-link{font-size:.75rem;color:rgba(255,255,255,.18);text-decoration:none;padding:.3rem .5rem;
-      border-radius:5px;transition:all .2s;letter-spacing:.05em}
-    .sys-link:hover{color:var(--muted)}
+    .sys-link{font-size:.9rem;color:rgba(255,255,255,.18);text-decoration:none;
+      padding:.5rem .75rem;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+      border-radius:8px;transition:all .2s;letter-spacing:.05em;-webkit-tap-highlight-color:transparent}
+    .sys-link:hover,.sys-link:active{color:var(--muted);background:rgba(255,255,255,.05)}
     /* how-to nav */
     .how-nav{font-size:.8rem;color:var(--muted);text-decoration:none;padding:.35rem .7rem;border-radius:7px;
       border:1px solid transparent;transition:all .2s;white-space:nowrap}
@@ -172,10 +173,23 @@
     .feat-icon{font-size:1.8rem;margin-bottom:.9rem}
     .feat-title{font-size:1rem;font-weight:700;margin-bottom:.5rem;color:var(--green)}
     .feat-text{font-size:.875rem;color:var(--muted);line-height:1.6}
-    .how-section{padding:3rem 1.5rem;text-align:center;margin-bottom:2rem}
-    .how-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;max-width:750px;margin:0 auto}
-    .how-step .how-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
-      display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;margin:0 auto 1rem}
+    .how-section{padding:4.5rem 1.5rem 5rem;text-align:center;margin-bottom:0;
+      background:linear-gradient(180deg,transparent 0%,rgba(0,255,136,.028) 40%,rgba(123,47,247,.04) 100%);
+      border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .how-section-inner{max-width:960px;margin:0 auto}
+    .how-section h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin-bottom:.6rem}
+    .how-section .how-sub{font-size:1rem;color:var(--muted);margin-bottom:3rem;max-width:560px;margin-left:auto;margin-right:auto}
+    .how-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.8rem;margin:0 auto 2.5rem}
+    .how-step{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;
+      transition:all .25s;cursor:default}
+    .how-step:hover{border-color:rgba(0,255,136,.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+    .how-step .how-num{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));
+      display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;margin:0 auto 1.1rem;
+      box-shadow:0 4px 20px rgba(0,255,136,.2)}
+    .how-step .how-stitle{font-size:1rem;font-weight:700;color:var(--green);margin-bottom:.55rem}
+    .how-step .how-sdesc{font-size:.855rem;color:var(--muted);line-height:1.65}
+    html[data-theme="2"] .how-section{background:linear-gradient(180deg,transparent 0%,rgba(255,193,7,.025) 40%,rgba(230,92,0,.035) 100%)}
+    html[data-theme="2"] .how-step .how-num{box-shadow:0 4px 20px rgba(255,193,7,.2)}
     .land-footer{text-align:center;padding:2rem 1rem 5rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted)}
 
     /* ── FORMS / CARDS ── */
@@ -483,7 +497,6 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
-    <a href="#" class="how-nav" onclick="showHowTo(event)">How It Works</a>
     <!-- Admin link: looks like a harmless node indicator -->
     <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
     <button id="walletBtn" onclick="connectWallet()">
@@ -515,12 +528,12 @@
   </div>
   <div class="feat-grid" id="featGrid"></div>
   <div class="how-section">
-    <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.5rem">How It Works</h2>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:2.5rem">Three simple steps to start earning</p>
-    <div class="how-steps" id="howSteps"></div>
-    <div style="text-align:center;margin-top:2rem">
-      <button class="btn btn-c" onclick="showHowTo()" style="font-size:.85rem;padding:.55rem 1.4rem">
-        📖 Full Guide &amp; Earnings Calculator →
+    <div class="how-section-inner">
+      <h2 id="howTitle">How It Works</h2>
+      <p class="how-sub" id="howSub">Three simple steps to start earning</p>
+      <div class="how-steps" id="howSteps"></div>
+      <button class="btn btn-g btn-xl" onclick="showHowTo()" style="padding:.75rem 2.2rem;font-size:.95rem;margin-top:.5rem">
+        📖 Full Guide &amp; Earnings Examples →
       </button>
     </div>
   </div>
@@ -581,7 +594,7 @@
     <!-- FIFO explanation -->
     <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">② The FIFO Matrix Explained</h2>
 
-    <div class="ht-callout">
+    <div class="ht-callout" id="htFifoText">
       <strong>FIFO = First In, First Out.</strong> Every new user's upline is derived from their referrer's upline matrix. The queue rotates automatically: your referrer moves to L6 in your chain, and their 5 existing uplines shift from L2→L1 to cover L1→L5. This means the oldest active participants always appear first in the payment chain — the system is provably fair and never requires admin intervention.
     </div>
 
@@ -596,14 +609,14 @@
     </div>
 
     <!-- EARNINGS EXAMPLE -->
-    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--green)">③ Earnings Example — Each User Brings 3 New Users</h2>
+    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--green)" id="htEarnTitle">③ Earnings Example — Each User Brings 3 New Users</h2>
 
-    <div class="ht-callout">
-      The scenario below assumes each level costs <strong>10 USDT</strong> and every active user refers exactly <strong>3 new users</strong>. Payments are direct wallet-to-wallet — you receive USDT the moment a downline activates a level where you are in their L1 position.
+    <div class="ht-callout" id="htEarnText">
+      The scenario below assumes each level costs <strong id="htLevelAmt">10 USDT</strong> and every active user refers exactly <strong>3 new users</strong>. Payments are direct wallet-to-wallet — you receive USDT the moment a downline activates a level where you are in their L1 position.
     </div>
 
     <div style="overflow-x:auto">
-      <table class="earn-table">
+      <table class="earn-table" id="htEarnTable">
         <thead>
           <tr>
             <th>Generation</th>
@@ -685,34 +698,7 @@
 
     <!-- FAQ -->
     <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">④ Frequently Asked Questions</h2>
-
-    <div class="ht-step-row">
-      <div class="ht-step-body">
-        <h3>Do I need to refer people to earn?</h3>
-        <p>You earn from <em>any</em> user who ends up with you in their upline, not just your direct referrals. As the FIFO matrix rotates, your node can appear in the L1–L6 of users multiple levels deep in any branch of the network.</p>
-      </div>
-    </div>
-
-    <div class="ht-step-row">
-      <div class="ht-step-body">
-        <h3>When does my referral link activate?</h3>
-        <p>Your referral link becomes active only after you have paid the system fee <strong>and</strong> all 6 level activations. This ensures every active referrer has already contributed to the network.</p>
-      </div>
-    </div>
-
-    <div class="ht-step-row">
-      <div class="ht-step-body">
-        <h3>What blockchain / token is used?</h3>
-        <p>SmartNode runs on <strong style="color:var(--cyan)">Solana</strong>. Payments are made in <strong>USDT (SPL token)</strong>. Solana offers near-instant finality and very low fees, making micro-payments practical.</p>
-      </div>
-    </div>
-
-    <div class="ht-step-row">
-      <div class="ht-step-body">
-        <h3>Is my wallet safe?</h3>
-        <p>SmartNode only reads your public address and asks you to sign individual payment transactions. It never requests access to your full wallet or seed phrase. You approve each payment manually in your wallet app.</p>
-      </div>
-    </div>
+    <div id="htFaqList"></div>
 
     <div style="text-align:center;padding:2rem 0">
       <button class="btn btn-g btn-xl" onclick="joinMatrix()">Join the Matrix →</button>
@@ -1019,17 +1005,35 @@
           <div class="fg"><label class="fl">Stat 4 Label</label><input class="fi" id="c_STAT_4_LBL"/></div>
         </div>
       </div>
-      <div class="admin-card"><div class="admin-card-title">How It Works</div>
+      <div class="admin-card"><div class="admin-card-title">How It Works — Homepage Section</div>
         <div class="fgrid">
-          <div class="fg"><label class="fl">Section Title</label><input class="fi" id="c_HOW_TITLE"/></div>
-          <div class="fg"><label class="fl">Section Subtitle</label><input class="fi" id="c_HOW_SUBTITLE"/></div>
-          <div class="fg"><label class="fl">Step 1 Name</label><input class="fi" id="c_HOW_STEP_1"/></div>
-          <div class="fg"><label class="fl">Step 2 Name</label><input class="fi" id="c_HOW_STEP_2"/></div>
-          <div class="fg"><label class="fl">Step 3 Name</label><input class="fi" id="c_HOW_STEP_3"/></div>
+          <div class="fg"><label class="fl">Section Title</label><input class="fi" id="c_HOW_TITLE" placeholder="How It Works"/></div>
+          <div class="fg"><label class="fl">Section Subtitle</label><input class="fi" id="c_HOW_SUBTITLE" placeholder="Three simple steps to start earning"/></div>
+          <div class="fg"><label class="fl">Step 1 Name</label><input class="fi" id="c_HOW_STEP_1" placeholder="Register"/></div>
+          <div class="fg"><label class="fl">Step 2 Name</label><input class="fi" id="c_HOW_STEP_2" placeholder="Activate"/></div>
+          <div class="fg"><label class="fl">Step 3 Name</label><input class="fi" id="c_HOW_STEP_3" placeholder="Earn"/></div>
         </div>
-        <div class="fg"><label class="fl">Step 1 Description</label><input class="fi" id="c_HOW_1"/></div>
-        <div class="fg"><label class="fl">Step 2 Description</label><input class="fi" id="c_HOW_2"/></div>
-        <div class="fg"><label class="fl">Step 3 Description</label><input class="fi" id="c_HOW_3"/></div>
+        <div class="fg" style="margin-top:.5rem"><label class="fl">Step 1 Description</label><input class="fi" id="c_HOW_1" placeholder="Connect wallet and register your node…"/></div>
+        <div class="fg" style="margin-top:.5rem"><label class="fl">Step 2 Description</label><input class="fi" id="c_HOW_2" placeholder="Pay system fee + 6 levels directly peer-to-peer…"/></div>
+        <div class="fg" style="margin-top:.5rem"><label class="fl">Step 3 Description</label><input class="fi" id="c_HOW_3" placeholder="Share your link and receive direct payments…"/></div>
+      </div>
+      <div class="admin-card"><div class="admin-card-title">How It Works — Full Guide Page</div>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">These texts appear on the full "How It Works" dedicated page.</p>
+        <div class="fg" style="margin-bottom:.7rem"><label class="fl">FIFO Explanation</label>
+          <textarea class="fi" id="c_HOW_FIFO" rows="3" style="resize:vertical;line-height:1.5" placeholder="FIFO = First In, First Out. Every new user's upline is derived from their referrer's upline matrix…"></textarea></div>
+        <div class="fg" style="margin-bottom:.7rem"><label class="fl">Earnings Section Intro</label>
+          <textarea class="fi" id="c_HOW_EARN_TEXT" rows="2" style="resize:vertical;line-height:1.5" placeholder="The scenario below assumes each level costs 10 USDT and every active user refers exactly 3 new users…"></textarea></div>
+        <p style="font-size:.73rem;color:var(--muted);margin:.8rem 0 .5rem;font-weight:600">FAQ (4 questions)</p>
+        <div class="fgrid">
+          <div class="fg"><label class="fl">FAQ 1 Question</label><input class="fi" id="c_HOW_FAQ_1_Q" placeholder="Do I need to refer people to earn?"/></div>
+          <div class="fg"><label class="fl">FAQ 1 Answer</label><input class="fi" id="c_HOW_FAQ_1_A" placeholder="You earn from any user who ends up with you in their upline…"/></div>
+          <div class="fg"><label class="fl">FAQ 2 Question</label><input class="fi" id="c_HOW_FAQ_2_Q" placeholder="When does my referral link activate?"/></div>
+          <div class="fg"><label class="fl">FAQ 2 Answer</label><input class="fi" id="c_HOW_FAQ_2_A" placeholder="After paying system fee and all 6 level activations…"/></div>
+          <div class="fg"><label class="fl">FAQ 3 Question</label><input class="fi" id="c_HOW_FAQ_3_Q" placeholder="What blockchain / token is used?"/></div>
+          <div class="fg"><label class="fl">FAQ 3 Answer</label><input class="fi" id="c_HOW_FAQ_3_A" placeholder="Solana network, USDT (SPL token)…"/></div>
+          <div class="fg"><label class="fl">FAQ 4 Question</label><input class="fi" id="c_HOW_FAQ_4_Q" placeholder="Is my wallet safe?"/></div>
+          <div class="fg"><label class="fl">FAQ 4 Answer</label><input class="fi" id="c_HOW_FAQ_4_A" placeholder="SmartNode only reads your public address…"/></div>
+        </div>
       </div>
       <div class="admin-card"><div class="admin-card-title">Register Page</div>
         <div class="fgrid">
@@ -1447,7 +1451,43 @@ function updateWalletUI(){
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active')}
 function goHome(){history.replaceState(null,'',location.pathname);showView('viewLanding')}
 function backToDash(){showView('viewActivation')}
-function showHowTo(e){if(e)e.preventDefault();showView('viewHowTo');window.scrollTo({top:0,behavior:'smooth'})}
+function renderHowTo(){
+  const C=cfg();
+  const fifo=$('htFifoText');
+  if(fifo&&C.HOW_FIFO)fifo.innerHTML=C.HOW_FIFO;
+  const earnTxt=$('htEarnText');
+  if(earnTxt&&C.HOW_EARN_TEXT)earnTxt.innerHTML=C.HOW_EARN_TEXT;
+  const lvlAmt=$('htLevelAmt');
+  if(lvlAmt)lvlAmt.textContent=(C.LEVEL_AMOUNT||'10')+' USDT';
+  // Rebuild earnings table rows using actual level amount
+  const amt=parseFloat(C.LEVEL_AMOUNT||10);
+  const rows=[[3,1],[9,2],[27,3],[81,4],[243,5],[729,6]];
+  const activation=amt*7;
+  const total=rows.reduce((s,[n])=>s+n*amt,0);
+  const tbody=document.querySelector('#htEarnTable tbody');
+  if(tbody){
+    tbody.innerHTML=`<tr><td><strong>You</strong></td><td>1</td><td>—</td><td>Pay ${activation} USDT to activate</td><td style="color:var(--red)">−${activation} USDT</td></tr>`
+      +rows.map(([n,l],i)=>{const earn=n*amt;const tag=i===0?'<span class="earn-tag">direct</span>':i===1?'<span class="earn-tag p">indirect</span>':'';
+        return `<tr><td>Gen ${l} ${tag}</td><td>${n}</td><td>L${l} in their chain</td><td>${n} × ${amt} USDT (L${l})</td><td class="hi">+${earn.toLocaleString()} USDT</td></tr>`}).join('')
+      +`<tr style="background:rgba(0,255,136,.05);font-weight:700"><td colspan="4" style="color:var(--green)">Total Received (all 6 generations)</td><td class="hi" style="font-size:1rem">+${total.toLocaleString()} USDT</td></tr>`
+      +`<tr style="background:rgba(0,255,136,.08)"><td colspan="4" style="color:var(--green)">Net Profit (after ${activation} USDT activation)</td><td class="hi" style="font-size:1.05rem">+${(total-activation).toLocaleString()} USDT</td></tr>`;
+  }
+  // FAQ
+  const faqEl=$('htFaqList');if(!faqEl)return;
+  const defaultFaqs=[
+    ['Do I need to refer people to earn?','You earn from <em>any</em> user who ends up with you in their upline, not just your direct referrals. As the FIFO matrix rotates, your node can appear in the L1–L6 of users multiple levels deep in any branch of the network.'],
+    ['When does my referral link activate?','Your referral link becomes active only after you have paid the system fee <strong>and</strong> all 6 level activations. This ensures every active referrer has already contributed to the network.'],
+    ['What blockchain / token is used?','SmartNode runs on <strong style="color:var(--cyan)">Solana</strong>. Payments are made in <strong>USDT (SPL token)</strong>. Solana offers near-instant finality and very low fees, making micro-payments practical.'],
+    ['Is my wallet safe?','SmartNode only reads your public address and asks you to sign individual payment transactions. It never requests access to your full wallet or seed phrase. You approve each payment manually in your wallet app.'],
+  ];
+  faqEl.innerHTML=[1,2,3,4].map(i=>{
+    const q=C[`HOW_FAQ_${i}_Q`]||defaultFaqs[i-1]?.[0]||'';
+    const a=C[`HOW_FAQ_${i}_A`]||defaultFaqs[i-1]?.[1]||'';
+    if(!q)return '';
+    return `<div class="ht-step-row"><div class="ht-step-body"><h3>${q}</h3><p>${a}</p></div></div>`;
+  }).join('');
+}
+function showHowTo(e){if(e)e.preventDefault();renderHowTo();showView('viewHowTo');window.scrollTo({top:0,behavior:'smooth'})}
 
 // ── Admin link (hidden, uses CONTROL_TOKEN from config) ──
 function openSys(e){
@@ -1506,12 +1546,11 @@ async function renderLanding(){
     [C.FEAT_3_ICON||'⚡',C.FEAT_3_TITLE||'Instant Payments',C.FEAT_3_TEXT||'']
   ].map(([i,t,x])=>`<div class="feat-card"><div class="feat-icon">${i}</div><div class="feat-title">${t}</div><div class="feat-text">${x}</div></div>`).join('');
   // How section title/subtitle
-  const howH=document.querySelector('.how-section h2');
-  const howP=document.querySelector('.how-section p');
+  const howH=$('howTitle');const howP=$('howSub');
   if(howH)howH.textContent=C.HOW_TITLE||'How It Works';
   if(howP)howP.textContent=C.HOW_SUBTITLE||'Three simple steps to start earning';
-  $('howSteps').innerHTML=[[C.HOW_STEP_1||'Register',C.HOW_1||''],[C.HOW_STEP_2||'Activate',C.HOW_2||''],[C.HOW_STEP_3||'Earn',C.HOW_3||'']]
-    .map(([t,x],i)=>`<div class="how-step"><div class="how-num">${i+1}</div><div style="font-size:.9rem;font-weight:700;margin-bottom:.4rem">${t}</div><div style="font-size:.82rem;color:var(--muted);line-height:1.55">${x}</div></div>`).join('');
+  $('howSteps').innerHTML=[[C.HOW_STEP_1||'Register',C.HOW_1||'Connect your Solana wallet and choose a unique username to register your node — free, instant, no KYC.'],[C.HOW_STEP_2||'Activate',C.HOW_2||'Pay the system fee and 6 level activations directly to your upline wallets. Each payment goes peer-to-peer — no intermediary.'],[C.HOW_STEP_3||'Earn',C.HOW_3||'Share your referral link. Every user who joins through your link sends their level payments directly to your wallet first.']]
+    .map(([t,x],i)=>`<div class="how-step"><div class="how-num">${i+1}</div><div class="how-stitle">${t}</div><div class="how-sdesc">${x}</div></div>`).join('');
   $('landFooter').textContent=C.FOOTER_TEXT||'';
 }
 
@@ -2005,6 +2044,8 @@ async function loadAdminConfig(){
     ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE','FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT',
      'FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT','FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT',
      'HOW_TITLE','HOW_SUBTITLE','HOW_1','HOW_2','HOW_3','HOW_STEP_1','HOW_STEP_2','HOW_STEP_3',
+     'HOW_FIFO','HOW_EARN_TEXT',
+     'HOW_FAQ_1_Q','HOW_FAQ_1_A','HOW_FAQ_2_Q','HOW_FAQ_2_A','HOW_FAQ_3_Q','HOW_FAQ_3_A','HOW_FAQ_4_Q','HOW_FAQ_4_A',
      'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
      'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
      'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
@@ -2033,6 +2074,8 @@ async function saveConfig(){
   ['APP_NAME','APP_TITLE','HERO_TITLE','HERO_SUBTITLE','FEAT_1_ICON','FEAT_1_TITLE','FEAT_1_TEXT',
    'FEAT_2_ICON','FEAT_2_TITLE','FEAT_2_TEXT','FEAT_3_ICON','FEAT_3_TITLE','FEAT_3_TEXT',
    'HOW_TITLE','HOW_SUBTITLE','HOW_1','HOW_2','HOW_3','HOW_STEP_1','HOW_STEP_2','HOW_STEP_3',
+   'HOW_FIFO','HOW_EARN_TEXT',
+   'HOW_FAQ_1_Q','HOW_FAQ_1_A','HOW_FAQ_2_Q','HOW_FAQ_2_A','HOW_FAQ_3_Q','HOW_FAQ_3_A','HOW_FAQ_4_Q','HOW_FAQ_4_A',
    'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
    'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
    'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
