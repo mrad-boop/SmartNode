@@ -117,6 +117,38 @@
     .sys-link{font-size:.75rem;color:rgba(255,255,255,.18);text-decoration:none;padding:.3rem .5rem;
       border-radius:5px;transition:all .2s;letter-spacing:.05em}
     .sys-link:hover{color:var(--muted)}
+    /* how-to nav */
+    .how-nav{font-size:.8rem;color:var(--muted);text-decoration:none;padding:.35rem .7rem;border-radius:7px;
+      border:1px solid transparent;transition:all .2s;white-space:nowrap}
+    .how-nav:hover{color:var(--green);border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.05)}
+    /* how-to page */
+    .ht-hero{text-align:center;padding:3rem 1rem 2rem;max-width:700px;margin:0 auto}
+    .ht-section{max-width:860px;margin:0 auto;padding:0 1rem 3rem}
+    .ht-step-row{display:flex;align-items:flex-start;gap:1.2rem;margin-bottom:1.8rem;padding:1.2rem;
+      background:var(--bg2);border:1px solid var(--border);border-radius:14px}
+    .ht-step-num{width:2.5rem;height:2.5rem;min-width:2.5rem;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-weight:800;font-size:1.1rem;background:rgba(0,255,136,.12);color:var(--green);
+      border:2px solid rgba(0,255,136,.3)}
+    .ht-step-num.p{background:rgba(123,47,247,.12);color:var(--purple);border-color:rgba(123,47,247,.3)}
+    .ht-step-num.c{background:rgba(0,212,255,.12);color:var(--cyan);border-color:rgba(0,212,255,.3)}
+    .ht-step-body h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem}
+    .ht-step-body p{font-size:.88rem;color:var(--muted);line-height:1.6;margin:0}
+    .earn-table{width:100%;border-collapse:collapse;font-size:.83rem;margin-top:1rem}
+    .earn-table th{padding:.55rem .8rem;background:rgba(0,255,136,.08);color:var(--green);
+      font-weight:700;text-align:left;border-bottom:1px solid var(--border)}
+    .earn-table td{padding:.5rem .8rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+    .earn-table tr:last-child td{border-bottom:none}
+    .earn-table .hi{color:var(--green);font-weight:700}
+    .earn-tag{display:inline-block;padding:.15rem .5rem;border-radius:5px;font-size:.7rem;font-weight:700;
+      background:rgba(0,255,136,.12);color:var(--green);margin-left:.3rem}
+    .earn-tag.p{background:rgba(123,47,247,.15);color:var(--purple)}
+    .earn-tag.c{background:rgba(0,212,255,.12);color:var(--cyan)}
+    .ht-callout{background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.2);border-radius:12px;
+      padding:1.2rem 1.4rem;margin:1.5rem 0;font-size:.88rem;line-height:1.7;color:var(--text)}
+    .ht-callout strong{color:var(--green)}
+    html[data-theme="2"] .ht-step-num{background:rgba(255,193,7,.1);color:var(--green);border-color:rgba(255,193,7,.3)}
+    html[data-theme="2"] .earn-table th{background:rgba(255,193,7,.08);color:var(--green)}
+    html[data-theme="2"] .ht-callout{background:rgba(255,193,7,.04);border-color:rgba(255,193,7,.2)}
 
     /* VIEWS */
     .view{display:none}.view.active{display:block}
@@ -154,6 +186,10 @@
       border-radius:8px;color:var(--text);font-size:.95rem;transition:border-color .2s,box-shadow .2s;outline:none}
     .form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,255,136,.1)}
     .form-input::placeholder{color:var(--muted)}
+    .form-input.input-err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(255,71,87,.15)!important;animation:shake .35s ease}
+    .input-err-msg{font-size:.72rem;color:var(--red);margin-top:.3rem;display:none}
+    .input-err-msg.show{display:block}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
     /* ── CUSTOM COUNTRY SELECT ── */
     .csel-wrap{position:relative;width:100%}
     .csel-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;
@@ -447,6 +483,7 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
+    <a href="#" class="how-nav" onclick="showHowTo(event)">How It Works</a>
     <!-- Admin link: looks like a harmless node indicator -->
     <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
     <button id="walletBtn" onclick="connectWallet()">
@@ -481,8 +518,210 @@
     <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.5rem">How It Works</h2>
     <p style="color:var(--muted);font-size:.9rem;margin-bottom:2.5rem">Three simple steps to start earning</p>
     <div class="how-steps" id="howSteps"></div>
+    <div style="text-align:center;margin-top:2rem">
+      <button class="btn btn-c" onclick="showHowTo()" style="font-size:.85rem;padding:.55rem 1.4rem">
+        📖 Full Guide &amp; Earnings Calculator →
+      </button>
+    </div>
   </div>
   <div class="land-footer" id="landFooter"></div>
+</div>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<div id="viewHowTo" class="view">
+  <div class="ht-hero">
+    <div style="display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .8rem;border-radius:100px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);font-size:.75rem;color:var(--cyan);margin-bottom:1.2rem">📖 Complete Guide</div>
+    <h1 style="font-size:clamp(1.6rem,5vw,2.4rem);margin-bottom:.7rem">How <span style="color:var(--green)">SmartNode</span> Works</h1>
+    <p style="color:var(--muted);font-size:.93rem;line-height:1.7;max-width:560px;margin:0 auto">
+      A step-by-step explanation of the FIFO matrix, how payments flow, and what you can earn when your network grows.
+    </p>
+    <button class="btn btn-p" onclick="goHome()" style="margin-top:1.5rem;font-size:.8rem">← Back to Home</button>
+  </div>
+
+  <div class="ht-section">
+
+    <!-- STEP 1: Register -->
+    <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:1.2rem;color:var(--green)">① Getting Started</h2>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num">1</div>
+      <div class="ht-step-body">
+        <h3>Connect Your Solana Wallet</h3>
+        <p>Use Phantom or Solflare browser extension, or the Phantom mobile app. Your wallet address is your unique identity on the network — no email, no KYC. On mobile, use the in-app browser to connect directly.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num">2</div>
+      <div class="ht-step-body">
+        <h3>Choose a Username &amp; Register</h3>
+        <p>Pick a unique username (3–20 characters, letters/numbers/underscore). Registration is <strong style="color:var(--green)">free</strong>. If you arrived via someone's referral link, your upline matrix is automatically set from their network — otherwise the system default is used.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num p">3</div>
+      <div class="ht-step-body">
+        <h3>Pay the System Fee &amp; 6 Level Activations</h3>
+        <p>To become fully active you complete <strong>7 payments</strong> in USDT on Solana:<br>
+        — 1× System Fee (sent to the platform)<br>
+        — 6× Level payments (sent <em>directly</em> to your 6 upline nodes, in order L1 → L6)<br>
+        Each payment goes wallet-to-wallet. SmartNode never holds your funds.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num c">4</div>
+      <div class="ht-step-body">
+        <h3>Share Your Referral Link &amp; Earn</h3>
+        <p>Once all 6 levels are paid your referral link activates. Anyone who registers through your link will have <em>you</em> at position L1 of their upline — meaning every level they pay sends USDT directly to your wallet first.</p>
+      </div>
+    </div>
+
+    <!-- FIFO explanation -->
+    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">② The FIFO Matrix Explained</h2>
+
+    <div class="ht-callout">
+      <strong>FIFO = First In, First Out.</strong> Every new user's upline is derived from their referrer's upline matrix. The queue rotates automatically: your referrer moves to L6 in your chain, and their 5 existing uplines shift from L2→L1 to cover L1→L5. This means the oldest active participants always appear first in the payment chain — the system is provably fair and never requires admin intervention.
+    </div>
+
+    <div class="ht-step-row" style="margin-bottom:.8rem">
+      <div class="ht-step-body" style="width:100%">
+        <h3 style="margin-bottom:.7rem">How the Matrix Builds</h3>
+        <p style="margin-bottom:.8rem">Example: Alice has upline <code style="background:rgba(0,255,136,.08);color:var(--green);padding:.1rem .4rem;border-radius:4px">[U1, U2, U3, U4, U5, Alice]</code></p>
+        <p>When Bob registers via Alice's link, Bob's upline becomes:<br>
+        <code style="background:rgba(0,212,255,.08);color:var(--cyan);padding:.1rem .4rem;border-radius:4px">[U2, U3, U4, U5, Alice, Bob's_referrer=Alice]</code><br>
+        — Alice moves to L5, and the chain shifts one position forward. Bob pays L1 (U2) first, all the way to L6 (Alice).</p>
+      </div>
+    </div>
+
+    <!-- EARNINGS EXAMPLE -->
+    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--green)">③ Earnings Example — Each User Brings 3 New Users</h2>
+
+    <div class="ht-callout">
+      The scenario below assumes each level costs <strong>10 USDT</strong> and every active user refers exactly <strong>3 new users</strong>. Payments are direct wallet-to-wallet — you receive USDT the moment a downline activates a level where you are in their L1 position.
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="earn-table">
+        <thead>
+          <tr>
+            <th>Generation</th>
+            <th>Nodes</th>
+            <th>Your Position</th>
+            <th>Payments Received</th>
+            <th>USDT Earned</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>You</strong></td>
+            <td>1</td>
+            <td>—</td>
+            <td>Pay 70 USDT to activate</td>
+            <td style="color:var(--red)">−70 USDT</td>
+          </tr>
+          <tr>
+            <td>Gen 1 <span class="earn-tag">direct</span></td>
+            <td>3</td>
+            <td>L1 in their chain</td>
+            <td>3 × 10 USDT (L1)</td>
+            <td class="hi">+30 USDT</td>
+          </tr>
+          <tr>
+            <td>Gen 2 <span class="earn-tag p">indirect</span></td>
+            <td>9</td>
+            <td>L2 in their chain</td>
+            <td>9 × 10 USDT (L2)</td>
+            <td class="hi">+90 USDT</td>
+          </tr>
+          <tr>
+            <td>Gen 3</td>
+            <td>27</td>
+            <td>L3 in their chain</td>
+            <td>27 × 10 USDT (L3)</td>
+            <td class="hi">+270 USDT</td>
+          </tr>
+          <tr>
+            <td>Gen 4</td>
+            <td>81</td>
+            <td>L4 in their chain</td>
+            <td>81 × 10 USDT (L4)</td>
+            <td class="hi">+810 USDT</td>
+          </tr>
+          <tr>
+            <td>Gen 5</td>
+            <td>243</td>
+            <td>L5 in their chain</td>
+            <td>243 × 10 USDT (L5)</td>
+            <td class="hi">+2,430 USDT</td>
+          </tr>
+          <tr>
+            <td>Gen 6</td>
+            <td>729</td>
+            <td>L6 in their chain</td>
+            <td>729 × 10 USDT (L6)</td>
+            <td class="hi">+7,290 USDT</td>
+          </tr>
+          <tr style="background:rgba(0,255,136,.05);font-weight:700">
+            <td colspan="4" style="color:var(--green)">Total Received (all 6 generations)</td>
+            <td class="hi" style="font-size:1rem">+10,920 USDT</td>
+          </tr>
+          <tr style="background:rgba(0,255,136,.08)">
+            <td colspan="4" style="color:var(--green)">Net Profit (after 70 USDT activation)</td>
+            <td class="hi" style="font-size:1.05rem">+10,850 USDT</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ht-callout" style="margin-top:1.5rem">
+      <strong>Important notes:</strong><br>
+      — These figures are <em>illustrative</em> only and assume ideal conditions (every user refers exactly 3 people).<br>
+      — Actual earnings depend on your network's activity and the FIFO queue position at each level.<br>
+      — All payments are peer-to-peer; SmartNode is a coordination layer, not a custodian.<br>
+      — The amount per level is set by the platform administrator and may differ from the example above.
+    </div>
+
+    <!-- FAQ -->
+    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">④ Frequently Asked Questions</h2>
+
+    <div class="ht-step-row">
+      <div class="ht-step-body">
+        <h3>Do I need to refer people to earn?</h3>
+        <p>You earn from <em>any</em> user who ends up with you in their upline, not just your direct referrals. As the FIFO matrix rotates, your node can appear in the L1–L6 of users multiple levels deep in any branch of the network.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-body">
+        <h3>When does my referral link activate?</h3>
+        <p>Your referral link becomes active only after you have paid the system fee <strong>and</strong> all 6 level activations. This ensures every active referrer has already contributed to the network.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-body">
+        <h3>What blockchain / token is used?</h3>
+        <p>SmartNode runs on <strong style="color:var(--cyan)">Solana</strong>. Payments are made in <strong>USDT (SPL token)</strong>. Solana offers near-instant finality and very low fees, making micro-payments practical.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-body">
+        <h3>Is my wallet safe?</h3>
+        <p>SmartNode only reads your public address and asks you to sign individual payment transactions. It never requests access to your full wallet or seed phrase. You approve each payment manually in your wallet app.</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:2rem 0">
+      <button class="btn btn-g btn-xl" onclick="joinMatrix()">Join the Matrix →</button>
+      <div style="margin-top:.8rem">
+        <button class="btn btn-p" onclick="goHome()" style="font-size:.8rem">← Back to Home</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- ═══ REGISTER ═══ -->
@@ -500,7 +739,8 @@
     <div class="card card-p" style="margin-bottom:1.5rem">
       <div class="form-group">
         <label class="form-label">Choose Username</label>
-        <input id="usernameInput" class="form-input" type="text" placeholder="e.g. BOSS, CryptoKing, Node_01" maxlength="20" oninput="onUsernameInput()"/>
+        <input id="usernameInput" class="form-input" type="text" placeholder="e.g. BOSS, CryptoKing, Node_01" maxlength="20" oninput="onUsernameInput();clearInputErr('usernameInput','usernameErr')"/>
+        <div id="usernameErr" class="input-err-msg"></div>
       </div>
       <div class="mx-preview">
         <div class="mx-preview-title">Your Upline Matrix Preview</div>
@@ -837,6 +1077,9 @@
         <div class="fgrid">
           <div class="fg"><label class="fl">Username *</label><input class="fi" id="newUsername" placeholder="min 3 chars, letters/numbers/_"/></div>
           <div class="fg"><label class="fl">Wallet (optional)</label><input class="fi" id="newWallet" placeholder="Solana address"/></div>
+          <div class="fg"><label class="fl">Country (optional)</label>
+            <select class="fi" id="newCountry"><option value="">— Select country —</option></select>
+          </div>
           <div class="fg"><label class="fl">Referrer (optional)</label><input class="fi" id="newReferrer" placeholder="existing username — ignored if custom matrix is set"/></div>
         </div>
 
@@ -849,17 +1092,10 @@
         </div>
         <div id="customMxFields" style="display:none;padding:.85rem;background:rgba(123,47,247,.06);border:1px solid rgba(123,47,247,.2);border-radius:10px;margin-bottom:.85rem">
           <p style="font-size:.75rem;color:var(--muted);margin-bottom:.8rem">
-            💡 Fill all 6 levels. Anyone who registers via <strong>this node's referral link</strong> will have their upline derived from these addresses.
+            💡 Fill all 6 levels. Anyone who registers via <strong>this node's referral link</strong> will have their upline derived from these nodes.
             Leave all empty to use referrer / default matrix logic instead.
           </p>
-          <div class="fgrid">
-            <div class="fg"><label class="fl">L1 — first to receive payment</label><input class="fi" id="cmx_1" placeholder="username"/></div>
-            <div class="fg"><label class="fl">L2</label><input class="fi" id="cmx_2" placeholder="username"/></div>
-            <div class="fg"><label class="fl">L3</label><input class="fi" id="cmx_3" placeholder="username"/></div>
-            <div class="fg"><label class="fl">L4</label><input class="fi" id="cmx_4" placeholder="username"/></div>
-            <div class="fg"><label class="fl">L5</label><input class="fi" id="cmx_5" placeholder="username"/></div>
-            <div class="fg"><label class="fl">L6 — last to receive</label><input class="fi" id="cmx_6" placeholder="username"/></div>
-          </div>
+          <div id="customMxGrid"></div>
         </div>
 
         <button class="btn btn-g" onclick="adminCreateUser()">Create Node</button>
@@ -1209,8 +1445,9 @@ function updateWalletUI(){
 
 // ── Views ────────────────────────────────────────────────
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active')}
-function goHome(){showView('viewLanding')}
+function goHome(){history.replaceState(null,'',location.pathname);showView('viewLanding')}
 function backToDash(){showView('viewActivation')}
+function showHowTo(e){if(e)e.preventDefault();showView('viewHowTo');window.scrollTo({top:0,behavior:'smooth'})}
 
 // ── Admin link (hidden, uses CONTROL_TOKEN from config) ──
 function openSys(e){
@@ -1286,9 +1523,20 @@ async function renderMatrixPreview(){
   if(referrer){const ru=await loadUser(referrer);if(ru)matrix=[...ru.uplineMatrix.slice(1),referrer]}
   $('matrixPreview').innerHTML=matrix.map((n,i)=>`<div class="lv-chip ${i===5?'lv6':''}"><div class="cn">L${i+1}</div><div class="cv" title="${n}">${n}</div></div>`).join('');
 }
+function showInputErr(inputId,errId,msg){
+  const inp=$(inputId);if(inp){inp.classList.add('input-err');inp.focus();}
+  const err=$(errId);if(err){err.textContent=msg;err.classList.add('show');}
+}
+function clearInputErr(inputId,errId){
+  const inp=$(inputId);if(inp)inp.classList.remove('input-err');
+  const err=$(errId);if(err)err.classList.remove('show');
+}
+
 async function register(){
   const raw=$('usernameInput').value.trim();
-  if(!raw){toast('Enter a username','err');return}
+  if(!raw){showInputErr('usernameInput','usernameErr','Please enter a username (min 3 characters)');return}
+  if(raw.length<3){showInputErr('usernameInput','usernameErr','Username must be at least 3 characters');return}
+  clearInputErr('usernameInput','usernameErr');
   const btn=$('registerBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registering...';
   try{
     const user=await apiPost('/api/register',{username:raw,walletAddress:connectedWallet||null,referrer:getRef()||null});
@@ -1296,7 +1544,6 @@ async function register(){
     toast(`Welcome, ${user.username}!`,'ok');showActivation();
   }catch(e){
     if(e.message==='wallet_taken'){
-      // Wallet already registered — find and log in that user
       toast('Wallet already registered — logging you in...','inf');
       try{
         const existing=await apiGet(`/api/wallet/${encodeURIComponent(connectedWallet)}`);
@@ -1304,7 +1551,9 @@ async function register(){
         toast(`Welcome back, ${existing.username}! 👋`,'ok');
         await showActivation();
       }catch{toast('Wallet is already linked to another account','err')}
-    }else{toast(e.message,'err')}
+    }else{
+      showInputErr('usernameInput','usernameErr',e.message);
+    }
   }
   finally{btn.disabled=false;btn.innerHTML='⬡ Activate Node &amp; Join Matrix'}
 }
@@ -1315,6 +1564,7 @@ function logout(){
   clearSession();currentUser=null;connectedWallet=null;
   $('logoutBtn').style.display='none';
   $('sysLink').style.display='';
+  history.replaceState(null,'',location.pathname);
   updateWalletUI();updateDebug();
   renderLanding();showView('viewLanding');
 }
@@ -1745,6 +1995,7 @@ function adminLogout(){
   adminPassword='';
   $('adminLoginBox').style.display='block';$('adminDash').style.display='none';$('adminPwd').value='';
   $('sysLink').style.display='';
+  history.replaceState(null,'',location.pathname);
   renderLanding();showView('viewLanding');
 }
 
@@ -1827,9 +2078,35 @@ async function adminDeleteUser(username){
   }catch(e){toast('Delete failed: '+e.message,'err')}
 }
 
+let _cmxBuilt=false;
+function buildCustomMxRows(){
+  if(_cmxBuilt)return;_cmxBuilt=true;
+  const grid=$('customMxGrid');if(!grid)return;
+  const colors=['#7b2ff7','#00d4ff','#00ff88','#ff9900','#ff4466','#a259ff'];
+  let html='';
+  for(let i=1;i<=6;i++){
+    const col=colors[i-1];
+    const lbl=i===1?'— first to receive payment':i===6?'— last to receive payment':'';
+    html+=`<div style="margin-bottom:1.1rem;padding:.85rem 1rem;border-left:4px solid ${col};border-radius:0 10px 10px 0;background:rgba(0,0,0,.22)">
+      <div style="font-size:.72rem;font-weight:800;color:${col};margin-bottom:.65rem;letter-spacing:.06em;text-transform:uppercase">L${i} ${lbl}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem">
+        <div><label class="fl" style="font-size:.68rem">Username *</label><input class="fi" id="cmx_${i}" placeholder="username" style="font-size:.82rem"/></div>
+        <div><label class="fl" style="font-size:.68rem">Display Name</label><input class="fi" id="cmxn_${i}" placeholder="Full name (optional)" style="font-size:.82rem"/></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        <div><label class="fl" style="font-size:.68rem">Solana Wallet</label><input class="fi" id="cmxw_${i}" placeholder="Wallet address (optional)" style="font-size:.82rem"/></div>
+        <div><label class="fl" style="font-size:.68rem">Country</label><select class="fi" id="cmxc_${i}" style="font-size:.82rem"><option value="">— Country —</option></select></div>
+      </div>
+    </div>`;
+  }
+  grid.innerHTML=html;
+  for(let i=1;i<=6;i++)buildCountrySelect(`cmxc_${i}`,true);
+}
+
 function toggleCustomMatrix(){
   const box=$('customMxFields');
   const open=box.style.display==='none';
+  if(open)buildCustomMxRows();
   box.style.display=open?'block':'none';
   const btn=$('cmxToggleBtn');
   btn.style.borderColor=open?'var(--green)':'';
@@ -1840,35 +2117,53 @@ function toggleCustomMatrix(){
 async function adminCreateUser(){
   const username=$('newUsername').value.trim();
   const wallet=$('newWallet').value.trim()||null;
+  const country=$('newCountry')?.value||null;
   const referrer=$('newReferrer').value.trim()||null;
   if(!username){toast('Username required','err');return}
 
-  // Check if custom matrix is set
   let customMatrix=null;
-  const cmxVals=[1,2,3,4,5,6].map(i=>($(`cmx_${i}`)?.value||'').trim());
-  const filled=cmxVals.filter(Boolean).length;
-  if(filled>0){
-    if(filled<6){toast('Fill all 6 levels for the custom matrix, or leave all empty','err');return}
-    customMatrix=cmxVals;
+  if(_cmxBuilt){
+    const cmxRows=[1,2,3,4,5,6].map(i=>({
+      username:($(`cmx_${i}`)?.value||'').trim(),
+      name:($(`cmxn_${i}`)?.value||'').trim()||null,
+      wallet:($(`cmxw_${i}`)?.value||'').trim()||null,
+      country:($(`cmxc_${i}`)?.value||'').trim()||null,
+    }));
+    const filled=cmxRows.filter(r=>r.username).length;
+    if(filled>0){
+      if(filled<6){toast('Fill all 6 level usernames for the custom matrix, or leave all empty','err');return}
+      customMatrix=cmxRows;
+    }
   }
 
   try{
-    const body={username,walletAddress:wallet,referrer};
+    const body={username,walletAddress:wallet,country:country||null,referrer};
     if(customMatrix)body.customMatrix=customMatrix;
     const user=await apiPost('/api/admin/create-user',body,{'X-Admin-Password':adminPassword});
-    const shareLink=`${location.origin}${location.pathname}?ref=${user.username}`;
     toast(`✓ Node "${user.username}" created! Share: ?ref=${user.username}`,'ok');
     $('newUsername').value='';$('newWallet').value='';$('newReferrer').value='';
-    for(let i=1;i<=6;i++){const el=$(`cmx_${i}`);if(el)el.value='';}
+    setCountryVal('newCountry','');
+    if(_cmxBuilt){
+      for(let i=1;i<=6;i++){
+        const eu=$(`cmx_${i}`);if(eu)eu.value='';
+        const en=$(`cmxn_${i}`);if(en)en.value='';
+        const ew=$(`cmxw_${i}`);if(ew)ew.value='';
+        setCountryVal(`cmxc_${i}`,'');
+      }
+    }
     loadUsers();
   }catch(e){toast('Create failed: '+e.message,'err')}
 }
 
+let _usersTabInit=false;
 function switchTab(id,btn){
   document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   $(id).classList.add('active');btn.classList.add('active');
-  if(id==='tUsers')loadUsers();
+  if(id==='tUsers'){
+    if(!_usersTabInit){_usersTabInit=true;buildCountrySelect('newCountry',true);}
+    loadUsers();
+  }
 }
 
 // ── Toast ────────────────────────────────────────────────

@@ -130,16 +130,51 @@ app.delete('/api/admin/users/:username', adminAuth, async (req, res) => {
 
 app.post('/api/admin/create-user', adminAuth, async (req, res) => {
   try {
-    let { username, walletAddress, referrer, customMatrix } = req.body;
+    let { username, walletAddress, country, referrer, customMatrix } = req.body;
     username = String(username || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
     if (username.length < 3) return res.status(400).json({ error: 'Username must be at least 3 characters' });
     if (await db.usernameExists(username)) return res.status(409).json({ error: `Username "${username}" already taken` });
     if (walletAddress && await db.walletExists(walletAddress)) return res.status(409).json({ error: 'Wallet already used' });
 
     let uplineMatrix;
-    if (Array.isArray(customMatrix) && customMatrix.length === 6) {
-      // Admin-defined custom upline — sanitize each entry
-      uplineMatrix = customMatrix.map(u => String(u || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20));
+    // customMatrix can be array of strings (legacy) or array of {username,wallet,country} objects
+    const isObjectMatrix = Array.isArray(customMatrix) && customMatrix.length === 6 && typeof customMatrix[0] === 'object';
+    const isStringMatrix = Array.isArray(customMatrix) && customMatrix.length === 6 && typeof customMatrix[0] === 'string';
+
+    if (isObjectMatrix || isStringMatrix) {
+      // Build upline from the provided entries
+      uplineMatrix = customMatrix.map(entry => {
+        const u = isObjectMatrix ? String(entry?.username || '') : String(entry || '');
+        return u.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
+      });
+
+      // For object matrix: auto-create or update each level node
+      if (isObjectMatrix) {
+        for (const entry of customMatrix) {
+          const lu = String(entry?.username || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
+          if (!lu) continue;
+          const lw = entry?.wallet ? String(entry.wallet).slice(0, 64) : null;
+          const lc = entry?.country ? String(entry.country).slice(0, 4) : null;
+          const ln = entry?.name ? String(entry.name).slice(0, 100) : null;
+          const exists = await db.usernameExists(lu);
+          if (!exists) {
+            // Auto-create the level node with the default upline
+            const appCfg = buildAppConfig(await db.getConfig());
+            await db.createUser({ username: lu, walletAddress: lw, referrer: null, uplineMatrix: [...appCfg.DEFAULT_MATRIX] });
+            const upd = {};
+            if (lc) upd.country = lc;
+            if (ln) upd.fullName = ln;
+            if (Object.keys(upd).length) await db.updateUser(lu, upd);
+          } else {
+            // Update wallet/country/name if provided
+            const updates = {};
+            if (lw) updates.walletAddress = lw;
+            if (lc) updates.country = lc;
+            if (ln) updates.fullName = ln;
+            if (Object.keys(updates).length) await db.updateUser(lu, updates);
+          }
+        }
+      }
     } else {
       const appCfg = buildAppConfig(await db.getConfig());
       uplineMatrix = [...appCfg.DEFAULT_MATRIX];
@@ -148,8 +183,12 @@ app.post('/api/admin/create-user', adminAuth, async (req, res) => {
         if (refUser) uplineMatrix = [...refUser.uplineMatrix.slice(1), referrer];
       }
     }
+
     const user = await db.createUser({ username, walletAddress: walletAddress || null, referrer: referrer || null, uplineMatrix });
-    res.status(201).json(user);
+    // Apply country to the newly created node if provided
+    const cleanCountry = country ? String(country).slice(0, 4) : null;
+    if (cleanCountry) await db.updateUser(username, { country: cleanCountry });
+    res.status(201).json({ ...user, country: cleanCountry });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
