@@ -1503,7 +1503,7 @@ function updateWalletUI(){
 
 // ── Views ────────────────────────────────────────────────
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active')}
-function goHome(){history.replaceState(null,'',location.pathname);showView('viewLanding')}
+function goHome(){history.replaceState(null,'',location.pathname);renderLanding();showView('viewLanding')}
 function backToDash(){showView('viewActivation')}
 function renderHowTo(){
   const C=cfg();
