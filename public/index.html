@@ -1870,7 +1870,7 @@ function renderReferralLevels(){
     const col=depthColors[d-1];
     html+=`<button class="ref-lvl-btn${cnt===0?' empty':''}" onclick="openRefLevel(${d})" style="border-color:${col}33">
       <span class="cnt" style="color:${col}">${cnt}</span>
-      <span style="color:${col};font-weight:800;font-size:.9rem">L${d}</span>
+      <span style="color:${col};font-weight:800;font-size:.9rem">Level ${d}</span>
       <span class="lbl">${d===1?'Direct':'Indirect'}</span>
     </button>`;
   }
@@ -1944,7 +1944,7 @@ function renderMyMatrices(){
     const col=depthColors[i];
     html+=`<button class="ref-lvl-btn${cnt===0?' empty':''}" onclick="openMxLevel('${p}')" style="border-color:${col}33">
       <span class="cnt" style="color:${col}">${cnt}</span>
-      <span style="color:${col};font-weight:800;font-size:.9rem">${p}</span>
+      <span style="color:${col};font-weight:800;font-size:.9rem">Pos ${i+1}</span>
       <span class="lbl">Position</span>
     </button>`;
   });
@@ -1958,7 +1958,7 @@ function openMxLevel(pos){
   const depthColors=['var(--green)','var(--cyan)','#c084fc','var(--gold)','#ff9f43','var(--red)'];
   const idx=['L1','L2','L3','L4','L5','L6'].indexOf(pos);
   const col=depthColors[idx]||'var(--green)';
-  $('mxLevelTitle').innerHTML=`Matrices where I am at <span style="color:${col}">position ${pos}</span>`;
+  $('mxLevelTitle').innerHTML=`Matrices where I am at <span style="color:${col}">Position ${idx+1}</span>`;
   $('mxLevelSubtitle').textContent=`${items.length} matrix${items.length!==1?'es':''} found`;
   renderMxLevelPage();
   showView('viewMatrixLevel');
@@ -1980,7 +1980,7 @@ function renderMxLevelPage(){
       const slotPaid=m.paidLevels.includes(idx);
       const cls='mx-slot'+(isMine?' mine':slotPaid?' paid-slot':'');
       const label=uname.length>8?uname.slice(0,7)+'…':uname;
-      return `<div class="${cls}"><div class="sl-pos">L${idx+1}</div><div class="sl-name" title="${uname}">${label}</div></div>`;
+      return `<div class="${cls}"><div class="sl-pos">Pos ${idx+1}</div><div class="sl-name" title="${uname}">${label}</div></div>`;
     }).join('');
     return `<div class="mx-node-card" style="margin-bottom:.75rem">
       <div class="mx-node-hdr">
