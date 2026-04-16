@@ -139,7 +139,7 @@ app.put('/api/admin/users/:username', adminAuth, async (req, res) => {
     if (phone         !== undefined) updates.phone         = phone         || '';
     if (country       !== undefined) updates.country       = country       || '';
     if (paidSystemFee !== undefined) updates.paidSystemFee = Boolean(paidSystemFee);
-    if (Array.isArray(paidLevels))   updates.paidLevels    = paidLevels.map(Number).filter(n => n >= 1 && n <= 6);
+    if (Array.isArray(paidLevels))   updates.paidLevels    = paidLevels.map(Number).filter(n => n >= 0 && n <= 5);
     const user = await db.updateUser(req.params.username, updates);
     res.json(user);
   } catch (e) { res.status(500).json({ error: e.message }); }
