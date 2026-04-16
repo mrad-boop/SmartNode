@@ -133,11 +133,11 @@ app.put('/api/admin/users/:username', adminAuth, async (req, res) => {
     const { walletAddress, fullName, nickname, address, phone, country, paidSystemFee, paidLevels } = req.body;
     const updates = {};
     if (walletAddress !== undefined) updates.walletAddress = walletAddress || null;
-    if (fullName      !== undefined) updates.fullName      = fullName      || null;
-    if (nickname      !== undefined) updates.nickname      = nickname      || null;
-    if (address       !== undefined) updates.address       = address       || null;
-    if (phone         !== undefined) updates.phone         = phone         || null;
-    if (country       !== undefined) updates.country       = country       || null;
+    if (fullName      !== undefined) updates.fullName      = fullName      || '';
+    if (nickname      !== undefined) updates.nickname      = nickname      || '';
+    if (address       !== undefined) updates.address       = address       || '';
+    if (phone         !== undefined) updates.phone         = phone         || '';
+    if (country       !== undefined) updates.country       = country       || '';
     if (paidSystemFee !== undefined) updates.paidSystemFee = Boolean(paidSystemFee);
     if (Array.isArray(paidLevels))   updates.paidLevels    = paidLevels.map(Number).filter(n => n >= 1 && n <= 6);
     const user = await db.updateUser(req.params.username, updates);
