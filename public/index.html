@@ -1070,6 +1070,33 @@
         <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">These 6 slots seed every new user's matrix when there is no referrer.</p>
         <div id="matrixAdminGrid"></div>
       </div>
+
+      <div class="admin-card" style="border-color:rgba(0,212,255,.25)">
+        <div class="admin-card-title" style="color:var(--cyan)">⟳ Overflow — Auto Referral Assignment</div>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1.1rem">
+          When enabled, any new user who registers <strong>without a referral link</strong> is automatically assigned
+          to the <strong>oldest fully-active member</strong> who has had zero referrals for at least <em>X days</em>.
+          The oldest waiting member is always served first (FIFO). This ensures every active node eventually benefits from organic traffic.
+        </p>
+        <div class="fgrid">
+          <div class="fg">
+            <label class="fl">Overflow Status</label>
+            <select class="fi" id="c_OVERFLOW_ENABLED">
+              <option value="0">⛔ Disabled</option>
+              <option value="1">✅ Enabled</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Days without referral before overflow (default: 7)</label>
+            <input class="fi" type="number" id="c_OVERFLOW_DAYS" min="1" max="365" placeholder="7"/>
+          </div>
+        </div>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.75rem">
+          💡 Eligible candidate: fully paid (system fee + all 6 levels), registered ≥ X days ago, 0 direct referrals.
+          If no candidate qualifies, the new user is registered normally without a referrer.
+        </p>
+      </div>
+
       <button class="btn btn-g btn-lg" onclick="saveConfig()">💾 Save Amounts &amp; Matrix</button>
     </div>
 
@@ -2107,7 +2134,8 @@ async function loadAdminConfig(){
      'HOW_FAQ_1_Q','HOW_FAQ_1_A','HOW_FAQ_2_Q','HOW_FAQ_2_A','HOW_FAQ_3_Q','HOW_FAQ_3_A','HOW_FAQ_4_Q','HOW_FAQ_4_A',
      'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
      'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
-     'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
+     'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME',
+     'OVERFLOW_ENABLED','OVERFLOW_DAYS'
     ].forEach(k=>{const el=$('c_'+k);if(el)el.value=C[k]??''});
     selectThemePick(parseInt(C.THEME||'1',10));
     const g=$('matrixAdminGrid');g.innerHTML='';
@@ -2137,7 +2165,8 @@ async function saveConfig(){
    'HOW_FAQ_1_Q','HOW_FAQ_1_A','HOW_FAQ_2_Q','HOW_FAQ_2_A','HOW_FAQ_3_Q','HOW_FAQ_3_A','HOW_FAQ_4_Q','HOW_FAQ_4_A',
    'CTA_JOIN','CTA_WALLET','STAT_1_LBL','STAT_2_LBL','STAT_3_LBL','STAT_4_LBL',
    'REG_TITLE','REG_SUBTITLE','DASH_TITLE','DASH_SUBTITLE','REF_LOCKED_TXT',
-   'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME'
+   'FOOTER_TEXT','SYSTEM_FEE_ADDRESS','SYSTEM_FEE_AMOUNT','LEVEL_AMOUNT','THEME',
+   'OVERFLOW_ENABLED','OVERFLOW_DAYS'
   ].forEach(k=>{const el=$('c_'+k);if(el&&el.value.trim()!=='')data[k]=el.value.trim()});
   for(let i=1;i<=6;i++){
     const u=$(`mx_u${i}`),w=$(`mx_w${i}`),c=$(`mx_c${i}`);

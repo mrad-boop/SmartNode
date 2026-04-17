@@ -168,6 +168,22 @@ async function getMatricesContaining(username) {
   return result;
 }
 
+async function getOverflowCandidate(days) {
+  // Oldest fully-paid user (sys fee + 6 levels) registered >= days ago with zero referrals
+  const { rows } = await pool.query(`
+    SELECT username FROM users
+    WHERE paid_system_fee = true
+      AND jsonb_array_length(paid_levels) = 6
+      AND registration_date <= NOW() - ($1 * INTERVAL '1 day')
+      AND NOT EXISTS (
+        SELECT 1 FROM users r WHERE r.referrer = users.username
+      )
+    ORDER BY registration_date ASC
+    LIMIT 1
+  `, [days]);
+  return rows[0]?.username || null;
+}
+
 async function getTotalReceived(username) {
   const { rows } = await pool.query('SELECT upline_list, paid_levels FROM users');
   let count = 0;
@@ -192,7 +208,7 @@ async function setConfigBulk(entries) {
 module.exports = {
   migrate,
   getUser, usernameExists, createUser, updateUser,
-  countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining,
+  countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining, getOverflowCandidate,
   getUserByWallet, walletExists, deleteUser, getDirectReferrals,
   getConfig, setConfigBulk,
 };

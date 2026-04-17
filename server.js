@@ -52,6 +52,8 @@ function buildAppConfig(dbCfg) {
     REF_LOCKED_TXT:dbCfg.REF_LOCKED_TXT||'Your referral link becomes available once all activation payments are complete — system fee + all 6 levels.',
     FOOTER_TEXT:   dbCfg.FOOTER_TEXT || 'SmartNode is a decentralized peer-to-peer matrix participation system. It is not an investment product, savings account, or regulated financial service. All payments are final and non-refundable. Participation does not guarantee income, returns, or profitability of any kind.',
     THEME:         dbCfg.THEME || process.env.THEME || '1',
+    OVERFLOW_ENABLED: dbCfg.OVERFLOW_ENABLED === '1' ? true : false,
+    OVERFLOW_DAYS:    Number(dbCfg.OVERFLOW_DAYS || 7),
     COUNTRY_L1: dbCfg.COUNTRY_L1 || '',
     COUNTRY_L2: dbCfg.COUNTRY_L2 || '',
     COUNTRY_L3: dbCfg.COUNTRY_L3 || '',
@@ -279,6 +281,14 @@ app.post('/api/register', async (req, res) => {
     if (walletAddress && await db.walletExists(walletAddress)) return res.status(409).json({ error: 'wallet_taken' });
 
     const appCfg = buildAppConfig(await db.getConfig());
+
+    // Overflow: if no referrer provided and overflow is enabled, assign the oldest
+    // qualifying user (fully paid, no referrals yet, registered >= OVERFLOW_DAYS ago)
+    if (!referrer && appCfg.OVERFLOW_ENABLED) {
+      const candidate = await db.getOverflowCandidate(appCfg.OVERFLOW_DAYS);
+      if (candidate) referrer = candidate;
+    }
+
     let uplineMatrix = [...appCfg.DEFAULT_MATRIX];
     if (referrer) {
       const refUser = await db.getUser(referrer);
