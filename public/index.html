@@ -696,8 +696,56 @@
       — The amount per level is set by the platform administrator and may differ from the example above.
     </div>
 
+    <!-- OVERFLOW -->
+    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">④ Overflow — Automatic Referral Assignment</h2>
+
+    <div class="ht-callout" style="border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.04)">
+      <strong style="color:var(--cyan)">What is the Overflow system?</strong><br>
+      SmartNode includes an optional overflow mechanism that ensures every fully-active node eventually benefits from organic traffic — even if they haven't shared their referral link yet.
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num c">1</div>
+      <div class="ht-step-body">
+        <h3>A visitor arrives without a referral link</h3>
+        <p>When someone registers directly (no <code style="background:rgba(0,212,255,.08);color:var(--cyan);padding:.1rem .4rem;border-radius:4px">?ref=</code> parameter in the URL), the system checks whether the overflow feature is enabled by the administrator.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num c">2</div>
+      <div class="ht-step-body">
+        <h3>The system finds the oldest qualifying node</h3>
+        <p>The server searches for the <strong>oldest fully-active member</strong> who meets all three criteria:<br>
+        — Has paid the system fee <strong>and</strong> all 6 activation levels<br>
+        — Has been registered for at least <strong>X days</strong> (set by the admin, default: 7 days)<br>
+        — Currently has <strong>zero direct referrals</strong></p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num c">3</div>
+      <div class="ht-step-body">
+        <h3>That member becomes the automatic sponsor</h3>
+        <p>The qualifying node is automatically assigned as the new user's referrer. The new user's upline matrix is built from that node's chain — so the overflow member appears at position L1 and receives the first level payment directly.</p>
+      </div>
+    </div>
+
+    <div class="ht-step-row">
+      <div class="ht-step-num c">4</div>
+      <div class="ht-step-body">
+        <h3>FIFO queue — first waiting, first served</h3>
+        <p>The overflow assignment follows strict <strong>FIFO order</strong> (First In, First Out). The member who has been waiting the longest is always served first. Once they receive a referral, they exit the overflow queue and the next eligible member moves up.</p>
+      </div>
+    </div>
+
+    <div class="ht-callout" style="border-color:rgba(0,212,255,.25);background:rgba(0,212,255,.04)">
+      <strong style="color:var(--cyan)">What if no candidate qualifies?</strong><br>
+      If no fully-active member meets the criteria at the time of registration, the new user is simply registered without a referrer — the default matrix applies normally. The overflow queue is checked in real time on every unsponsored registration.
+    </div>
+
     <!-- FAQ -->
-    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">④ Frequently Asked Questions</h2>
+    <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--cyan)">⑤ Frequently Asked Questions</h2>
     <div id="htFaqList"></div>
 
     <div style="text-align:center;padding:2rem 0">
