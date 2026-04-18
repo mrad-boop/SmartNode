@@ -22,7 +22,7 @@ services:
       - key: SYSTEM_FEE_AMOUNT
         value: "10"
       - key: LEVEL_AMOUNT
-        value: "10"
+        value: "5"
       - key: MATRIX_L1
         value: Admin_Node
       - key: MATRIX_L2
