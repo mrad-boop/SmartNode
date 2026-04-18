@@ -612,7 +612,7 @@
     <h2 style="font-size:1.15rem;font-weight:800;margin:2rem 0 1.2rem;color:var(--green)" id="htEarnTitle">③ Earnings Example — Each User Brings 3 New Users</h2>
 
     <div class="ht-callout" id="htEarnText">
-      The scenario below assumes each level costs <strong id="htLevelAmt">10 USDT</strong> and every active user refers exactly <strong>3 new users</strong>. Payments are direct wallet-to-wallet — you receive USDT the moment a downline activates a level where you are in their L1 position.
+      The scenario below assumes each level costs <strong id="htLevelAmt">5 USDT</strong> and every active user refers exactly <strong>3 new users</strong>. Payments are direct wallet-to-wallet — you receive USDT the moment a downline activates a level where you are in their L1 position.
     </div>
 
     <div style="overflow-x:auto">
@@ -631,58 +631,58 @@
             <td><strong>You</strong></td>
             <td>1</td>
             <td>—</td>
-            <td>Pay 70 USDT to activate</td>
-            <td style="color:var(--red)">−70 USDT</td>
+            <td>Pay 40 USDT to activate</td>
+            <td style="color:var(--red)">−40 USDT</td>
           </tr>
           <tr>
             <td>Gen 1 <span class="earn-tag">direct</span></td>
             <td>3</td>
             <td>L1 in their chain</td>
-            <td>3 × 10 USDT (L1)</td>
-            <td class="hi">+30 USDT</td>
+            <td>3 × 5 USDT (L1)</td>
+            <td class="hi">+15 USDT</td>
           </tr>
           <tr>
             <td>Gen 2 <span class="earn-tag p">indirect</span></td>
             <td>9</td>
             <td>L2 in their chain</td>
-            <td>9 × 10 USDT (L2)</td>
-            <td class="hi">+90 USDT</td>
+            <td>9 × 5 USDT (L2)</td>
+            <td class="hi">+45 USDT</td>
           </tr>
           <tr>
             <td>Gen 3</td>
             <td>27</td>
             <td>L3 in their chain</td>
-            <td>27 × 10 USDT (L3)</td>
-            <td class="hi">+270 USDT</td>
+            <td>27 × 5 USDT (L3)</td>
+            <td class="hi">+135 USDT</td>
           </tr>
           <tr>
             <td>Gen 4</td>
             <td>81</td>
             <td>L4 in their chain</td>
-            <td>81 × 10 USDT (L4)</td>
-            <td class="hi">+810 USDT</td>
+            <td>81 × 5 USDT (L4)</td>
+            <td class="hi">+405 USDT</td>
           </tr>
           <tr>
             <td>Gen 5</td>
             <td>243</td>
             <td>L5 in their chain</td>
-            <td>243 × 10 USDT (L5)</td>
-            <td class="hi">+2,430 USDT</td>
+            <td>243 × 5 USDT (L5)</td>
+            <td class="hi">+1,215 USDT</td>
           </tr>
           <tr>
             <td>Gen 6</td>
             <td>729</td>
             <td>L6 in their chain</td>
-            <td>729 × 10 USDT (L6)</td>
-            <td class="hi">+7,290 USDT</td>
+            <td>729 × 5 USDT (L6)</td>
+            <td class="hi">+3,645 USDT</td>
           </tr>
           <tr style="background:rgba(0,255,136,.05);font-weight:700">
             <td colspan="4" style="color:var(--green)">Total Received (all 6 generations)</td>
-            <td class="hi" style="font-size:1rem">+10,920 USDT</td>
+            <td class="hi" style="font-size:1rem">+5,460 USDT</td>
           </tr>
           <tr style="background:rgba(0,255,136,.08)">
-            <td colspan="4" style="color:var(--green)">Net Profit (after 70 USDT activation)</td>
-            <td class="hi" style="font-size:1.05rem">+10,850 USDT</td>
+            <td colspan="4" style="color:var(--green)">Net Profit (after 40 USDT activation)</td>
+            <td class="hi" style="font-size:1.05rem">+5,420 USDT</td>
           </tr>
         </tbody>
       </table>
@@ -1070,7 +1070,7 @@
         <div class="fg" style="margin-bottom:.7rem"><label class="fl">FIFO Explanation</label>
           <textarea class="fi" id="c_HOW_FIFO" rows="3" style="resize:vertical;line-height:1.5" placeholder="FIFO = First In, First Out. Every new user's upline is derived from their referrer's upline matrix…"></textarea></div>
         <div class="fg" style="margin-bottom:.7rem"><label class="fl">Earnings Section Intro</label>
-          <textarea class="fi" id="c_HOW_EARN_TEXT" rows="2" style="resize:vertical;line-height:1.5" placeholder="The scenario below assumes each level costs 10 USDT and every active user refers exactly 3 new users…"></textarea></div>
+          <textarea class="fi" id="c_HOW_EARN_TEXT" rows="2" style="resize:vertical;line-height:1.5" placeholder="The scenario below assumes each level costs 5 USDT and every active user refers exactly 3 new users…"></textarea></div>
         <p style="font-size:.73rem;color:var(--muted);margin:.8rem 0 .5rem;font-weight:600">FAQ (4 questions)</p>
         <div class="fgrid">
           <div class="fg"><label class="fl">FAQ 1 Question</label><input class="fi" id="c_HOW_FAQ_1_Q" placeholder="Do I need to refer people to earn?"/></div>
@@ -1592,11 +1592,11 @@ function renderHowTo(){
   const earnTxt=$('htEarnText');
   if(earnTxt&&C.HOW_EARN_TEXT)earnTxt.innerHTML=C.HOW_EARN_TEXT;
   const lvlAmt=$('htLevelAmt');
-  if(lvlAmt)lvlAmt.textContent=(C.LEVEL_AMOUNT||'10')+' USDT';
+  if(lvlAmt)lvlAmt.textContent=(C.LEVEL_AMOUNT||'5')+' USDT';
   // Rebuild earnings table rows using actual level amount
-  const amt=parseFloat(C.LEVEL_AMOUNT||10);
+  const amt=parseFloat(C.LEVEL_AMOUNT||5);
   const rows=[[3,1],[9,2],[27,3],[81,4],[243,5],[729,6]];
-  const activation=amt*7;
+  const activation=(parseFloat(C.SYSTEM_FEE_AMOUNT)||10)+amt*6;
   const total=rows.reduce((s,[n])=>s+n*amt,0);
   const tbody=document.querySelector('#htEarnTable tbody');
   if(tbody){
