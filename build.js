@@ -16,7 +16,7 @@ const DEFAULTS = {
   // System fee
   SYSTEM_FEE_ADDRESS: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
   SYSTEM_FEE_AMOUNT:  '10',
-  LEVEL_AMOUNT:       '10',
+  LEVEL_AMOUNT:       '5',
 
   // Default matrix usernames (Level 1 → 6)
   MATRIX_L1: 'Admin_Node',
