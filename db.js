@@ -45,7 +45,9 @@ async function migrate() {
       status     VARCHAR(20)  NOT NULL DEFAULT 'open',
       created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
-    ALTER TABLE tickets ADD COLUMN IF NOT EXISTS subject VARCHAR(120) NOT NULL DEFAULT '';
+    ALTER TABLE tickets ADD COLUMN IF NOT EXISTS subject      VARCHAR(120) NOT NULL DEFAULT '';
+    ALTER TABLE tickets ADD COLUMN IF NOT EXISTS admin_reply  TEXT         NOT NULL DEFAULT '';
+    ALTER TABLE tickets ADD COLUMN IF NOT EXISTS replied_at   TIMESTAMPTZ;
   `);
   console.log('[db] Tables ready');
 }
@@ -65,6 +67,25 @@ async function getTickets() {
 
 async function updateTicket(id, status) {
   await pool.query('UPDATE tickets SET status=$1 WHERE id=$2', [status, id]);
+}
+
+async function replyToTicket(id, reply) {
+  await pool.query(
+    `UPDATE tickets SET admin_reply=$1, replied_at=NOW(), status='read' WHERE id=$2`,
+    [reply, id]
+  );
+}
+
+async function getTicketsByUsername(username) {
+  const { rows } = await pool.query(
+    'SELECT * FROM tickets WHERE username=$1 ORDER BY created_at DESC', [username]
+  );
+  return rows;
+}
+
+async function getTicketById(id) {
+  const { rows } = await pool.query('SELECT * FROM tickets WHERE id=$1', [id]);
+  return rows[0] || null;
 }
 
 function normalize(row) {
@@ -239,5 +260,5 @@ module.exports = {
   countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining, getOverflowCandidate,
   getUserByWallet, walletExists, deleteUser, getDirectReferrals,
   getConfig, setConfigBulk,
-  createTicket, getTickets, updateTicket,
+  createTicket, getTickets, updateTicket, replyToTicket, getTicketsByUsername, getTicketById,
 };

@@ -867,6 +867,15 @@
     <!-- Levels -->
     <div class="section-lbl">Section 2 — Upline Matrix Levels</div>
     <div class="mx-grid-act" id="matrixLevels"></div>
+
+    <!-- My Tickets -->
+    <div id="myTicketsSection" style="margin-top:1.5rem;display:none">
+      <div class="section-lbl" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleMyTickets()">
+        <span>🎫 My Support Tickets</span>
+        <span id="myTicketsToggle" style="font-size:.75rem;color:var(--muted)">Show ▼</span>
+      </div>
+      <div id="myTicketsList" style="display:none;margin-top:.8rem"></div>
+    </div>
   </div>
 </div>
 
@@ -980,7 +989,8 @@
     <div id="ticketSuccess" style="display:none;text-align:center;padding:2rem;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);border-radius:14px;margin-bottom:1.5rem">
       <div style="font-size:2rem;margin-bottom:.5rem">✅</div>
       <p style="color:var(--green);font-weight:700">Ticket submitted successfully!</p>
-      <p style="color:var(--muted);font-size:.83rem;margin-top:.4rem">We will review your request and get back to you.</p>
+      <p id="ticketIdMsg" style="color:var(--muted);font-size:.83rem;margin-top:.4rem"></p>
+      <p style="color:var(--muted);font-size:.8rem;margin-top:.3rem">We will review your request and reply as soon as possible. If you submitted with your username, you can check the reply from your dashboard.</p>
       <button class="btn btn-g" onclick="resetTicketForm()" style="margin-top:1rem;font-size:.82rem">Submit another</button>
     </div>
 
@@ -1318,6 +1328,35 @@
     <div style="display:flex;gap:.7rem;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn btn-p" onclick="closeEditUserModal()">Cancel</button>
       <button class="btn btn-g" onclick="adminSaveUser()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- TICKET DETAIL MODAL (admin) -->
+<div class="modal-ov hidden" id="ticketModal">
+  <div class="modal" style="max-width:580px;width:95vw">
+    <div class="m-title">🎫 Ticket <span id="tmId" style="color:var(--muted);font-size:.85rem"></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem;margin-bottom:1rem;font-size:.8rem">
+      <div><span style="color:var(--muted)">User:</span> <strong id="tmUser">—</strong></div>
+      <div><span style="color:var(--muted)">Category:</span> <span id="tmCat">—</span></div>
+      <div><span style="color:var(--muted)">Date:</span> <span id="tmDate">—</span></div>
+      <div><span style="color:var(--muted)">Status:</span> <span id="tmStatus">—</span></div>
+    </div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:.3rem">Subject</div>
+    <div id="tmSubject" style="font-size:.92rem;font-weight:600;margin-bottom:1rem;color:var(--text)">—</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:.3rem">Message</div>
+    <div id="tmMessage" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.85rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow-y:auto;margin-bottom:1rem">—</div>
+    <div id="tmExistingReply" style="display:none;margin-bottom:1rem">
+      <div style="font-size:.82rem;color:var(--green);margin-bottom:.3rem">✅ Previous reply sent</div>
+      <div id="tmPrevReply" style="background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);border-radius:8px;padding:.75rem;font-size:.83rem;line-height:1.65;white-space:pre-wrap;word-break:break-word"></div>
+    </div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem">Reply to user</div>
+    <textarea id="tmReply" rows="4" placeholder="Write your response here…"
+      style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-size:.85rem;resize:vertical;margin-bottom:.9rem"></textarea>
+    <div style="display:flex;gap:.7rem;flex-wrap:wrap;justify-content:flex-end">
+      <button class="btn btn-r" style="font-size:.82rem" onclick="setTicketStatus(window._tmId,'resolved');closeTicketModal()">✓ Resolve</button>
+      <button class="btn btn-p" style="font-size:.82rem" onclick="closeTicketModal()">Close</button>
+      <button class="btn btn-g" id="tmSendBtn" style="font-size:.82rem" onclick="sendTicketReply()">Send Reply</button>
     </div>
   </div>
 </div>
@@ -1823,6 +1862,7 @@ async function showActivation(){
     }catch{matrixNodes={}}
   }
   renderActivation();showView('viewActivation');updateDebug();
+  loadMyTickets();
 }
 function isFullyPaid(u){return u.paidSystemFee&&u.paidLevels.length===6}
 
@@ -2228,7 +2268,7 @@ async function adminLogin(){
     $('sysLink').style.display='none';
     $('adminLoginBox').style.display='none';$('adminDash').style.display='block';
     startSessionWatch();
-    await loadAdminConfig();await loadUsers();loadAdminTickets();
+    await loadAdminConfig(); await loadUsers(); loadAdminTickets();
   }catch{toast('Wrong password','err')}
 }
 function adminLogout(){
@@ -2595,7 +2635,8 @@ async function submitTicket(){
   if(!message||message.length<10){toast('Please describe your issue (min 10 characters)','err');return;}
   const btn=$('tkSubmitBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Sending…';
   try{
-    await apiFetch('POST','/api/ticket',{username:username||null,category,subject,message});
+    const result=await apiFetch('POST','/api/ticket',{username:username||null,category,subject,message});
+    $('ticketIdMsg').textContent=`Ticket reference: #${result.id}`;
     $('ticketForm').style.display='none';
     $('ticketSuccess').style.display='';
     window.scrollTo({top:0,behavior:'smooth'});
@@ -2620,12 +2661,11 @@ async function loadAdminTickets(){
       <td style="font-size:.72rem;white-space:nowrap">${new Date(t.created_at).toLocaleString()}</td>
       <td>${t.username?`<strong>${t.username}</strong>`:'<span style="color:var(--muted)">anon</span>'}</td>
       <td><span style="font-size:.75rem;padding:.15rem .45rem;border-radius:5px;background:rgba(255,255,255,.05)">${t.category}</span></td>
-      <td style="font-size:.8rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.subject}">${t.subject||'—'}</td>
-      <td><span style="color:${sc[t.status]||'var(--muted)'};font-size:.8rem">${sl[t.status]||t.status}</span></td>
-      <td style="font-size:.78rem;color:var(--muted);max-width:200px">${t.message.length>100?t.message.slice(0,100)+'…':t.message}</td>
+      <td style="font-size:.8rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.subject||''}">${t.subject||'—'}</td>
+      <td><span style="color:${sc[t.status]||'var(--muted)'};font-size:.8rem">${sl[t.status]||t.status}</span>${t.admin_reply?'<span style="font-size:.65rem;color:var(--green);margin-left:.3rem">↩ replied</span>':''}</td>
       <td style="white-space:nowrap">
-        ${t.status!=='read'?`<button class="btn btn-gold" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'read')">Read</button>`:''}
-        ${t.status!=='resolved'?`<button class="btn btn-g" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'resolved')">Resolve</button>`:''}
+        <button class="btn btn-c" style="font-size:.68rem;padding:.18rem .5rem;margin:.1rem" onclick="openTicketModal(${JSON.stringify(t).replace(/"/g,'&quot;')})">👁 View &amp; Reply</button>
+        ${t.status!=='resolved'?`<button class="btn btn-g" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'resolved')">✓ Resolve</button>`:''}
         ${t.status!=='open'?`<button class="btn btn-r" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'open')">Reopen</button>`:''}
       </td></tr>`).join('');
   }catch(e){toast('Load failed: '+e.message,'err');}
@@ -2636,6 +2676,85 @@ async function setTicketStatus(id,status){
     await apiFetch('PATCH',`/api/admin/tickets/${id}`,{status},{'X-Admin-Password':adminPassword});
     loadAdminTickets();
   }catch(e){toast('Update failed: '+e.message,'err');}
+}
+
+function openTicketModal(t){
+  window._tmId=t.id;
+  $('tmId').textContent='#'+t.id;
+  $('tmUser').textContent=t.username||'Anonymous';
+  $('tmCat').textContent=t.category;
+  $('tmDate').textContent=new Date(t.created_at).toLocaleString();
+  const sc={open:'🔴 Open',read:'🟡 Read',resolved:'🟢 Resolved'};
+  $('tmStatus').textContent=sc[t.status]||t.status;
+  $('tmSubject').textContent=t.subject||'—';
+  $('tmMessage').textContent=t.message;
+  if(t.admin_reply){
+    $('tmExistingReply').style.display='';
+    $('tmPrevReply').textContent=t.admin_reply;
+    $('tmReply').placeholder='Update your reply…';
+    $('tmReply').value='';
+  }else{
+    $('tmExistingReply').style.display='none';
+    $('tmReply').placeholder='Write your response here…';
+    $('tmReply').value='';
+  }
+  $('ticketModal').classList.remove('hidden');
+}
+
+function closeTicketModal(){$('ticketModal').classList.add('hidden');}
+
+async function sendTicketReply(){
+  const reply=$('tmReply').value.trim();
+  if(!reply){toast('Please write a reply first','err');return;}
+  const btn=$('tmSendBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Sending…';
+  try{
+    await apiFetch('POST',`/api/admin/tickets/${window._tmId}/reply`,{reply},{'X-Admin-Password':adminPassword});
+    toast('Reply sent!','ok');
+    closeTicketModal();
+    loadAdminTickets();
+  }catch(e){toast('Failed: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent='Send Reply';}
+}
+
+// Close ticket modal on overlay click
+document.addEventListener('DOMContentLoaded',()=>{
+  $('ticketModal')?.addEventListener('click',e=>{if(e.target===$('ticketModal'))closeTicketModal();});
+});
+
+// User: load their own tickets in dashboard
+async function loadMyTickets(){
+  if(!currentUser)return;
+  const sec=$('myTicketsSection');
+  if(!sec)return;
+  try{
+    const tickets=await apiFetch('GET',`/api/tickets/user/${encodeURIComponent(currentUser.username)}`);
+    if(!tickets.length){sec.style.display='none';return;}
+    sec.style.display='';
+    const sc={open:'🔴 Open',read:'🟡 Read',resolved:'🟢 Resolved'};
+    $('myTicketsList').innerHTML=tickets.map(t=>`
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.7rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.4rem">
+          <span style="font-size:.78rem;color:var(--muted)">#${t.id} · ${new Date(t.created_at).toLocaleDateString()}</span>
+          <span style="font-size:.75rem">${sc[t.status]||t.status}</span>
+          <span style="font-size:.75rem;padding:.15rem .45rem;border-radius:5px;background:rgba(255,255,255,.05);color:var(--muted)">${t.category}</span>
+        </div>
+        <div style="font-size:.88rem;font-weight:600;margin-bottom:.4rem">${t.subject||'(no subject)'}</div>
+        <div style="font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:${t.admin_reply?'.8rem':'0'}">${t.message}</div>
+        ${t.admin_reply?`
+        <div style="background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.18);border-radius:8px;padding:.75rem;margin-top:.3rem">
+          <div style="font-size:.72rem;color:var(--green);margin-bottom:.35rem">✅ Admin reply · ${t.replied_at?new Date(t.replied_at).toLocaleString():''}</div>
+          <div style="font-size:.83rem;line-height:1.65;white-space:pre-wrap">${t.admin_reply}</div>
+        </div>`:''}
+      </div>`).join('');
+  }catch{}
+}
+
+let _myTicketsOpen=false;
+function toggleMyTickets(){
+  _myTicketsOpen=!_myTicketsOpen;
+  $('myTicketsList').style.display=_myTicketsOpen?'':'none';
+  $('myTicketsToggle').textContent=_myTicketsOpen?'Hide ▲':'Show ▼';
+  if(_myTicketsOpen)loadMyTickets();
 }
 </script>
 </body>

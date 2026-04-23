@@ -383,6 +383,30 @@ app.patch('/api/admin/tickets/:id', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.post('/api/admin/tickets/:id/reply', adminAuth, async (req, res) => {
+  try {
+    const { reply } = req.body;
+    if (!reply || !reply.trim()) return res.status(400).json({ error: 'Reply cannot be empty' });
+    await db.replyToTicket(req.params.id, String(reply).trim().slice(0, 4000));
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Public: user checks their own tickets by username
+app.get('/api/tickets/user/:username', async (req, res) => {
+  try { res.json(await db.getTicketsByUsername(req.params.username)); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Public: user checks a single ticket by ID
+app.get('/api/tickets/:id', async (req, res) => {
+  try {
+    const t = await db.getTicketById(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Ticket not found' });
+    res.json(t);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
