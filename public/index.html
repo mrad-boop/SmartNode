@@ -497,13 +497,11 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
-    <button onclick="showTicketForm()" style="background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#ff6b7a;border-radius:8px;padding:.38rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer">🎫 Support</button>
     <button id="walletBtn" onclick="connectWallet()">
       <span class="wdot"></span><span id="walletTxt">Connect Wallet</span>
     </button>
     <button id="logoutBtn" class="btn btn-r" onclick="logout()"
       style="display:none;font-size:.76rem;padding:.4rem .75rem">Logout</button>
-    <!-- Admin link: subtle, after all other buttons -->
     <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
   </div>
 </header>
@@ -804,13 +802,16 @@
         <p style="color:var(--muted);font-size:.83rem">Activate your matrix levels to receive payments</p>
       </div>
       <!-- User pill → click to open profile -->
-      <div class="user-pill" onclick="openProfile()" title="View my profile">
-        <div class="user-av" id="userAv">👤</div>
-        <div>
-          <div style="font-weight:700;font-size:.88rem" id="dispUser">—</div>
-          <div style="font-size:.7rem;color:var(--muted)" id="dispWallet">No wallet</div>
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end">
+        <button onclick="showTicketForm()" style="background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#ff6b7a;border-radius:8px;padding:.38rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer">🎫 Support</button>
+        <div class="user-pill" onclick="openProfile()" title="View my profile">
+          <div class="user-av" id="userAv">👤</div>
+          <div>
+            <div style="font-weight:700;font-size:.88rem" id="dispUser">—</div>
+            <div style="font-size:.7rem;color:var(--muted)" id="dispWallet">No wallet</div>
+          </div>
+          <span style="font-size:.7rem;color:var(--muted)">👤</span>
         </div>
-        <span style="font-size:.7rem;color:var(--muted)">👤</span>
       </div>
     </div>
 
@@ -2610,8 +2611,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ── Ticket / Support system ──────────────────────────────
 function showTicketForm(){
-  // Pre-fill username if logged in
-  if(currentUser) { const el=$('tkUsername'); if(el) el.value=currentUser.username; }
+  if(currentUser){
+    const el=$('tkUsername');
+    if(el){ el.value=currentUser.username; el.closest('div').style.display='none'; }
+  }
   showView('viewTicket');
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2623,6 +2626,10 @@ function resetTicketForm(){
   $('tkCount').textContent='0 / 2000';
   $('ticketSuccess').style.display='none';
   $('ticketForm').style.display='';
+  if(currentUser){
+    const el=$('tkUsername');
+    if(el){ el.value=currentUser.username; el.closest('div').style.display='none'; }
+  }
 }
 
 async function submitTicket(){

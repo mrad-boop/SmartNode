@@ -6,16 +6,17 @@ const db      = require('./db');
 const app = express();
 app.use(express.json());
 
-// Never cache index.html or config.js — always serve fresh on deploy
-app.use((req, res, next) => {
-  if (req.path === '/' || req.path === '/index.html' || req.path === '/config.js') {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
   }
-  next();
-});
-app.use(express.static(path.join(__dirname, 'public')));
+}));
 
 // ── Config builder ────────────────────────────────────────────
 function buildAppConfig(dbCfg) {
@@ -409,7 +410,9 @@ app.get('/api/tickets/:id', async (req, res) => {
 
 app.get('*', (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), { etag: false, lastModified: false });
 });
 
 const PORT = process.env.PORT || 3000;
