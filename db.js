@@ -35,8 +35,36 @@ async function migrate() {
       key   VARCHAR(64) PRIMARY KEY,
       value TEXT        NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS tickets (
+      id         SERIAL PRIMARY KEY,
+      username   VARCHAR(20),
+      category   VARCHAR(40)  NOT NULL,
+      subject    VARCHAR(120) NOT NULL DEFAULT '',
+      message    TEXT         NOT NULL,
+      status     VARCHAR(20)  NOT NULL DEFAULT 'open',
+      created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    );
+    ALTER TABLE tickets ADD COLUMN IF NOT EXISTS subject VARCHAR(120) NOT NULL DEFAULT '';
   `);
   console.log('[db] Tables ready');
+}
+
+async function createTicket({ username, category, subject, message }) {
+  const { rows } = await pool.query(
+    `INSERT INTO tickets (username, category, subject, message) VALUES ($1,$2,$3,$4) RETURNING *`,
+    [username || null, category, subject || '', message]
+  );
+  return rows[0];
+}
+
+async function getTickets() {
+  const { rows } = await pool.query('SELECT * FROM tickets ORDER BY created_at DESC');
+  return rows;
+}
+
+async function updateTicket(id, status) {
+  await pool.query('UPDATE tickets SET status=$1 WHERE id=$2', [status, id]);
 }
 
 function normalize(row) {
@@ -211,4 +239,5 @@ module.exports = {
   countUsers, getAllUsers, getReferralCount, getTotalReceived, getMatricesContaining, getOverflowCandidate,
   getUserByWallet, walletExists, deleteUser, getDirectReferrals,
   getConfig, setConfigBulk,
+  createTicket, getTickets, updateTicket,
 };

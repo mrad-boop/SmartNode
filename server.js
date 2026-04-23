@@ -344,6 +344,35 @@ app.get('/api/my-matrices/:username', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Tickets (public submit + admin manage) ─────────────────
+app.post('/api/ticket', async (req, res) => {
+  try {
+    const { username, category, subject, message } = req.body;
+    if (!category || !message || !message.trim()) return res.status(400).json({ error: 'Category and message are required' });
+    const ticket = await db.createTicket({
+      username: username ? String(username).slice(0, 20) : null,
+      category: String(category).slice(0, 40),
+      subject:  String(subject || '').slice(0, 120),
+      message:  String(message).trim().slice(0, 2000),
+    });
+    res.json(ticket);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/tickets', adminAuth, async (req, res) => {
+  try { res.json(await db.getTickets()); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch('/api/admin/tickets/:id', adminAuth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['open','read','resolved'].includes(status)) return res.status(400).json({ error: 'Invalid status' });
+    await db.updateTicket(req.params.id, status);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

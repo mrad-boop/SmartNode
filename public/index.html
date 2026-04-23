@@ -499,6 +499,7 @@
   <div class="hdr-right">
     <!-- Admin link: looks like a harmless node indicator -->
     <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
+    <button onclick="showTicketForm()" style="background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#ff6b7a;border-radius:8px;padding:.38rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer">🎫 Support</button>
     <button id="walletBtn" onclick="connectWallet()">
       <span class="wdot"></span><span id="walletTxt">Connect Wallet</span>
     </button>
@@ -966,6 +967,58 @@
   </div>
 </div>
 
+<!-- ═══ TICKET / SUPPORT ═══ -->
+<div id="viewTicket" class="view">
+  <div style="max-width:560px;margin:0 auto;padding:2rem 1rem">
+    <button onclick="goHome()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.82rem;margin-bottom:1.5rem">← Back</button>
+    <div style="text-align:center;margin-bottom:2rem">
+      <div style="font-size:2rem;margin-bottom:.5rem">🎫</div>
+      <h2 style="font-size:1.4rem;margin-bottom:.4rem">Support &amp; Reports</h2>
+      <p style="color:var(--muted);font-size:.85rem">Report a bug, an issue, or contact the support team.</p>
+    </div>
+
+    <div id="ticketSuccess" style="display:none;text-align:center;padding:2rem;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);border-radius:14px;margin-bottom:1.5rem">
+      <div style="font-size:2rem;margin-bottom:.5rem">✅</div>
+      <p style="color:var(--green);font-weight:700">Ticket submitted successfully!</p>
+      <p style="color:var(--muted);font-size:.83rem;margin-top:.4rem">We will review your request and get back to you.</p>
+      <button class="btn btn-g" onclick="resetTicketForm()" style="margin-top:1rem;font-size:.82rem">Submit another</button>
+    </div>
+
+    <div id="ticketForm">
+      <div style="display:grid;gap:1rem">
+        <div>
+          <label style="font-size:.8rem;color:var(--muted);display:block;margin-bottom:.4rem">Category *</label>
+          <select id="tkCategory" style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-size:.88rem">
+            <option value="">— Select a category —</option>
+            <option value="Bug">🐛 Bug / Technical Issue</option>
+            <option value="Payment">💳 Payment Problem</option>
+            <option value="Account">👤 Account Issue</option>
+            <option value="Matrix">⬡ Matrix / Upline Issue</option>
+            <option value="Other">💬 Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.8rem;color:var(--muted);display:block;margin-bottom:.4rem">Subject *</label>
+          <input id="tkSubject" type="text" maxlength="120" placeholder="Brief description of the issue"
+            style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-size:.88rem"/>
+        </div>
+        <div>
+          <label style="font-size:.8rem;color:var(--muted);display:block;margin-bottom:.4rem">Your username (optional)</label>
+          <input id="tkUsername" type="text" maxlength="20" placeholder="Leave blank to stay anonymous"
+            style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-size:.88rem"/>
+        </div>
+        <div>
+          <label style="font-size:.8rem;color:var(--muted);display:block;margin-bottom:.4rem">Message * <span id="tkCount" style="float:right;color:var(--muted)">0 / 2000</span></label>
+          <textarea id="tkMessage" rows="6" maxlength="2000" placeholder="Describe your issue in detail…"
+            oninput="document.getElementById('tkCount').textContent=this.value.length+' / 2000'"
+            style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+        </div>
+        <button id="tkSubmitBtn" class="btn btn-g" onclick="submitTicket()" style="font-size:.9rem;padding:.75rem">Submit Ticket</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ ADMIN ═══ -->
 <div id="viewAdmin" class="view">
   <div id="adminLoginBox" style="max-width:380px;margin:4rem auto;padding:0 1rem">
@@ -994,6 +1047,7 @@
       <button class="tab-btn active" onclick="switchTab('tContent',this)">📝 Content</button>
       <button class="tab-btn" onclick="switchTab('tMatrix',this)">💰 Matrix &amp; Amounts</button>
       <button class="tab-btn" onclick="switchTab('tUsers',this)">👥 Users</button>
+      <button class="tab-btn" onclick="switchTab('tTickets',this);loadAdminTickets()">🎫 Tickets <span id="tkBadge" style="display:none;background:var(--red);color:#fff;border-radius:100px;font-size:.65rem;padding:.1rem .4rem;margin-left:.3rem">0</span></button>
     </div>
 
     <!-- Content tab -->
@@ -1191,6 +1245,20 @@
         </table>
       </div>
     </div>
+
+    <!-- ── TICKETS TAB ─────────────────────────────────── -->
+    <div id="tTickets" class="tab-pane">
+      <div class="admin-card">
+        <div class="admin-card-title">🎫 Support Tickets</div>
+        <div class="table-wrap">
+          <table class="users-table">
+            <thead><tr><th>#</th><th>Date</th><th>User</th><th>Category</th><th>Subject</th><th>Status</th><th>Message</th><th>Actions</th></tr></thead>
+            <tbody id="ticketsTableBody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Loading tickets…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2160,7 +2228,7 @@ async function adminLogin(){
     $('sysLink').style.display='none';
     $('adminLoginBox').style.display='none';$('adminDash').style.display='block';
     startSessionWatch();
-    await loadAdminConfig();await loadUsers();
+    await loadAdminConfig();await loadUsers();loadAdminTickets();
   }catch{toast('Wrong password','err')}
 }
 function adminLogout(){
@@ -2499,6 +2567,76 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('editUserModal')?.addEventListener('click',e=>{if(e.target===$('editUserModal'))closeEditUserModal();});
   $('walletModal')?.addEventListener('click',e=>{if(e.target===$('walletModal'))closeWalletModal();});
 });
+
+// ── Ticket / Support system ──────────────────────────────
+function showTicketForm(){
+  // Pre-fill username if logged in
+  if(currentUser) { const el=$('tkUsername'); if(el) el.value=currentUser.username; }
+  showView('viewTicket');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetTicketForm(){
+  $('tkCategory').value='';
+  $('tkSubject').value='';
+  $('tkMessage').value='';
+  $('tkCount').textContent='0 / 2000';
+  $('ticketSuccess').style.display='none';
+  $('ticketForm').style.display='';
+}
+
+async function submitTicket(){
+  const category=$('tkCategory').value.trim();
+  const subject=$('tkSubject').value.trim();
+  const message=$('tkMessage').value.trim();
+  const username=$('tkUsername').value.trim();
+  if(!category){toast('Please select a category','err');return;}
+  if(!subject){toast('Please enter a subject','err');return;}
+  if(!message||message.length<10){toast('Please describe your issue (min 10 characters)','err');return;}
+  const btn=$('tkSubmitBtn');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Sending…';
+  try{
+    await apiFetch('POST','/api/ticket',{username:username||null,category,subject,message});
+    $('ticketForm').style.display='none';
+    $('ticketSuccess').style.display='';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){toast('Failed to submit: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent='Submit Ticket';}
+}
+
+async function loadAdminTickets(){
+  const tb=$('ticketsTableBody');
+  if(!tb)return;
+  tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem"><span class="spin"></span> Loading…</td></tr>';
+  try{
+    const tickets=await apiFetch('GET','/api/admin/tickets',null,{'X-Admin-Password':adminPassword});
+    const open=tickets.filter(t=>t.status==='open').length;
+    const badge=$('tkBadge');
+    if(badge){badge.style.display=open?'inline':'none';badge.textContent=open;}
+    if(!tickets.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No tickets yet</td></tr>';return;}
+    const sc={open:'var(--red)',read:'var(--gold)',resolved:'var(--green)'};
+    const sl={open:'🔴 Open',read:'🟡 Read',resolved:'🟢 Resolved'};
+    tb.innerHTML=tickets.map(t=>`<tr>
+      <td style="color:var(--muted)">#${t.id}</td>
+      <td style="font-size:.72rem;white-space:nowrap">${new Date(t.created_at).toLocaleString()}</td>
+      <td>${t.username?`<strong>${t.username}</strong>`:'<span style="color:var(--muted)">anon</span>'}</td>
+      <td><span style="font-size:.75rem;padding:.15rem .45rem;border-radius:5px;background:rgba(255,255,255,.05)">${t.category}</span></td>
+      <td style="font-size:.8rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.subject}">${t.subject||'—'}</td>
+      <td><span style="color:${sc[t.status]||'var(--muted)'};font-size:.8rem">${sl[t.status]||t.status}</span></td>
+      <td style="font-size:.78rem;color:var(--muted);max-width:200px">${t.message.length>100?t.message.slice(0,100)+'…':t.message}</td>
+      <td style="white-space:nowrap">
+        ${t.status!=='read'?`<button class="btn btn-gold" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'read')">Read</button>`:''}
+        ${t.status!=='resolved'?`<button class="btn btn-g" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'resolved')">Resolve</button>`:''}
+        ${t.status!=='open'?`<button class="btn btn-r" style="font-size:.68rem;padding:.18rem .4rem;margin:.1rem" onclick="setTicketStatus(${t.id},'open')">Reopen</button>`:''}
+      </td></tr>`).join('');
+  }catch(e){toast('Load failed: '+e.message,'err');}
+}
+
+async function setTicketStatus(id,status){
+  try{
+    await apiFetch('PATCH',`/api/admin/tickets/${id}`,{status},{'X-Admin-Password':adminPassword});
+    loadAdminTickets();
+  }catch(e){toast('Update failed: '+e.message,'err');}
+}
 </script>
 </body>
 </html>
