@@ -406,6 +406,36 @@
     /* bottom padding for debug console */
     main { padding-bottom: 4rem; }
 
+    /* ── Landing page ────────────────────────────────────── */
+    .land-hero { text-align:center; padding: 3.5rem 1rem 2rem; }
+    .land-badge { display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1rem;border-radius:100px;background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.18);font-size:.78rem;color:var(--green);margin-bottom:1.3rem; }
+    .land-title { font-size:clamp(1.9rem,6vw,2.8rem);font-weight:900;letter-spacing:-.02em;line-height:1.15;margin-bottom:.8rem; }
+    .land-sub { color:var(--muted);font-size:.95rem;line-height:1.7;max-width:520px;margin:0 auto 1.8rem; }
+    .land-cta { display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2.2rem; }
+    .land-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:480px;margin:0 auto 2.5rem; }
+    @media(max-width:480px){ .land-stats{grid-template-columns:repeat(2,1fr)} }
+    .ls { text-align:center;padding:.7rem .4rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px; }
+    .ls-val { font-size:1.3rem;font-weight:800;color:var(--green); }
+    .ls-lbl { font-size:.65rem;color:var(--muted);margin-top:.15rem; }
+    .feat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;max-width:700px;margin:0 auto 2.5rem;padding:0 .5rem; }
+    @media(max-width:560px){ .feat-grid{grid-template-columns:1fr} }
+    .feat-card { background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1rem;text-align:left; }
+    .feat-icon { font-size:1.4rem;margin-bottom:.5rem; }
+    .feat-title { font-size:.88rem;font-weight:700;color:var(--green);margin-bottom:.4rem; }
+    .feat-text { font-size:.78rem;color:var(--muted);line-height:1.6; }
+    .how-section { background:rgba(255,255,255,.02);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2.5rem 1rem;text-align:center;margin-bottom:2rem; }
+    .how-title { font-size:1.4rem;font-weight:800;margin-bottom:.4rem; }
+    .how-sub { color:var(--muted);font-size:.88rem;margin-bottom:1.8rem; }
+    .how-steps { display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:600px;margin:0 auto 1.5rem; }
+    @media(max-width:520px){ .how-steps{grid-template-columns:1fr} }
+    .how-step { text-align:center;padding:.5rem; }
+    .how-num { width:2.2rem;height:2.2rem;border-radius:50%;background:linear-gradient(135deg,#7b2ff7,#00d4ff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;color:#fff;margin:0 auto .7rem; }
+    .how-stitle { font-size:.9rem;font-weight:700;color:var(--green);margin-bottom:.3rem; }
+    .how-sdesc { font-size:.78rem;color:var(--muted);line-height:1.6; }
+    .land-footer-txt { text-align:center;color:var(--muted);font-size:.75rem;padding:1rem .5rem 0; }
+    .btn-purple { background:linear-gradient(135deg,rgba(123,47,247,.25),rgba(123,47,247,.15));border:1px solid rgba(123,47,247,.4);color:#b47fff;font-weight:700; }
+    .btn-purple:hover { background:linear-gradient(135deg,rgba(123,47,247,.4),rgba(123,47,247,.3));border-color:rgba(123,47,247,.6); }
+
     /* ── Guide page ──────────────────────────────────────── */
     .guide-hero { text-align:center; padding: 3rem 1rem 2rem; }
     .guide-badge { display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .9rem;border-radius:100px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);font-size:.75rem;color:var(--cyan);margin-bottom:1.2rem; }
@@ -444,15 +474,63 @@
 </header>
 
 <main>
+  <!-- ── LANDING VIEW ─────────────────────────────────── -->
+  <div id="viewLanding" class="view active">
+    <div class="land-hero">
+      <div class="land-badge">⬡ Decentralized Matrix Protocol on Solana</div>
+      <h1 class="land-title">The DeFi <span class="neon-green">Matrix Network</span></h1>
+      <p class="land-sub">Earn passive income through a decentralized 6-level FIFO referral matrix on Solana. Join thousands of nodes worldwide.</p>
+      <div class="land-cta">
+        <button class="btn btn-green btn-large" onclick="joinMatrix()">Join the Matrix →</button>
+        <button class="btn btn-purple btn-large" onclick="connectWallet()">Connect Wallet</button>
+      </div>
+      <div class="land-stats">
+        <div class="ls"><div class="ls-val" id="landUsers">—</div><div class="ls-lbl">Active Nodes</div></div>
+        <div class="ls"><div class="ls-val neon-cyan">6</div><div class="ls-lbl">Matrix Levels</div></div>
+        <div class="ls"><div class="ls-val neon-purple">{{LEVEL_AMOUNT}}</div><div class="ls-lbl">USDT Per Level</div></div>
+        <div class="ls"><div class="ls-val" style="font-size:1rem">◎</div><div class="ls-lbl">Solana Network</div></div>
+      </div>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">⬡</div>
+        <div class="feat-title">6-Level Matrix</div>
+        <div class="feat-text">Every node connects to 6 upline levels. Payments flow automatically through the chain.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">◎</div>
+        <div class="feat-title">Solana Powered</div>
+        <div class="feat-text">Built on Solana for near-zero fees and instant transactions. Connect with Phantom wallet.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Instant Direct Payments</div>
+        <div class="feat-text">USDT payments go directly to users wallets via Solana Blockchain. No middlemen, no delays.</div>
+      </div>
+    </div>
+
+    <div class="how-section">
+      <h2 class="how-title">How It Works</h2>
+      <p class="how-sub">Three simple steps to start earning</p>
+      <div class="how-steps">
+        <div class="how-step"><div class="how-num">1</div><div class="how-stitle">Register</div><div class="how-sdesc">Connect your Phantom wallet and choose a username to register your node.</div></div>
+        <div class="how-step"><div class="how-num">2</div><div class="how-stitle">Activate</div><div class="how-sdesc">Pay the system activation fee and unlock each of your 6 upline levels.</div></div>
+        <div class="how-step"><div class="how-num">3</div><div class="how-stitle">Earn</div><div class="how-sdesc">Share your referral link. Every new node you bring earns you a level payment.</div></div>
+      </div>
+      <button class="btn btn-green" onclick="showHowTo()" style="padding:.75rem 2rem;font-size:.9rem">📖 Full Guide &amp; Earnings Examples →</button>
+    </div>
+    <div class="land-footer-txt">{{APP_NAME}} is a decentralized peer-to-peer matrix system. Payments are final and non-refundable.</div>
+  </div>
+
   <!-- ── REGISTRATION VIEW ──────────────────────────────── -->
   <div id="viewRegister" class="view">
     <div class="container">
-      <div style="text-align:center;margin-bottom:2rem">
-        <div class="hero-badge">⬡ DeFi Matrix Protocol</div>
-        <h1 class="hero-title">
-          Join the <span class="neon-green">{{APP_NAME}}</span><br>Matrix Network
-        </h1>
-        <p class="hero-sub">Decentralized FIFO referral system on Solana. Earn from 6 upline levels.</p>
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <button class="btn" onclick="goHome()" style="font-size:.8rem;background:rgba(123,47,247,.1);border:1px solid rgba(123,47,247,.3);color:#b47fff;margin-bottom:1.2rem">← Back to Home</button>
+        <div class="hero-badge">⬡ Join {{APP_NAME}}</div>
+        <h2 class="hero-title" style="font-size:1.6rem">Register Your Node</h2>
+        <p class="hero-sub" style="font-size:.88rem">Connect your Solana wallet and choose a unique username.</p>
       </div>
 
       <div id="referrerBadge" class="referrer-badge" style="display:none">
@@ -478,9 +556,6 @@
         <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:.7rem">
           Free registration. Activation payments happen on next step.
         </p>
-        <button class="btn" onclick="showHowTo()" style="width:100%;margin-top:.6rem;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);color:var(--cyan);font-size:.82rem;padding:.6rem">
-          📖 Full Guide &amp; Earnings Examples →
-        </button>
       </div>
 
       <div class="stats-strip">
@@ -864,9 +939,9 @@ function register() {
 function logout() {
   clearSession();
   currentUser = null;
-  showView('viewRegister');
   document.getElementById('logoutBtn').style.display = 'none';
   updateDebug();
+  goHome();
 }
 
 /* ── Views ──────────────────────────────────────────────── */
@@ -875,7 +950,9 @@ function showView(id) {
   document.getElementById(id).classList.add('active');
 }
 function showHowTo() { showView('viewHowTo'); window.scrollTo({top:0,behavior:'smooth'}); }
-function goHome() { renderMatrixPreview(); updateDebug(); showView('viewRegister'); window.scrollTo({top:0,behavior:'smooth'}); }
+function goHome() { countUsers(); showView('viewLanding'); window.scrollTo({top:0,behavior:'smooth'}); }
+function joinMatrix() { renderMatrixPreview(); updateDebug(); showView('viewRegister'); window.scrollTo({top:0,behavior:'smooth'}); }
+function countUsers() { const el=document.getElementById('landUsers'); if(el) el.textContent=getAllUsernames().length||'—'; }
 
 function showActivation() {
   if (!currentUser) return;
@@ -1116,9 +1193,9 @@ function init() {
     }
   }
 
-  renderMatrixPreview();
   updateDebug();
-  showView('viewRegister');
+  countUsers();
+  showView('viewLanding');
 
   // Listen for Phantom events
   window.solana?.on('connect',    () => { connectedWallet = window.solana.publicKey?.toString(); updateWalletUI(); });
