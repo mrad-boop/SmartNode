@@ -497,14 +497,14 @@
     <span class="logo-txt" id="appName">SmartNode</span>
   </div>
   <div class="hdr-right">
-    <!-- Admin link: looks like a harmless node indicator -->
-    <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
     <button onclick="showTicketForm()" style="background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#ff6b7a;border-radius:8px;padding:.38rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer">🎫 Support</button>
     <button id="walletBtn" onclick="connectWallet()">
       <span class="wdot"></span><span id="walletTxt">Connect Wallet</span>
     </button>
     <button id="logoutBtn" class="btn btn-r" onclick="logout()"
       style="display:none;font-size:.76rem;padding:.4rem .75rem">Logout</button>
+    <!-- Admin link: subtle, after all other buttons -->
+    <a id="sysLink" href="#" onclick="openSys(event)" class="sys-link">⬡</a>
   </div>
 </header>
 
