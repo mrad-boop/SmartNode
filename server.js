@@ -5,6 +5,16 @@ const db      = require('./db');
 
 const app = express();
 app.use(express.json());
+
+// Never cache index.html or config.js — always serve fresh on deploy
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path === '/index.html' || req.path === '/config.js') {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Config builder ────────────────────────────────────────────
@@ -374,6 +384,7 @@ app.patch('/api/admin/tickets/:id', adminAuth, async (req, res) => {
 });
 
 app.get('*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
