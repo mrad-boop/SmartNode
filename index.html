@@ -465,6 +465,7 @@
     <span class="logo-text">{{APP_NAME}}</span>
   </div>
   <div style="display:flex;gap:.6rem;align-items:center">
+    <a id="sysLink" href="#" onclick="openAdmin(event)" style="color:rgba(0,255,136,.35);font-size:1.1rem;text-decoration:none;line-height:1;padding:.2rem .4rem" title="">⬡</a>
     <button id="walletBtn" onclick="connectWallet()">
       <span class="wallet-dot"></span>
       <span id="walletBtnTxt">Connect Wallet</span>
@@ -799,6 +800,44 @@ function findUserByWallet(address) {
   return null;
 }
 
+// Overflow: oldest fully-paid user (sys fee + 6 levels) with no referrals, registered >= OVERFLOW_DAYS ago
+const OVERFLOW_DAYS = 7;
+function getOverflowCandidate() {
+  const cutoff = Date.now() - OVERFLOW_DAYS * 24 * 60 * 60 * 1000;
+  const all = getAllUsernames().map(loadUser).filter(Boolean);
+  const referrers = new Set(all.map(u => u.referrer).filter(Boolean));
+  const candidates = all.filter(u =>
+    u.paidSystemFee && u.paidLevels && u.paidLevels.length >= 6 &&
+    u.registrationDate <= cutoff && !referrers.has(u.username)
+  );
+  candidates.sort((a, b) => a.registrationDate - b.registrationDate);
+  return candidates[0] || null;
+}
+
+// Admin panel link (hidden ⬡ in header)
+let adminUnlocked = false;
+function openAdmin(e) {
+  e.preventDefault();
+  const pw = prompt('Admin password:');
+  if (!pw) return;
+  if (pw === (localStorage.getItem('sn_admin_pw') || 'admin')) {
+    adminUnlocked = true;
+    showView('viewAdmin');
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    toast('Wrong password', 'error');
+  }
+}
+
+// 5-min inactivity session timeout
+let _inactTimer;
+function resetInactTimer() {
+  clearTimeout(_inactTimer);
+  if (!currentUser) return;
+  _inactTimer = setTimeout(() => { if(currentUser){ toast('Session expired — logged out','info'); logout(); } }, 5*60*1000);
+}
+['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, resetInactTimer, {passive:true}));
+
 function getAllUsernames() {
   const out = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -908,28 +947,41 @@ function renderMatrixPreview() {
 function register() {
   const raw = document.getElementById('usernameInput').value.trim();
   if (!raw) { toast('Please enter a username', 'error'); return; }
-  // Sanitize: alphanum + underscore only
   const username = raw.replace(/[^a-zA-Z0-9_]/g, '');
   if (username.length < 3) { toast('Username must be at least 3 characters', 'error'); return; }
   if (username.length > 20) { toast('Username max 20 characters', 'error'); return; }
   if (loadUser(username)) { toast(`Username "${username}" is already taken`, 'error'); return; }
 
-  const ref = getUrlParam('ref');
+  // One wallet per matrix — reject if wallet already registered
+  if (connectedWallet && findUserByWallet(connectedWallet)) {
+    toast('This wallet is already registered — connecting you to your matrix…', 'info');
+    const existing = findUserByWallet(connectedWallet);
+    currentUser = existing; saveSession(existing.username);
+    showActivation(); return;
+  }
+
+  // Overflow: no referral link → assign oldest fully-paid inactive node as referrer
+  let ref = getUrlParam('ref');
+  if (!ref) {
+    const overflow = getOverflowCandidate();
+    if (overflow) ref = overflow.username;
+  }
   const uplineMatrix = computeMatrix(ref);
 
   const userData = {
     username,
     walletAddress: connectedWallet || null,
     referrer: ref || null,
-    uplineMatrix,          // PERMANENT — never changes after registration
+    uplineMatrix,
     paidSystemFee: false,
-    paidLevels: [],        // e.g. [0, 1, 2] means L1, L2, L3 paid
+    paidLevels: [],
     registrationDate: Date.now(),
   };
 
   saveUser(userData);
   saveSession(username);
   currentUser = userData;
+  resetInactTimer();
 
   toast(`Node activated! Welcome, ${username}`, 'success');
   showActivation();
@@ -937,9 +989,11 @@ function register() {
 
 /* ── Session / Login ────────────────────────────────────── */
 function logout() {
+  clearTimeout(_inactTimer);
   clearSession();
   currentUser = null;
   document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('sysLink').style.display = '';
   updateDebug();
   goHome();
 }
@@ -951,15 +1005,28 @@ function showView(id) {
 }
 function showHowTo() { showView('viewHowTo'); window.scrollTo({top:0,behavior:'smooth'}); }
 function goHome() { countUsers(); showView('viewLanding'); window.scrollTo({top:0,behavior:'smooth'}); }
-function joinMatrix() { renderMatrixPreview(); updateDebug(); showView('viewRegister'); window.scrollTo({top:0,behavior:'smooth'}); }
+function joinMatrix() {
+  // If wallet connected and already registered → go directly to their matrix
+  if (connectedWallet) {
+    const existing = findUserByWallet(connectedWallet);
+    if (existing) {
+      currentUser = existing; saveSession(existing.username);
+      toast(`Welcome back, ${existing.username}! 👋`, 'success');
+      showActivation(); return;
+    }
+  }
+  renderMatrixPreview(); updateDebug(); showView('viewRegister'); window.scrollTo({top:0,behavior:'smooth'});
+}
 function countUsers() { const el=document.getElementById('landUsers'); if(el) el.textContent=getAllUsernames().length||'—'; }
 
 function showActivation() {
   if (!currentUser) return;
   document.getElementById('logoutBtn').style.display = '';
+  document.getElementById('sysLink').style.display = 'none';
   renderActivation();
   showView('viewActivation');
   updateDebug();
+  resetInactTimer();
 }
 
 function renderActivation() {
