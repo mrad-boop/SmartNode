@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
 
   <!-- ── Primary SEO ─────────────────────────────────── -->
   <title>SmartNode — Decentralized FIFO Matrix Network on Solana</title>
@@ -869,14 +872,6 @@
     <div class="section-lbl">Section 2 — Upline Matrix Levels</div>
     <div class="mx-grid-act" id="matrixLevels"></div>
 
-    <!-- My Tickets -->
-    <div id="myTicketsSection" style="margin-top:1.5rem;display:none">
-      <div class="section-lbl" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleMyTickets()">
-        <span>🎫 My Support Tickets</span>
-        <span id="myTicketsToggle" style="font-size:.75rem;color:var(--muted)">Show ▼</span>
-      </div>
-      <div id="myTicketsList" style="display:none;margin-top:.8rem"></div>
-    </div>
   </div>
 </div>
 
@@ -946,6 +941,16 @@
         <button class="btn btn-g btn-full" style="margin-top:.5rem" onclick="saveProfile()">💾 Save Profile</button>
       </div>
     </div>
+
+    <!-- My Tickets -->
+    <div id="myTicketsSection" style="margin-top:1.5rem;display:none">
+      <div class="section-lbl" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleMyTickets()">
+        <span>🎫 My Support Tickets</span>
+        <span id="myTicketsToggle" style="font-size:.75rem;color:var(--muted)">Show ▼</span>
+      </div>
+      <div id="myTicketsList" style="display:none;margin-top:.8rem"></div>
+    </div>
+
   </div>
 </div>
 
@@ -1863,7 +1868,6 @@ async function showActivation(){
     }catch{matrixNodes={}}
   }
   renderActivation();showView('viewActivation');updateDebug();
-  loadMyTickets();
 }
 function isFullyPaid(u){return u.paidSystemFee&&u.paidLevels.length===6}
 
@@ -2025,6 +2029,7 @@ async function openProfile(){
   renderReferralLevels();
   renderMyMatrices();
   showView('viewProfile');
+  loadMyTickets();
 }
 
 function flatByDepth(nodes,acc={}){
